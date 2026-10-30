@@ -173,6 +173,7 @@ body.touch #chatBox{bottom:auto;top:max(8px,env(safe-area-inset-top))}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -510,41 +511,77 @@ const newPriv=()=>({money:100,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0
 const Net={peer:null,conns:{},rel:null,fast:null,offline:false};
 const PREFIX='chetyre-shtolni-v1-';
 function randCode(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
+const PEER_OPTS={config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}};
 function createRoom(){
  const code=randCode();G.host=true;G.myId=PREFIX+code;G.code=code;
  addPlayer(G.myId,myName(),firstFreeTeam(),false);enterLobby();
+ Relay.host(code);
  if(!window.Peer){goOffline();return}
- try{const peer=new Peer(G.myId);Net.peer=peer;
+ try{const peer=new Peer(G.myId,PEER_OPTS);Net.peer=peer;
   peer.on('open',()=>{$('netNote').textContent='Комната открыта. Отправьте код другу.';Voice.bind(peer)});
   peer.on('connection',c=>hostConn(c));
-  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();const oldId=G.myId;const p=G.P[oldId];delete G.P[oldId];G.order=[];G.P={};createRoom();return}
+  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();Relay.stop();G.order=[];G.P={};createRoom();return}
     if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'||e.type==='browser-incompatible')goOffline();});
  }catch(e){goOffline()}
 }
-function goOffline(){Net.offline=true;$('netNote').textContent='Нет связи с сервером соединения. Играть можно с ботами, друзья подключиться не смогут.';}
+function goOffline(){Net.offline=true;$('netNote').textContent='Прямые соединения недоступны. Друзья войдут через резервную связь, но голос работать не будет.';setTimeout(()=>{if(!Relay.ready)$('netNote').textContent='Нет связи с интернет-серверами. Сейчас можно играть только с ботами.'},8000)}
 function hostConn(c){
  c.on('open',()=>{const id=c.peer;const kind=c.metadata&&c.metadata.kind;
+  if(Net.conns[id]&&Net.conns[id].relay){c.close();return}
   Net.conns[id]=Net.conns[id]||{};Net.conns[id][kind]=c;
   c.on('data',m=>handleHost(id,m));
-  if(kind==='rel')c.on('close',()=>playerLeft(id));
+  if(kind==='rel')c.on('close',()=>{if(!(Net.conns[id]&&Net.conns[id].relay))playerLeft(id)});
  })}
 function joinRoom(code){
- G.host=false;G.code=code;
- if(!window.Peer){$('menuErr').textContent='Не загрузилась сетевая библиотека. Проверьте интернет.';return}
- $('menuErr').textContent='Подключаемся…';
- const peer=new Peer();Net.peer=peer;
- const fail=setTimeout(()=>{$('menuErr').textContent='Комната не отвечает. Проверьте код. Если код верный, сеть оператора могла заблокировать прямое соединение: попробуйте Wi-Fi.';try{peer.destroy()}catch(e){}},15000);
- peer.on('error',e=>{if(e.type==='peer-unavailable'){clearTimeout(fail);$('menuErr').textContent='Комнаты с таким кодом нет.';}else if(G.state==='menu'){clearTimeout(fail);$('menuErr').textContent='Ошибка соединения: '+e.type}});
- peer.on('open',id=>{G.myId=id;Voice.bind(peer);
+ G.host=false;G.code=code;$('menuErr').textContent='Подключаемся…';
+ let done=false,timer=0,rel=null,fast=null;
+ const forced=new URLSearchParams(location.search).get('relay')==='1';
+ const toRelay=()=>{if(done)return;done=true;clearTimeout(timer);
+  try{rel&&rel.close();fast&&fast.close()}catch(e){}
+  if(!G.myId)G.myId='r'+Math.random().toString(36).slice(2,12);
+  $('menuErr').textContent='Прямое соединение не прошло, пробуем резервную связь…';
+  Relay.join(code,myName(),()=>{$('netNote').textContent='Резервная связь: возможна задержка, голос может не работать.';enterLobby()},
+   ()=>{$('menuErr').textContent='Не удалось войти. Проверьте код и что хост ещё в лобби: начавшийся бой закрыт для входа.'})};
+ timer=setTimeout(toRelay,forced?0:8000);
+ if(forced||!window.Peer)return;
+ let peer;try{peer=new Peer(PEER_OPTS)}catch(e){toRelay();return}
+ Net.peer=peer;
+ peer.on('error',()=>toRelay());
+ peer.on('open',id=>{if(done&&Net.relay)return;G.myId=G.myId||id;Voice.bind(peer);if(done)return;
   const hostId=PREFIX+code;
-  const rel=peer.connect(hostId,{reliable:true,serialization:'json',metadata:{kind:'rel'}});
-  const fast=peer.connect(hostId,{reliable:false,serialization:'json',metadata:{kind:'fast'}});
+  rel=peer.connect(hostId,{reliable:true,serialization:'json',metadata:{kind:'rel'}});
+  fast=peer.connect(hostId,{reliable:false,serialization:'json',metadata:{kind:'fast'}});
   Net.rel=rel;Net.fast=fast;
-  rel.on('open',()=>{clearTimeout(fail);rel.send({t:'hello',name:myName()});enterLobby()});
+  rel.on('open',()=>{if(done)return;done=true;clearTimeout(timer);rel.send({t:'hello',name:myName()});$('netNote').textContent='Комната найдена.';enterLobby()});
   rel.on('data',recv);fast.on('data',recv);
-  rel.on('close',()=>{if(G.state!=='menu'&&!G.ended)hostLost()});
+  rel.on('close',()=>{if(!Net.relay&&G.state!=='menu'&&!G.ended)hostLost()});
  });
 }
+/* ===== Резервная связь через публичные MQTT-брокеры ===== */
+const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+const relayConn=(c,topic,wrap,minGap)=>{let last=0;return{open:true,relay:true,send(m){const n=performance.now();if(minGap&&n-last<minGap)return;last=n;if(c.connected)c.publish(topic,JSON.stringify(wrap(m)))},close(){}}};
+const Relay={cl:[],ready:false,seen:{},tm:0,
+ mk(u){return mqtt.connect(u,{clientId:'shtolni_'+Math.random().toString(36).slice(2,14),clean:true,connectTimeout:4000,reconnectPeriod:2500,keepalive:30})},
+ stop(){clearInterval(this.tm);this.cl.forEach(c=>{try{c.end(true)}catch(e){}});this.cl=[];this.seen={};this.ready=false},
+ host(code){if(!window.mqtt)return;const T='chetyre-shtolni-v1/'+code;
+  BROKERS.forEach(u=>{const c=this.mk(u);this.cl.push(c);c.on('error',()=>{});
+   c.on('connect',()=>{this.ready=true;c.subscribe(T+'/host')});
+   c.on('message',(t,b)=>{let o;try{o=JSON.parse(b.toString())}catch(e){return}const id=String(o.f||'');if(!id||!o.m)return;
+    if(!Net.conns[id]||!Net.conns[id].relay){const topic=T+'/c/'+id;Net.conns[id]={relay:true,rel:relayConn(c,topic,m=>m),fast:relayConn(c,topic,m=>m,80)}}
+    this.seen[id]=performance.now();handleHost(id,o.m)})});
+  this.tm=setInterval(()=>{const n=performance.now();for(const id in this.seen){const k=Net.conns[id];if(!k||!k.relay){delete this.seen[id];continue}
+    if(n-this.seen[id]>20000){delete this.seen[id];playerLeft(id)}else k.rel.send({t:'ping'})}},4000)},
+ join(code,name,ok,fail){if(!window.mqtt){fail();return}const T='chetyre-shtolni-v1/'+code,id=G.myId;let i=0;
+  const next=()=>{if(i>=BROKERS.length){fail();return}const c=this.mk(BROKERS[i++]);let got=false,hello=0;this.cl.push(c);c.on('error',()=>{});
+   const giveUp=setTimeout(()=>{clearInterval(hello);try{c.end(true)}catch(e){}next()},6000);
+   const up=relayConn(c,T+'/host',m=>({f:id,m}));
+   c.on('connect',()=>{c.subscribe(T+'/c/'+id,()=>{clearInterval(hello);up.send({t:'hello',name});hello=setInterval(()=>up.send({t:'hello',name}),1000)})});
+   c.on('message',(t,b)=>{let m;try{m=JSON.parse(b.toString())}catch(e){return}this.seen.host=performance.now();
+    if(!got){got=true;clearTimeout(giveUp);clearInterval(hello);Net.relay=true;Net.rel=up;Net.fast=relayConn(c,T+'/host',x=>({f:id,m:x}),80);ok();
+     this.tm=setInterval(()=>{up.send({t:'ping'});if(performance.now()-this.seen.host>20000&&G.state!=='menu'&&!G.ended){clearInterval(this.tm);hostLost()}},4000)}
+    recv(m)})};
+  next()}
+};
 function hostLost(){toast('Хост покинул игру');$('endTitle').textContent='Связь с хостом потеряна';$('endTable').textContent='';$('btnBack').style.display='none';$('endNote').textContent='Перезагрузите страницу, чтобы создать новую комнату.';$('end').style.display='flex';exitPointer()}
 function toHost(m){if(G.host)handleHost(G.myId,m);else if(Net.rel&&Net.rel.open)Net.rel.send(m)}
 function toHostFast(m){if(G.host)handleHost(G.myId,m);else if(Net.fast&&Net.fast.open)Net.fast.send(m);else if(Net.rel&&Net.rel.open)Net.rel.send(m)}
@@ -599,7 +636,7 @@ function nearShop(p){const b=BASES[p.team];return Math.hypot(p.x-b[0]-.5,p.z-b[1
 function handleHost(id,m){
  const p=G.P[id];
  switch(m.t){
- case 'hello':if(G.state!=='lobby'){return}addPlayer(id,String(m.name||'Боец').slice(0,14),firstFreeTeam(),false);pushRoster();break;
+ case 'hello':if(G.state!=='lobby'){return}if(G.P[id]){pushRoster();break}addPlayer(id,String(m.name||'Боец').slice(0,14),firstFreeTeam(),false);pushRoster();break;
  case 'team':if(p&&G.state==='lobby'&&m.team>=0&&m.team<4){p.team=m.team;pushRoster()}break;
  case 'map':if(id===G.myId&&G.state==='lobby'){G.map=m.map?1:0;pushRoster()}break;
  case 'cfg':if(id===G.myId&&G.state==='lobby'){if(TIME_OPTS.includes(m.zs))ZONE_START=m.zs;if(LIFE_OPTS.includes(m.lv))MAX_LIVES=m.lv;pushRoster()}break;
@@ -1191,7 +1228,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={G,me,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
