@@ -99,6 +99,18 @@ body.touch #hint{bottom:104px}
 body.touch #ammo{top:auto;right:auto;left:calc(50% + 100px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);padding:2px 8px;white-space:nowrap}
 body.touch #itemName{display:none}
 #tWpn{position:absolute;z-index:3;left:50%;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);transform:translateX(-50%);width:190px;height:42px;padding:0 6px;pointer-events:auto;touch-action:none;background:#000a;border:1px solid #fff5;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tSet{right:max(262px,calc(env(safe-area-inset-right) + 262px));top:max(8px,env(safe-area-inset-top));border-radius:6px;font-size:22px}
+body.edit #hud{z-index:40;background:#1b2019e6}
+body.edit #hud>*:not(#touch):not(#bar):not(#micBtn){display:none!important}
+body.edit #joyZone,body.edit #lookZone{display:none}
+body.edit #touch{display:block!important}
+body.edit .tb,body.edit #tWpn,body.edit #bar,body.edit #micBtn{visibility:visible!important;opacity:1!important;outline:1px dashed #fff8;outline-offset:2px}
+body.edit #bar{min-width:170px;min-height:38px;overflow:hidden}
+body.edit .laySel{outline:2px solid var(--amber)!important}
+#layoutPanel{position:fixed;z-index:41;left:50%;top:max(6px,env(safe-area-inset-top));transform:translateX(-50%);display:none;width:min(94vw,430px);background:#171b15;border:1px solid var(--amber);border-radius:6px;padding:6px 10px;gap:4px;font-size:13px;touch-action:none}
+#layoutPanel.low{top:auto;bottom:max(6px,env(safe-area-inset-bottom))}
+#layoutPanel label{display:flex;gap:8px;align-items:center}#layoutPanel input{flex:1;width:auto;padding:0;touch-action:none}
+#layoutPanel button{padding:4px 8px;font-size:12px}
 #micBtn{position:absolute;pointer-events:auto;left:50%;top:70px;transform:translateX(-50%);padding:3px 9px;font-size:12px;background:#000a}
 #micBtn.on{border-color:var(--green);color:#a7f3a0}
 #load{position:fixed;inset:0;z-index:28;display:none;align-items:center;justify-content:center;background:#0d100b;font:400 22px var(--disp);color:var(--amber)}
@@ -114,6 +126,7 @@ body.touch #itemName{display:none}
   <input id="nick" maxlength="14" placeholder="Боец">
   <button id="btnCreate" class="pri">Создать комнату</button>
   <div class="row"><input id="joinCode" maxlength="5" placeholder="Код комнаты" style="text-transform:uppercase" aria-label="Код комнаты"><button id="btnJoin">Войти</button></div>
+  <button class="layoutOpen" hidden>Настроить кнопки</button>
   <p id="menuErr" class="note err"></p>
   <p class="note">ПК: WASD, мышь, Shift бег, Пробел прыжок, R перезарядка, ПКМ особое действие, 1–9 или колесо смена предмета, B магазин, V микрофон, Y канал голоса, T чат, Tab счёт. На телефоне играйте горизонтально.</p>
 </div></div>
@@ -121,7 +134,7 @@ body.touch #itemName{display:none}
 <div id="lobby" class="screen" style="display:none"><div class="card">
   <div class="row"><div><p class="sub">Код комнаты</p><div id="roomCode" class="code">-----</div></div>
     <button id="btnCopy">Скопировать ссылку</button>
-    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyVc">Голос: всем</button></span></div>
+    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
   <p id="netNote" class="note"></p>
   <div id="teamsEl" class="teams"></div>
   <div class="row seg"><span>Карта:</span><button id="m0" data-m="0">Равнина</button><button id="m1" data-m="1">Пустыня</button>
@@ -154,7 +167,7 @@ body.touch #itemName{display:none}
   <div id="score"></div>
   <div id="touch">
     <div id="joyZone"></div><div id="lookZone"></div><div id="joy"><i></i></div>
-    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
+    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tSet" aria-label="Настроить кнопки">⚙</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
   </div>
   <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B).</p></div></div>
 </div>
@@ -168,6 +181,12 @@ body.touch #itemName{display:none}
   <label><input type="checkbox" id="chAmmo">Бесконечные патроны</label>
   <button id="cheatClose">Закрыть</button>
 </div></div>
+
+<div id="layoutPanel"><b id="layName">Коснитесь кнопки и перетащите её</b>
+  <label>Размер <input type="range" id="laySize" min="0.6" max="1.8" step="0.05" value="1" disabled></label>
+  <label>Джойстик <input type="range" id="layJoy" min="0.6" max="1.8" step="0.05" value="1"></label>
+  <div class="row"><button id="layFlip">Панель вверх/вниз</button><button id="layReset">Сбросить</button><button id="layDone" class="pri">Готово</button></div>
+</div>
 
 <div id="aim"><h2>Выберите цель ракеты на карте</h2><canvas id="aimMap" width="128" height="128"></canvas><button id="aimCancel">Отмена</button></div>
 
@@ -209,6 +228,7 @@ const ITEMS=[
  {id:'pistol',cat:'gun',kind:'gun',price:80,name:'Пистолет',d:'22 урона, магазин 12',dmg:22,rate:.22,mag:12,ammo:'pistol',spread:.012,range:60,auto:false},
  {id:'ak',cat:'gun',kind:'gun',price:280,name:'Автомат',d:'18 урона, магазин 30, очередями',dmg:18,rate:.1,mag:30,ammo:'ak',spread:.022,range:70,auto:true},
  {id:'rifle',cat:'gun',kind:'gun',price:420,name:'Винтовка',d:'75 урона, в голову вдвое больше, прицел на ПКМ',dmg:75,rate:1.1,mag:5,ammo:'rifle',spread:.002,range:120,auto:false,scope:true},
+ {id:'shotgun',cat:'gun',kind:'gun',price:320,name:'Дробовик',d:'8 дробин по 12 урона, магазин 6. Страшен вблизи, издалека слаб',dmg:12,pellets:8,rate:.8,mag:6,ammo:'shotgun',spread:.055,range:40,auto:false},
  {id:'rpg',cat:'gun',kind:'rpg',price:650,name:'РПГ-7',d:'Ракета: взрыв и воронка в земле',rate:1,mag:1,ammo:'rpg'},
  {id:'knife',cat:'gun',kind:'knife',price:40,name:'Армейский нож',d:'45 урона в упор, ПКМ: бросок на 70. Подберите после броска',dmg:45,rate:.45},
  {id:'medkit',cat:'use',kind:'med',price:60,name:'Аптечка',d:'Лечит 60 здоровья'},
@@ -230,6 +250,7 @@ const ITEMS=[
  {id:'a_pistol',cat:'ammo',kind:'ammo',price:15,name:'Патроны для пистолета',d:'Пачка 24 шт.',ammo:'pistol',pack:24},
  {id:'a_rifle',cat:'ammo',kind:'ammo',price:35,name:'Патроны для винтовки',d:'Пачка 10 шт.',ammo:'rifle',pack:10},
  {id:'a_ak',cat:'ammo',kind:'ammo',price:30,name:'Патроны для автомата',d:'Пачка 60 шт.',ammo:'ak',pack:60},
+ {id:'a_shotgun',cat:'ammo',kind:'ammo',price:30,name:'Патроны для дробовика',d:'Пачка 12 шт.',ammo:'shotgun',pack:12},
  {id:'a_rpg',cat:'ammo',kind:'ammo',price:70,name:'Ракеты для РПГ-7',d:'1 ракета',ammo:'rpg',pack:1},
 ];
 const IT={};ITEMS.forEach(i=>IT[i.id]=i);
@@ -463,7 +484,7 @@ let AC=null;const initAudio=()=>{if(!AC){try{AC=new(window.AudioContext||window.
 function vol(x,y,z){if(x==null)return 1;const d=Math.hypot(x-me.x,y-me.y,z-me.z);return clamp(1-d/90,0,1)**2}
 function noise(dur,freq,v,q){if(!AC||v<.01)return;const n=Math.floor(AC.sampleRate*dur),b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n)**2;const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;if(q)f.Q.value=q;const g=AC.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(AC.destination);s.start()}
 function tone(fr,dur,v,type){if(!AC||v<.01)return;const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.value=fr;g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur)}
-const sfx={pistol:(v)=>noise(.14,3200,.35*v),ak:(v)=>noise(.1,2400,.3*v),rifle:(v)=>{noise(.32,1800,.55*v)},boom:(v)=>{noise(1.1,500,.9*v)},pick:()=>noise(.05,5000,.12),hit:()=>tone(1300,.06,.1),hurt:()=>tone(160,.15,.2,'sawtooth'),beep:(v)=>tone(1500,.07,.14*v),click:()=>tone(500,.03,.07),rocket:(v)=>noise(.5,900,.4*v),flash:(v)=>tone(4200,1.4,.12*v,'sine')};
+const sfx={pistol:(v)=>noise(.14,3200,.35*v),ak:(v)=>noise(.1,2400,.3*v),rifle:(v)=>{noise(.32,1800,.55*v)},shotgun:(v)=>{noise(.3,1200,.65*v)},boom:(v)=>{noise(1.1,500,.9*v)},pick:()=>noise(.05,5000,.12),hit:()=>tone(1300,.06,.1),hurt:()=>tone(160,.15,.2,'sawtooth'),beep:(v)=>tone(1500,.07,.14*v),click:()=>tone(500,.03,.07),rocket:(v)=>noise(.5,900,.4*v),flash:(v)=>tone(4200,1.4,.12*v,'sine')};
 
 /* ===== Модели ===== */
 function box(w,h,d,col,x,y,z,mat){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat||new THREE.MeshBasicMaterial({color:col}));m.position.set(x||0,y||0,z||0);return m}
@@ -472,6 +493,7 @@ function vmModel(id){const g=new THREE.Group(),it=IT[id];if(!it)return g;
  const add=(...a)=>g.add(box(...a));
  if(id==='pistol'){add(.05,.07,.26,dark,0,0,-.1);add(.045,.13,.06,dark,0,-.09,0)}
  else if(id==='ak'){add(.055,.08,.5,dark,0,0,-.2);add(.03,.03,.3,steel,0,.02,-.55);add(.05,.16,.07,0x8a5a2b,0,-.11,-.25);add(.05,.1,.2,wood,0,-.03,.12);}
+ else if(id==='shotgun'){add(.06,.08,.34,0x6b4a2a,0,-.01,.02);add(.04,.04,.5,dark,0,.02,-.38);add(.05,.05,.16,0x8a5a2b,0,-.03,-.3)}
  else if(id==='rifle'){add(.05,.07,.6,wood,0,0,-.15);add(.025,.025,.5,dark,0,.02,-.65);add(.05,.05,.2,dark,0,.08,-.2)}
  else if(id==='rpg'){add(.08,.08,.8,0x4a5a35,0,0,-.2);add(.13,.13,.2,0x4a5a35,0,0,-.7);add(.05,.13,.05,dark,0,-.09,-.1)}
  else if(id==='knife'){add(.02,.03,.28,0xc8ccd0,0,.0,-.2);add(.03,.05,.1,0x222222,0,0,-.03)}
@@ -509,10 +531,10 @@ function removeAvatar(p){if(p.av){scene.remove(p.av);p.av=null}}
 /* ===== Состояние ===== */
 const G={state:'menu',map:0,seed:0,time:0,P:{},order:[],host:false,myId:null,placed:{},projs:{},drones:{},pickups:{},nid:1,ended:false};
 const me={x:0,y:0,z:0,vx:0,vy:0,vz:0,ground:false,yaw:0,pitch:0,camY:0};
-let Inv={money:0,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0}};
+let Inv={money:0,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0,shotgun:0}};
 let held='pick0';const mags={};
 const P=()=>G.P[G.myId];
-const newPriv=()=>({money:100,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0},armor:0,armorId:null});
+const newPriv=()=>({money:100,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0,shotgun:0},armor:0,armorId:null});
 
 /* ===== Сеть ===== */
 const Net={peer:null,conns:{},rel:null,fast:null,offline:false};
@@ -969,7 +991,7 @@ function bindHold(el,on,off){el.addEventListener('touchstart',e=>{e.preventDefau
 $('joyZone').addEventListener('touchstart',e=>{e.preventDefault();initAudio();const t=e.changedTouches[0];joy.id=t.identifier;joy.x0=t.clientX;joy.y0=t.clientY;joy.dx=joy.dy=0;const j=$('joy');j.style.display='block';j.style.left=t.clientX+'px';j.style.top=t.clientY+'px'},{passive:false});
 $('lookZone').addEventListener('touchstart',e=>{e.preventDefault();initAudio();const t=e.changedTouches[0];look.id=t.identifier;look.x=t.clientX;look.y=t.clientY},{passive:false});
 document.addEventListener('touchmove',e=>{for(const t of e.changedTouches){
- if(t.identifier===joy.id){let dx=t.clientX-joy.x0,dy=t.clientY-joy.y0;const l=Math.hypot(dx,dy),m=48;if(l>m){dx*=m/l;dy*=m/l}joy.dx=dx/m;joy.dy=dy/m;$('joy').firstChild.style.transform=`translate(${dx}px,${dy}px)`}
+ if(t.identifier===joy.id){let dx=t.clientX-joy.x0,dy=t.clientY-joy.y0;const js=LAY.joyS||1,l=Math.hypot(dx,dy),m=48*js;if(l>m){dx*=m/l;dy*=m/l}joy.dx=dx/m;joy.dy=dy/m;$('joy').firstChild.style.transform=`translate(${dx/js}px,${dy/js}px)`}
  if(t.identifier===look.id||t.identifier===fireT.id){const o=t.identifier===look.id?look:fireT;const s=scoped?.0016:.0052;me.yaw-=(t.clientX-o.x)*s;me.pitch=clamp(me.pitch-(t.clientY-o.y)*s,-1.54,1.54);o.x=t.clientX;o.y=t.clientY}
 }},{passive:true});
 const touchEnd=e=>{for(const t of e.changedTouches){if(t.identifier===joy.id){joy.id=null;joy.dx=joy.dy=0;$('joy').style.display='none';$('joy').firstChild.style.transform=''}if(t.identifier===look.id)look.id=null;if(t.identifier===fireT.id)fireT.id=null}};
@@ -986,6 +1008,7 @@ bindHold($('tSprint'),()=>{inp.sprint=!inp.sprint;$('tSprint').style.borderColor
  el.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===sw.id){const dx=t.clientX-sw.x;if(Math.abs(dx)>=40){step(dx<0?1:-1);sw.x=t.clientX;sw.moved=true}}},{passive:false});
  el.addEventListener('touchend',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===sw.id){sw.id=null;if(!sw.moved){const r=el.getBoundingClientRect(),dx=t.clientX-sw.x;if(Math.abs(dx)>=14)step(dx<0?1:-1);else step(t.clientX<r.left+r.width/2?-1:1)}}},{passive:false});
  el.addEventListener('touchcancel',()=>{sw.id=null})}
+bindHold($('tSet'),()=>{},()=>openLayout());
 bindHold($('tChat'),()=>{},()=>openChat());
 bindHold($('tShop'),()=>{shopOpen?closeShop():openShop()});
 $('hud').addEventListener('touchstart',()=>{},{passive:true});
@@ -1005,14 +1028,14 @@ function rayPlayers(o,d,max){let best=null,bd=max;const me_=P();
   const r=rayBox(o,d,[x-.36,y,z-.36],[x+.36,y+1.82,z+.36]);if(r!=null&&r<bd){bd=r;best={p:t,d:r,head:o[1]+d[1]*r>y+1.38}}});
  return best}
 function fireGun(it){
- const o=eye(),d=lookDir(scoped||CH.aim?0:it.spread*(me.ground?1:2));const r=rayV(o[0],o[1],o[2],d[0],d[1],d[2],it.range),tm=r?r.d:it.range,h=rayPlayers(o,d,tm);
+ const o=eye();sfx[it.id](1);for(let n=0;n<(it.pellets||1);n++){const d=lookDir(scoped||CH.aim?0:it.spread*(me.ground?1:2));const r=rayV(o[0],o[1],o[2],d[0],d[1],d[2],it.range),tm=r?r.d:it.range,h=rayPlayers(o,d,tm);
  const end=h?h.d:tm,e=[o[0]+d[0]*end,o[1]+d[1]*end,o[2]+d[2]*end];
  const st=[o[0]+d[0]*.8-d[2]*.15,o[1]+d[1]*.8-.14,o[2]+d[2]*.8+d[0]*.15];
- tracer(st,e);sfx[it.id](1);toHost({t:'tr',a:st.map(n=>+n.toFixed(2)),b:e.map(n=>+n.toFixed(2)),w:it.id});
+ tracer(st,e);if(n<3)toHost({t:'tr',a:st.map(n=>+n.toFixed(2)),b:e.map(n=>+n.toFixed(2)),w:it.id});
  const dh=rayDrones(o,d,end);if(dh){toHost({t:'drhit',id:dh.id});hitT=.18}
  else if(h){toHost({t:'hit',id:h.p.id,d:h.head?it.dmg*2:it.dmg,w:it.id,h:h.head?1:0})}
- else if(r)debris(e[0],e[1],e[2],2,matColor(r.m));
- recoil=Math.min(1,recoil+(it.id==='rifle'?1:.35));me.pitch=clamp(me.pitch+(it.id==='rifle'?.03:.009),-1.54,1.54);me.yaw+=(Math.random()-.5)*.006;muzzleT=.04;
+ else if(r)debris(e[0],e[1],e[2],2,matColor(r.m))}
+ const heavy=it.id==='rifle'||it.id==='shotgun';recoil=Math.min(1,recoil+(heavy?1:.35));me.pitch=clamp(me.pitch+(heavy?.03:.009),-1.54,1.54);me.yaw+=(Math.random()-.5)*.006;muzzleT=.04;
 }
 let muzzleT=0;
 function rayDrones(o,d,max){let best=null,bd=max;const my=P();for(const id in G.drones){const q=G.drones[id];if(q.tm===my.team)continue;const r=rayBox(o,d,[q.rx-.6,q.ry-.6,q.rz-.6],[q.rx+.6,q.ry+.6,q.rz+.6]);if(r!=null&&r<bd){bd=r;best=q}}return best}
@@ -1273,6 +1296,35 @@ function aimAt(){const o=eye(),my=P();let best=null,bs=.5;
   if(c>bs&&l<130&&!rayV(o[0],o[1],o[2],dx/l,dy/l,dz/l,l)){bs=c;best=[dx,dy,dz,l]}}
  if(best){me.yaw=Math.atan2(-best[0],-best[2]);me.pitch=Math.asin(best[1]/best[3])}}
 
+/* ===== Настройка кнопок на телефоне ===== */
+const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar'];
+const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов'};
+const LAY_KEY='shtolni-layout-v1';
+let LAY={},layoutOn=false,laySel=null,layDrag=null,layHudPrev='';
+try{LAY=JSON.parse(localStorage.getItem(LAY_KEY))||{}}catch(e){LAY={}}
+function saveLayout(){try{localStorage.setItem(LAY_KEY,JSON.stringify(LAY))}catch(e){}}
+function placeBtn(id){const el=$(id),v=LAY[id];if(!v){el.style.left=el.style.top=el.style.right=el.style.bottom=el.style.transform='';return}
+ el.style.left=v.x*100+'%';el.style.top=v.y*100+'%';el.style.right='auto';el.style.bottom='auto';el.style.transform=`translate(-50%,-50%) scale(${v.s})`}
+function applyLayout(){LAY_IDS.forEach(placeBtn);$('joy').style.transform=LAY.joyS?`scale(${LAY.joyS})`:'';$('layJoy').value=LAY.joyS||1}
+function layEntry(id){if(!LAY[id]){const r=$(id).getBoundingClientRect();LAY[id]={x:(r.left+r.width/2)/innerWidth,y:(r.top+r.height/2)/innerHeight,s:1};placeBtn(id)}return LAY[id]}
+function laySelect(id){if(laySel)$(laySel).classList.remove('laySel');laySel=id;if(id)$(id).classList.add('laySel');$('layName').textContent=id?LAY_NAMES[id]+': перетащите или измените размер':'Коснитесь кнопки и перетащите её';$('laySize').disabled=!id;if(id)$('laySize').value=LAY[id]?LAY[id].s:1}
+function openLayout(){if(layoutOn)return;layoutOn=true;closeShop();closeAim();closeChat();if(G.state==='game')cheatOpen=true;inp.fire=false;inp.jump=false;joy.id=null;
+ layHudPrev=$('hud').style.display;$('hud').style.display='block';$('touch').style.display='block';document.body.classList.add('edit');$('layoutPanel').style.display='grid';if(!$('tWpn').textContent)$('tWpn').textContent='◀ Оружие ▶';laySelect(null)}
+function closeLayout(){if(!layoutOn)return;layoutOn=false;laySelect(null);saveLayout();document.body.classList.remove('edit');$('layoutPanel').style.display='none';$('hud').style.display=layHudPrev;if(G.state==='game')cheatOpen=false;else $('touch').style.display='none'}
+$('laySize').addEventListener('input',e=>{if(!laySel)return;layEntry(laySel).s=+e.target.value;placeBtn(laySel);saveLayout()});
+$('layJoy').addEventListener('input',e=>{LAY.joyS=+e.target.value;applyLayout();saveLayout()});
+$('layFlip').onclick=()=>$('layoutPanel').classList.toggle('low');
+$('layReset').onclick=()=>{LAY={};laySelect(null);applyLayout();saveLayout()};
+$('layDone').onclick=closeLayout;
+// Пока идёт настройка, касания двигают кнопки и не нажимают их
+document.addEventListener('touchstart',e=>{if(!layoutOn||e.target.closest('#layoutPanel'))return;e.preventDefault();e.stopPropagation();
+ const t=e.changedTouches[0],el=e.target.closest(LAY_IDS.map(i=>'#'+i).join());if(!el){laySelect(null);return}
+ const v=layEntry(el.id);laySelect(el.id);layDrag={id:t.identifier,el:el.id,ox:v.x-t.clientX/innerWidth,oy:v.y-t.clientY/innerHeight}},{capture:true,passive:false});
+document.addEventListener('touchmove',e=>{if(!layoutOn||!layDrag)return;e.preventDefault();e.stopPropagation();for(const t of e.changedTouches)if(t.identifier===layDrag.id){const v=LAY[layDrag.el];v.x=clamp(t.clientX/innerWidth+layDrag.ox,.02,.98);v.y=clamp(t.clientY/innerHeight+layDrag.oy,.02,.98);placeBtn(layDrag.el)}},{capture:true,passive:false});
+const layEnd=e=>{if(!layoutOn||e.target.closest('#layoutPanel'))return;e.stopPropagation();if(layDrag){layDrag=null;saveLayout()}};
+document.addEventListener('touchend',layEnd,true);document.addEventListener('touchcancel',layEnd,true);
+if(isTouch){document.querySelectorAll('.layoutOpen').forEach(b=>{b.hidden=false;b.onclick=openLayout});applyLayout()}
+
 /* ===== Главный цикл ===== */
 let last=performance.now();
 function frame(now){
@@ -1297,7 +1349,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
