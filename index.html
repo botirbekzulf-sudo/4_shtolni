@@ -94,6 +94,11 @@ body.touch #chatBox{bottom:auto;top:max(8px,env(safe-area-inset-top))}
 #cheatBox{background:#171b15;border:1px solid var(--amber);border-radius:6px;padding:12px 14px;width:min(100%,320px);display:grid;gap:10px}
 #cheatBox h2{color:var(--amber)}#cheatBox label{display:flex;gap:8px;align-items:center;cursor:pointer}#cheatBox input{width:20px;height:20px;flex:none}
 #tChat{right:max(196px,calc(env(safe-area-inset-right) + 196px));top:max(8px,env(safe-area-inset-top));border-radius:6px}
+body.touch #bar,body.touch #micBtn{z-index:3}
+body.touch #hint{bottom:104px}
+body.touch #ammo{top:auto;right:auto;left:calc(50% + 100px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);padding:2px 8px;white-space:nowrap}
+body.touch #itemName{display:none}
+#tWpn{position:absolute;z-index:3;left:50%;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);transform:translateX(-50%);width:190px;height:42px;padding:0 6px;pointer-events:auto;touch-action:none;background:#000a;border:1px solid #fff5;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #micBtn{position:absolute;pointer-events:auto;left:50%;top:70px;transform:translateX(-50%);padding:3px 9px;font-size:12px;background:#000a}
 #micBtn.on{border-color:var(--green);color:#a7f3a0}
 #load{position:fixed;inset:0;z-index:28;display:none;align-items:center;justify-content:center;background:#0d100b;font:400 22px var(--disp);color:var(--amber)}
@@ -149,7 +154,7 @@ body.touch #chatBox{bottom:auto;top:max(8px,env(safe-area-inset-top))}
   <div id="score"></div>
   <div id="touch">
     <div id="joyZone"></div><div id="lookZone"></div><div id="joy"><i></i></div>
-    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tChat">ЧАТ</button>
+    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
   </div>
   <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B).</p></div></div>
 </div>
@@ -974,6 +979,13 @@ bindHold($('tJump'),()=>{inp.jump=true},()=>{inp.jump=false});
 bindHold($('tRel'),()=>reload());
 bindHold($('tAlt'),()=>{inp.alt=true;inp.altPress=true},()=>{inp.alt=false});
 bindHold($('tSprint'),()=>{inp.sprint=!inp.sprint;$('tSprint').style.borderColor=inp.sprint?'#f0b429':''});
+// Смена предмета: свайп влево-вправо (длинный листает несколько) или касание края
+{const el=$('tWpn'),sw={id:null,x:0,moved:false};
+ const step=d=>{cycle(d);try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}};
+ el.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();initAudio();const t=e.changedTouches[0];sw.id=t.identifier;sw.x=t.clientX;sw.moved=false},{passive:false});
+ el.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===sw.id){const dx=t.clientX-sw.x;if(Math.abs(dx)>=40){step(dx<0?1:-1);sw.x=t.clientX;sw.moved=true}}},{passive:false});
+ el.addEventListener('touchend',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===sw.id){sw.id=null;if(!sw.moved){const r=el.getBoundingClientRect(),dx=t.clientX-sw.x;if(Math.abs(dx)>=14)step(dx<0?1:-1);else step(t.clientX<r.left+r.width/2?-1:1)}}},{passive:false});
+ el.addEventListener('touchcancel',()=>{sw.id=null})}
 bindHold($('tChat'),()=>{},()=>openChat());
 bindHold($('tShop'),()=>{shopOpen?closeShop():openShop()});
 $('hud').addEventListener('touchstart',()=>{},{passive:true});
@@ -1145,9 +1157,12 @@ function updateAvatars(dt){
 /* ===== Интерфейс ===== */
 let toastTm=0;function toast(s,sec){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTm);toastTm=setTimeout(()=>t.style.opacity=0,(sec||2)*1000)}
 function addFeed(h){const d=document.createElement('div');d.innerHTML=h;const f=$('feed');f.appendChild(d);while(f.children.length>4)f.removeChild(f.firstChild);setTimeout(()=>d.remove(),5000)}
-function renderBar(){const b=$('bar');b.textContent='';barItems().forEach((it,i)=>{const x=document.createElement('button');if(it.id===held)x.className='on';
+let barSig='';
+function renderBar(){const b=$('bar'),list=barItems(),sig=held+'|'+list.map(i=>i.id+Inv.inv[i.id]).join();$('tWpn').textContent='◀ '+(IT[held]?IT[held].name:'')+' ▶';
+ // Панель пересобирается только при изменении, иначе касание теряется
+ if(sig!==barSig){barSig=sig;b.textContent='';list.forEach((it,i)=>{const x=document.createElement('button');if(it.id===held)x.className='on';
   const cnt=it.mag?'':Inv.inv[it.id]>1?'×'+Inv.inv[it.id]:'';x.innerHTML=`<small>${i+1}</small>${esc(it.name.replace('Кирка ','').replace('Армейский ','').replace('Шахтёрский ','').replace(' граната','').replace('Песчаная ',''))} ${cnt}`;
-  const go=e=>{e.preventDefault();select(it.id)};x.addEventListener('click',go);x.addEventListener('touchend',go);b.appendChild(x)});
+  const go=e=>{e.preventDefault();select(it.id)};x.addEventListener('click',go);b.appendChild(x)});const on=b.querySelector('.on');if(on)b.scrollLeft=on.offsetLeft-(b.clientWidth-on.offsetWidth)/2}
  const o=$('ores');o.innerHTML=Object.keys(ORES).map(k=>`<span title="${ORES[k].n}" style="color:${ORES[k].c}">■ <b>${Inv.ores[k]||0}</b></span>`).join('');$('money').textContent='$'+Inv.money}
 let shopCat='gun';
 function openShop(){const p=P();if(!p||!p.alive||Drone||aimOpen||cheatOpen||chatOpen)return;if(!nearShop(p)){toast('Магазин работает только на вашей базе',1.6);return}shopOpen=true;scoped=false;$('shop').style.display='flex';exitPointer();renderShop()}
