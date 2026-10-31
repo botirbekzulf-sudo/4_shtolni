@@ -115,20 +115,69 @@ body.edit .laySel{outline:2px solid var(--amber)!important}
 #micBtn.on{border-color:var(--green);color:#a7f3a0}
 #load{position:fixed;inset:0;z-index:28;display:none;align-items:center;justify-content:center;background:#0d100b;font:400 22px var(--disp);color:var(--amber)}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
+/* Единый вид: тёмные таблички с рубленым углом, янтарный акцент */
+:root{--plate:#0e120cdb;--edge:#ffffff24;--cut:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px))}
+.screen{background:linear-gradient(#0d100b 0,#1a2015 55%,#3a2e16 100%)}
+.ridge{position:fixed;left:0;right:0;bottom:0;width:100%;height:38vh;pointer-events:none}
+.ridge path{fill:#0b0e09}.ridge .adit{fill:var(--amber);opacity:.85}
+.card{position:relative}
+.menuCard{max-width:880px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:center}
+@media(max-width:640px) and (orientation:portrait){.menuCard{grid-template-columns:minmax(0,1fr)}}
+.brand h1{font-size:clamp(30px,min(7vw,13vh),68px);margin:4px 0 8px}
+.kicker{margin:0;color:var(--amber);font-size:12px;letter-spacing:.09em;text-transform:uppercase}
+.play{display:grid;gap:8px;background:#171c14f2;border:1px solid var(--edge);padding:14px;clip-path:var(--cut)}
+.play .row button{flex:1}.play .row>input{flex:2 1 110px}
+.tutCard{max-width:620px;background:#171c14f5;border:1px solid var(--edge);padding:18px;clip-path:var(--cut)}
+#tutTitle{font-size:24px;color:var(--amber)}#tutBody{line-height:1.5;min-height:150px}#tutBody p{margin:0 0 8px;max-width:62ch}#tutBody ul{margin:0 0 8px;padding-left:18px;display:grid;gap:3px}
+button{clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));border-radius:0}
+input{border-radius:0}
+.team{border-radius:0;background:#171c14e6}.team h2{color:var(--c)}
+.seg{gap:6px}.seg>span:first-child{color:var(--dim);min-width:170px}.seg .row{gap:4px}.seg button{padding:6px 10px}
+#res,#top,#vitals,#ammo,#mapWrap,#score,#feed div,#chatLog div{background:var(--plate);border:1px solid var(--edge);border-radius:0;clip-path:var(--cut)}
+#mapWrap{padding:2px}#top{min-width:138px}
+#timer{color:#fff;line-height:1.05}
+#hpTxt{font:400 18px var(--disp);margin-left:4px}#hpBar{height:9px;background:#ffffff17}#arBar{background:#ffffff17}
+#lives{font-size:15px}
+#hint{background:var(--plate);border:1px solid var(--amber);border-radius:0;clip-path:var(--cut)}
+#bar{gap:4px;padding:2px}
+#bar button{background:var(--plate);border-color:var(--edge);min-width:60px;padding:4px 7px;text-align:left}
+#bar button.on{background:var(--amber);border-color:var(--amber);color:#1c1503;font-weight:700}#bar button.on small{color:#1c1503}
+#micBtn{background:var(--plate)}
+.tb{clip-path:none;border-radius:50%;background:#0e120ca6;backdrop-filter:blur(2px)}
+#tFire{background:#7f1d1d99}
+#tShop,#tChat,#tSet,#tTur{border-radius:6px;clip-path:none}
+#tTur{right:max(172px,calc(env(safe-area-inset-right) + 172px));bottom:96px;visibility:hidden;background:#14532dcc;border-color:#86efac}
+#tWpn{border-radius:0}
+#tSet{right:auto;left:max(164px,calc(env(safe-area-inset-left) + 164px))}
+#shopBox{background:#141812;border-radius:0;clip-path:var(--cut)}
+#shopHead{background:#1b2118}
+.it{border-radius:0;background:#1d2319;border-color:#ffffff1a;align-content:start}.it b{font:400 15px var(--disp)}
+.it .row{margin-top:auto}
+#tabs button{white-space:nowrap}
+#lock div{border-radius:0;clip-path:var(--cut)}
+@media(max-height:430px){.screen{align-items:flex-start;padding-block:8px}.card{gap:8px}.ridge{height:24vh}#tutBody{min-height:0;font-size:13px}.seg>span:first-child{min-width:0}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 
-<div id="menu" class="screen"><div class="card" style="max-width:520px">
-  <div><h1>Четыре Штольни</h1><p class="sub">Шутер от первого лица: копай руду, покупай оружие, взрывай землю. Время боя и число жизней выбираются в лобби, потом зона начинает сжиматься.</p></div>
-  <label for="nick">Позывной</label>
-  <input id="nick" maxlength="14" placeholder="Боец">
-  <button id="btnCreate" class="pri">Создать комнату</button>
-  <div class="row"><input id="joinCode" maxlength="5" placeholder="Код комнаты" style="text-transform:uppercase" aria-label="Код комнаты"><button id="btnJoin">Войти</button></div>
-  <button class="layoutOpen" hidden>Настроить кнопки</button>
-  <p id="menuErr" class="note err"></p>
-  <p class="note">ПК: WASD, мышь, Shift бег, Пробел прыжок, R перезарядка, ПКМ особое действие, 1–9 или колесо смена предмета, B магазин, V микрофон, Y канал голоса, T чат, Tab счёт. На телефоне играйте горизонтально.</p>
+<div id="menu" class="screen">
+<svg class="ridge" viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"><path d="M0 220V170L90 150 180 165 300 120 400 135 500 20 600 130 700 115 820 165 910 148 1000 170V220Z"/><path class="adit" d="M470 220v-34a30 30 0 0 1 60 0v34Z"/></svg>
+<div class="card menuCard">
+  <div class="brand"><p class="kicker">4 команды · 2 карты · разрушаемая земля</p><h1>Четыре Штольни</h1><p class="sub">Копай руду, покупай оружие, ставь турели и взрывай землю под врагом. Побеждает последняя живая команда.</p></div>
+  <div class="play">
+    <label for="nick">Позывной</label>
+    <input id="nick" maxlength="14" placeholder="Боец">
+    <button id="btnCreate" class="pri">Создать комнату</button>
+    <div class="row"><input id="joinCode" maxlength="5" placeholder="Код комнаты" style="text-transform:uppercase" aria-label="Код комнаты"><button id="btnJoin">Войти</button></div>
+    <p id="menuErr" class="note err"></p>
+    <div class="row"><button id="btnTut">Обучение</button><button class="layoutOpen" hidden>Настроить кнопки</button></div>
+  </div>
+</div></div>
+
+<div id="tut" class="screen" style="display:none"><div class="card tutCard">
+  <p id="tutStep" class="kicker"></p><h2 id="tutTitle"></h2><div id="tutBody"></div>
+  <div class="row"><button id="tutClose">В меню</button><span style="margin-left:auto" class="row"><button id="tutPrev">Назад</button><button id="tutNext" class="pri">Дальше</button></span></div>
 </div></div>
 
 <div id="lobby" class="screen" style="display:none"><div class="card">
@@ -167,7 +216,7 @@ body.edit .laySel{outline:2px solid var(--amber)!important}
   <div id="score"></div>
   <div id="touch">
     <div id="joyZone"></div><div id="lookZone"></div><div id="joy"><i></i></div>
-    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tSet" aria-label="Настроить кнопки">⚙</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
+    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tSet" aria-label="Настроить кнопки">⚙</button><button class="tb" id="tTur">ТУР.</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
   </div>
   <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B).</p></div></div>
 </div>
@@ -191,7 +240,7 @@ body.edit .laySel{outline:2px solid var(--amber)!important}
 <div id="aim"><h2>Выберите цель ракеты на карте</h2><canvas id="aimMap" width="128" height="128"></canvas><button id="aimCancel">Отмена</button></div>
 
 <div id="shop"><div id="shopBox">
-  <div id="shopHead"><h2>Магазин базы</h2><button id="sellAll">Продать всю руду</button><span id="shopMoney">$0</span><button id="shopClose">Закрыть</button></div>
+  <div id="shopHead"><h2 id="shopTitle">Магазин базы</h2><button id="sellAll">Продать всю руду</button><span id="shopMoney">$0</span><button id="shopClose">Закрыть</button></div>
   <div id="tabs"></div><div id="items"></div>
 </div></div>
 
@@ -239,6 +288,9 @@ const ITEMS=[
  {id:'vest1',cat:'armor',kind:'armor',price:100,name:'Бронежилет ур.1',d:'Прочность 50, поглощает 40% урона. Выстрел в голову не держит',ap:50,absorb:.4},
  {id:'vest2',cat:'armor',kind:'armor',price:220,name:'Бронежилет ур.2',d:'Прочность 100, поглощает 55% урона. Выстрел в голову не держит',ap:100,absorb:.55},
  {id:'vest3',cat:'armor',kind:'armor',price:400,name:'Бронежилет ур.3',d:'Прочность 150, поглощает 70% урона. Выстрел в голову не держит',ap:150,absorb:.7},
+ {id:'t_def',cat:'def',kind:'turret',price:350,name:'Защитная турель',d:'Положите в неё оружие и патроны: сама стреляет по врагам до 35 м'},
+ {id:'t_med',cat:'def',kind:'turret',price:250,name:'Медицинская турель',d:'Положите аптечки или адреналин: лечит союзников в радиусе 8 м'},
+ {id:'t_nade',cat:'def',kind:'turret',price:300,name:'Метательная турель',d:'Положите гранаты: М-67, флешки или дым. Метает во врагов на 6-28 м'},
  {id:'charge',cat:'boom',kind:'place',price:120,name:'Шахтёрский заряд',d:'Ставится на стену. Через 3 с вырывает огромную полость'},
  {id:'flash',cat:'boom',kind:'nade',price:40,name:'Флешка',d:'Ослепляет тех, кто смотрит на вспышку'},
  {id:'smoke',cat:'boom',kind:'nade',price:35,name:'Дымовая граната',d:'Плотный дым на 12 секунд'},
@@ -254,8 +306,8 @@ const ITEMS=[
  {id:'a_rpg',cat:'ammo',kind:'ammo',price:70,name:'Ракеты для РПГ-7',d:'1 ракета',ammo:'rpg',pack:1},
 ];
 const IT={};ITEMS.forEach(i=>IT[i.id]=i);
-const CATS=[['gun','Оружие'],['use','Расходники'],['armor','Броня'],['boom','Взрывное'],['strike','Ударные'],['ammo','Патроны'],['mine','Добыча'],['ore','Продать ресурсы']];
-const EXP={quake:{r:2.6,dr:0,d:0},rpg:{r:3.6,dr:6,d:110},m67:{r:2.6,dr:6,d:100},mine:{r:2.6,dr:4,d:120},claymore:{r:1.6,dr:8,d:110,cone:1},charge:{r:6.2,dr:7.5,d:130},fpv1:{r:2.5,dr:5,d:90},fpv2:{r:3.5,dr:6,d:120},fpv3:{r:5,dr:8,d:160},bm:{r:11,dr:18,d:300},flash:{r:0,dr:0,d:0},smoke:{r:0,dr:0,d:0}};
+const CATS=[['gun','Оружие'],['use','Расходники'],['armor','Броня'],['def','Защита'],['boom','Взрывное'],['strike','Ударные'],['ammo','Патроны'],['mine','Добыча'],['ore','Продать ресурсы']];
+const EXP={tboom:{r:.8,dr:0,d:0},quake:{r:2.6,dr:0,d:0},rpg:{r:3.6,dr:6,d:110},m67:{r:2.6,dr:6,d:100},mine:{r:2.6,dr:4,d:120},claymore:{r:1.6,dr:8,d:110,cone:1},charge:{r:6.2,dr:7.5,d:130},fpv1:{r:2.5,dr:5,d:90},fpv2:{r:3.5,dr:6,d:120},fpv3:{r:5,dr:8,d:160},bm:{r:11,dr:18,d:300},flash:{r:0,dr:0,d:0},smoke:{r:0,dr:0,d:0}};
 
 /* ===== Шум и случайность ===== */
 function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -502,6 +554,7 @@ function vmModel(id){const g=new THREE.Group(),it=IT[id];if(!it)return g;
   else{add(.025,.3,.025,wood,0,.02,-.1);add(.24,.035,.035,c,0,.16,-.1)}}
  else if(it.kind==='nade'){add(.09,.11,.09,id==='m67'?0x3f4f2e:id==='flash'?0x9aa0a6:0x777777,0,0,-.05)}
  else if(id==='adren'){add(.04,.04,.2,0xdfe7ea,0,0,-.1);add(.01,.01,.1,0xaaaaaa,0,0,-.25);add(.03,.03,.1,0xe5484d,0,0,-.08)}
+ else if(it.kind==='turret'){add(.2,.06,.2,0x555a50,0,-.05,-.08);add(.05,.14,.05,0x555a50,0,.04,-.08);add(.14,.08,.14,id==='t_med'?0xdddddd:id==='t_nade'?0x4a5a35:0x3a3f44,0,.14,-.08)}
  else if(id==='medkit'){add(.18,.13,.1,0xdddddd,0,0,-.05);add(.1,.03,.11,0xcc2222,0,0,-.05);add(.03,.1,.11,0xcc2222,0,0,-.05)}
  else if(id==='sandwall'){add(.28,.14,.14,0xcdb47d,0,0,-.05)}
  else if(id==='claymore'){add(.2,.13,.05,0x4a5a35,0,0,-.05)}
@@ -529,7 +582,7 @@ function makeAvatar(p){
 function removeAvatar(p){if(p.av){scene.remove(p.av);p.av=null}}
 
 /* ===== Состояние ===== */
-const G={state:'menu',map:0,seed:0,time:0,P:{},order:[],host:false,myId:null,placed:{},projs:{},drones:{},pickups:{},nid:1,ended:false};
+const G={state:'menu',map:0,seed:0,time:0,P:{},order:[],host:false,myId:null,placed:{},projs:{},drones:{},turrets:{},pickups:{},nid:1,ended:false};
 const me={x:0,y:0,z:0,vx:0,vy:0,vz:0,ground:false,yaw:0,pitch:0,camY:0};
 let Inv={money:0,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0,shotgun:0}};
 let held='pick0';const mags={};
@@ -681,6 +734,9 @@ function handleHost(id,m){
  case 'med':if(p&&p.alive&&p.priv.inv.medkit>0&&p.hp<100){p.priv.inv.medkit--;p.hp=Math.max(p.hp,Math.min(100,p.hp+60));pushInv(id)}break;
  case 'adr':if(p&&p.alive&&p.priv.inv.adren>0){p.priv.inv.adren--;p.hp=Math.max(p.hp,Math.min(100,p.hp+25));pushInv(id)}break;
  case 'chat':if(p)bcast({t:'chat',id,s:String(m.s||'').slice(0,120)});break;
+ case 'turp':hTurPlace(p,m);break;
+ case 'tl':hTurLoad(p,m);break;
+ case 'thit':{const q=G.turrets[m.id];if(q&&p&&p.alive&&p.team!==q.tm)turHurt(q,clamp(m.d,0,160));break}
  case 'wall':hWall(p,m);break;
  case 'throw':hThrow(p,m);break;
  case 'place':hPlace(p,m);break;
@@ -721,6 +777,44 @@ function hDrone(p,m){if(!p||!p.alive||!IT[m.k]||IT[m.k].kind!=='fpv'||!(p.priv.i
  p.priv.inv[m.k]--;pushInv(p.id);bcast({t:'dr',id:G.nid++,k:m.k,x:m.x,y:m.y,z:m.z,yaw:m.yaw,o:p.id,tm:p.team})}
 function droneBoom(q,x,y,z){bcast({t:'rmd',id:q.id});doBoom(x,y,z,q.k,q.o,q.tm)}
 
+/* ===== Турели ===== */
+const TUR_ITEMS={t_med:['medkit','adren'],t_nade:['m67','flash','smoke']};
+const turSync=q=>bcast({t:'tus',id:q.id,hp:Math.ceil(q.hp),l:q.l});
+function hTurPlace(p,m){if(!p||!p.alive||!IT[m.k]||IT[m.k].kind!=='turret'||!(p.priv.inv[m.k]>0))return;p.priv.inv[m.k]--;pushInv(p.id);
+ bcast({t:'turadd',id:G.nid++,k:m.k,x:m.x,y:m.y,z:m.z,yaw:m.yaw,o:p.id,tm:p.team,hp:150})}
+function turEmpty(q,v){const l=q.l;if(l.w){v.inv[l.w]=(v.inv[l.w]||0)+1;v.ammo[IT[l.w].ammo]+=l.ammo||0;l.w=null;l.ammo=0}(TUR_ITEMS[q.k]||[]).forEach(i=>{if(l[i]){v.inv[i]=(v.inv[i]||0)+l[i];l[i]=0}})}
+function hTurLoad(p,m){const q=G.turrets[m.id];if(!p||!p.alive||!q||q.tm!==p.team||Math.hypot(p.x-q.x,p.z-q.z)>6)return;const v=p.priv,l=q.l,it=IT[m.v];
+ if(m.a==='w'){if(q.k!=='t_def'||!it||it.kind!=='gun'||!(v.inv[m.v]>0))return;if(l.w){v.inv[l.w]=(v.inv[l.w]||0)+1;v.ammo[IT[l.w].ammo]+=l.ammo||0;l.ammo=0}v.inv[m.v]--;l.w=m.v}
+ else if(m.a==='am'){if(!l.w)return;const t=IT[l.w].ammo,pack=ITEMS.find(i=>i.kind==='ammo'&&i.ammo===t).pack,n=Math.min(v.ammo[t]||0,m.all?1e9:pack);v.ammo[t]-=n;l.ammo=(l.ammo||0)+n}
+ else if(m.a==='it'){if(!(TUR_ITEMS[q.k]||[]).includes(m.v)||!(v.inv[m.v]>0))return;const n=m.all?v.inv[m.v]:1;v.inv[m.v]-=n;l[m.v]=(l[m.v]||0)+n}
+ else if(m.a==='out')turEmpty(q,v);
+ else if(m.a==='pick'){if(q.o!==p.id)return;turEmpty(q,v);v.inv[q.k]=(v.inv[q.k]||0)+1;pushInv(p.id);bcast({t:'turrm',id:q.id});return}
+ else return;
+ pushInv(p.id);turSync(q)}
+function turHurt(q,d){q.hp-=d;if(q.hp<=0){bcast({t:'turrm',id:q.id});doBoom(q.x,q.y+.5,q.z,'tboom',null,-1)}else turSync(q)}
+function turretsTick(dt){
+ for(const id in G.turrets){const q=G.turrets[id];q.cd=(q.cd||0)-dt;
+  if(!solid(Math.floor(q.x),Math.floor(q.y-.05),Math.floor(q.z))&&q.y>1)q.y-=dt*9;
+  const ex=q.x,ey=q.y+1.1,ez=q.z,l=q.l;let best=null,bd=1e9;
+  const seeable=(t,max)=>{const dx=t.x-ex,dy=t.y+1.1-ey,dz=t.z-ez,d=Math.hypot(dx,dy,dz)||1;return d<=max&&!rayV(ex,ey,ez,dx/d,dy/d,dz/d,d-.3)?d:0};
+  if(q.k==='t_med'){
+   if(q.cd>0||!(l.medkit>0||l.adren>0))continue;
+   for(const pid of G.order){const t=G.P[pid];if(t.alive&&t.team===q.tm&&t.hp<100&&t.hp<bd&&Math.hypot(t.x-ex,t.z-ez)<8){bd=t.hp;best=t}}
+   if(!best)continue;const big=l.medkit>0&&(best.hp<=60||!(l.adren>0));if(big)l.medkit--;else l.adren--;
+   best.hp=Math.max(best.hp,Math.min(100,best.hp+(big?60:25)));q.cd=2;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));
+   bcast({t:'tr',a:[ex,ey,ez],b:[best.x,best.y+1,best.z],w:'',id:'tur',c:0x4ade80});turSync(q);sendState();continue}
+  const range=q.k==='t_nade'?28:35;
+  for(const pid of G.order){const t=G.P[pid];if(!t.alive||t.team===q.tm)continue;const d=Math.hypot(t.x-ex,t.y+1.1-ey,t.z-ez);if(d<bd&&d<=range&&(q.k==='t_nade'?d>=6:seeable(t,range))){bd=d;best=t}}
+  if(!best)continue;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));if(q.cd>0)continue;
+  if(q.k==='t_def'){const it=IT[l.w];if(!it||!(l.ammo>0)||bd>Math.min(it.range,35))continue;q.cd=Math.max(it.rate*1.3,.2);l.ammo--;
+   const aim=Math.random()<.6,off=()=>aim?0:(Math.random()-.5)*2.2;
+   bcast({t:'tr',a:[ex,ey,ez],b:[best.x+off(),best.y+1.1+off(),best.z+off()],w:l.w,id:'tur'});
+   if(aim)damage(best,it.dmg*(it.pellets||1)*(it.pellets?.6:1),G.P[q.o],l.w);turSync(q)}
+  else{const k=['m67','flash','smoke'].find(i=>l[i]>0);if(!k)continue;q.cd=3;l[k]--;const f=bd/15;
+   spawnProj({id:q.o,team:q.tm},k,ex,ey,ez,(best.x-ex)/f,(best.y-q.y)/f+9*f,(best.z-ez)/f);turSync(q)}
+ }
+}
+
 /* ===== Урон и победа ===== */
 function damage(t,d,by,w,head){
  if(!t.alive||G.ended)return;
@@ -748,6 +842,7 @@ function doBoom(x,y,z,k,oid,tm,yaw){
   const ray=rayV(x,y+.3,z,dx/(dist||1),(dy-.3)/(dist||1),dz/(dist||1),dist);
   let dmg=e.d*(1-(dist/e.dr)**1.5);if(ray&&e.r<3)dmg*=.3;else if(ray)dmg*=.6;if(id===oid)dmg*=.6;
   damage(t,dmg,id===oid?t:by,k)});
+ for(const tid in G.turrets){const q=G.turrets[tid];if(q.tm===tm)continue;const dist=Math.hypot(q.x-x,q.y+.6-y,q.z-z);if(dist<e.dr)turHurt(q,e.d*(1-(dist/e.dr)**1.5))}
  // Цепная детонация расставленной взрывчатки
  for(const pid in G.placed){const q=G.placed[pid];if(!q.deton&&Math.hypot(q.x-x,q.y-y,q.z-z)<Math.max(e.r,2.5)){q.deton=G.time+.15}}
 }
@@ -760,16 +855,19 @@ const H_R={
  roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
   if(G.state==='lobby')renderLobby();Voice.onRoster()},
  start(m){startMatch(m)},
- s(m){m.a.forEach(q=>{if(q[0]===G.myId)return;const p=G.P[q[0]];if(!p)return;p.x=q[1];p.y=q[2];p.z=q[3];p.yaw=q[4];p.pitch=q[5];p.item=q[6]});(m.d||[]).forEach(q=>{const d=G.drones[q[0]];if(d&&d.o!==G.myId){d.x=q[1];d.y=q[2];d.z=q[3];d.yaw=q[4]}})},
+ s(m){m.a.forEach(q=>{if(q[0]===G.myId)return;const p=G.P[q[0]];if(!p)return;p.x=q[1];p.y=q[2];p.z=q[3];p.yaw=q[4];p.pitch=q[5];p.item=q[6]});(m.tu||[]).forEach(q=>{const u=G.turrets[q[0]];if(u){u.y=q[1];u.yaw=q[2]}});(m.d||[]).forEach(q=>{const d=G.drones[q[0]];if(d&&d.o!==G.myId){d.x=q[1];d.y=q[2];d.z=q[3];d.yaw=q[4]}})},
  p(){},
  st(m){G.time=G.host?G.time:lerp(G.time,m.time,Math.abs(G.time-m.time)>1?1:.2);m.pl.forEach(q=>{const p=G.P[q[0]];if(!p)return;p.hp=q[1];p.lives=q[2];p.alive=!!q[3];p.kills=q[4]})},
  inv(m){const had=Inv.inv;Inv=m.v;for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag&&mags[id]==null)mags[id]=IT[id].mag;if(!(Inv.inv[held]>0))held='pick0';renderBar();renderShop()},
  vxs(m){m.c.forEach(c=>{const v=getV(c[0],c[1],c[2]);if(v){debris(c[0]+.5,c[1]+.5,c[2]+.5,2,matColor(v));setV(c[0],c[1],c[2],AIR)}});minePending=0;},
  vset(m){m.c.forEach(c=>setV(c[0],c[1],c[2],c[3]))},
- tr(m){if(m.id===G.myId)return;tracer(m.a,m.b);if(sfx[m.w])sfx[m.w](vol(m.a[0],m.a[1],m.a[2]))},
+ tr(m){if(m.id===G.myId)return;tracer(m.a,m.b,m.c);if(sfx[m.w])sfx[m.w](vol(m.a[0],m.a[1],m.a[2]))},
  proj(m){const pr={...m,t:0,mesh:null};if(m.k==='bm'){bmWarn(pr)}const c=m.k==='bm'?0xd9dde0:m.k==='rpg'?0x4a5a35:m.k==='knife'?0xc8ccd0:m.k==='flash'?0xdddddd:m.k==='smoke'?0x888888:0x3f4f2e;pr.mesh=m.k==='bm'?box(1,5,1,c):box(m.k==='knife'?.06:.2,m.k==='knife'?.06:.2,m.k==='knife'?.35:(m.k==='rpg'?.6:.2),c);pr.mesh.position.set(m.x,m.y,m.z);scene.add(pr.mesh);G.projs[m.id]=pr;if(m.k==='rpg')sfx.rocket(vol(m.x,m.y,m.z))},
  rm(m){const pr=G.projs[m.id];if(pr){scene.remove(pr.mesh);if(pr.beam)scene.remove(pr.beam);delete G.projs[m.id]}},
  boom(m){onBoom(m)},
+ turadd(m){const q={...m,l:{w:null,ammo:0},mesh:null,head:null,ry:m.yaw||0};delete q.t;const g=turretMesh(m.k,m.tm);q.mesh=g;q.head=g.userData.head;g.position.set(m.x,m.y,m.z);scene.add(g);G.turrets[m.id]=q},
+ tus(m){const q=G.turrets[m.id];if(q){q.hp=m.hp;q.l=m.l;if(curTur===m.id)renderShop()}},
+ turrm(m){const q=G.turrets[m.id];if(q){scene.remove(q.mesh);delete G.turrets[m.id];if(curTur===m.id)closeShop()}},
  ev(m){G.evT=G.evT||{};G.evN=G.evN||{};if(m.f){G.evT[m.f]=G.time+m.dur;G.evN[m.f]=m.n}toast('Событие: '+m.n,3);addChat('<span style="color:#f0b429">Событие: '+esc(m.n)+'</span>');tone(880,.25,.1,'triangle')},
  tp(m){const t=G.P[m.id];if(!t)return;t.x=m.x;t.y=m.y;t.z=m.z;t.rx=undefined;if(m.id===G.myId){me.x=m.x;me.y=m.y;me.z=m.z;me.vx=me.vy=me.vz=0;me.camY=m.y}},
  chat(m){const p=G.P[m.id];if(p&&m.s)addChat(nameC(p)+': '+esc(m.s))},
@@ -812,7 +910,7 @@ function startMatch(m){
  $('load').style.display='flex';
  setTimeout(()=>{
   G.seed=m.seed;G.map=m.map;G.time=0;G.ended=false;G.state='game';
-  Object.values(G.projs).forEach(q=>scene.remove(q.mesh));Object.values(G.placed).forEach(q=>scene.remove(q.mesh));Object.values(G.pickups).forEach(q=>scene.remove(q.mesh));Object.values(G.drones).forEach(q=>scene.remove(q.mesh));Object.values(G.projs).forEach(q=>{if(q.beam)scene.remove(q.beam)});G.projs={};G.placed={};G.pickups={};G.drones={};Drone=null;adrenT=0;G.evT={};G.evN={};G.evQ=[];G.evNext=EV_INT;G.evLast=-1;envMode=0;worldMat.color.setScalar(1);scene.background=skyTex;$('chatLog').textContent='';
+  Object.values(G.projs).forEach(q=>scene.remove(q.mesh));Object.values(G.placed).forEach(q=>scene.remove(q.mesh));Object.values(G.pickups).forEach(q=>scene.remove(q.mesh));Object.values(G.drones).forEach(q=>scene.remove(q.mesh));Object.values(G.projs).forEach(q=>{if(q.beam)scene.remove(q.beam)});G.projs={};G.placed={};G.pickups={};Object.values(G.turrets).forEach(q=>scene.remove(q.mesh));G.turrets={};G.drones={};Drone=null;adrenT=0;G.evT={};G.evN={};G.evQ=[];G.evNext=EV_INT;G.evLast=-1;envMode=0;worldMat.color.setScalar(1);scene.background=skyTex;$('chatLog').textContent='';
   for(const k in mags)delete mags[k];held='pick0';
   clearChunks();genWorld(m.seed,m.map);paintAtlas(m.map);paintSky(m.map);buildAll();bakeMap();
   const cnt=[0,0,0,0];
@@ -843,14 +941,14 @@ $('btnBack').onclick=()=>toHost({t:'back'});
 let snapT=0,stT=0,zoneTickT=0;
 function hostTick(dt){
  if(G.ended)return;G.time+=dt;
- snapT-=dt;if(snapT<=0){snapT=.066;bcastFast({t:'s',a:G.order.map(id=>{const p=G.P[id];return[id,+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2),+p.yaw.toFixed(2),+p.pitch.toFixed(2),p.item]}),d:Object.values(G.drones).map(q=>[q.id,+q.x.toFixed(2),+q.y.toFixed(2),+q.z.toFixed(2),+(q.yaw||0).toFixed(2)])})}
+ snapT-=dt;if(snapT<=0){snapT=.066;bcastFast({t:'s',a:G.order.map(id=>{const p=G.P[id];return[id,+p.x.toFixed(2),+p.y.toFixed(2),+p.z.toFixed(2),+p.yaw.toFixed(2),+p.pitch.toFixed(2),p.item]}),d:Object.values(G.drones).map(q=>[q.id,+q.x.toFixed(2),+q.y.toFixed(2),+q.z.toFixed(2),+(q.yaw||0).toFixed(2)]),tu:Object.values(G.turrets).map(q=>[q.id,+q.y.toFixed(2),+(q.yaw||0).toFixed(2)])})}
  stT-=dt;if(stT<=0){stT=.25;sendState()}
  zoneTickT-=dt;if(zoneTickT<=0){zoneTickT=.5;const r=zoneR(G.time),k=clamp((G.time-ZONE_START)/ZONE_DUR,0,1);
   G.order.forEach(id=>{const p=G.P[id];if(p.alive&&Math.hypot(p.x-CX,p.z-CZ)>r)damage(p,(4+14*k)*.5,null,'zone')})}
  G.order.forEach(id=>{const p=G.P[id];
   if(!p.alive&&p.lives>0&&p.respawnAt&&G.time>=p.respawnAt){p.respawnAt=0;p.alive=true;p.hp=100;p.invuln=G.time+2;const s=spawnPos(p.team,p.spawnI||0);Object.assign(p,s);if(p.bot){p.vx=p.vy=p.vz=0}bcast({t:'spawn',id,x:s.x,y:s.y,z:s.z})}
   if(p.bot&&p.alive)botTick(p,dt)});
- eventsTick();
+ eventsTick();turretsTick(dt);
  // Дроны: пилот погиб или батарея села
  for(const id in G.drones){const q=G.drones[id],o=G.P[q.o];q.t+=dt;if(!o||!o.alive)bcast({t:'rmd',id:q.id});else if(q.t>IT[q.k].batt+2)droneBoom(q,q.x,q.y,q.z)}
  // Расставленная взрывчатка
@@ -976,6 +1074,7 @@ document.addEventListener('keydown',e=>{
  if(e.code==='Escape'&&aimOpen){closeAim();return}
  if(e.code==='Escape'&&cheatOpen){closeCheat();return}
  if(e.code==='KeyB'){shopOpen?closeShop():openShop();return}
+ if(e.code==='KeyE'){curTur?closeShop():openTurret();return}
  if(e.code==='KeyV')Voice.toggle();
  if(e.code==='KeyY')Voice.channel();
  if(shopOpen||aimOpen||cheatOpen)return;
@@ -1009,6 +1108,7 @@ bindHold($('tSprint'),()=>{inp.sprint=!inp.sprint;$('tSprint').style.borderColor
  el.addEventListener('touchend',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===sw.id){sw.id=null;if(!sw.moved){const r=el.getBoundingClientRect(),dx=t.clientX-sw.x;if(Math.abs(dx)>=14)step(dx<0?1:-1);else step(t.clientX<r.left+r.width/2?-1:1)}}},{passive:false});
  el.addEventListener('touchcancel',()=>{sw.id=null})}
 bindHold($('tSet'),()=>{},()=>openLayout());
+bindHold($('tTur'),()=>{},()=>{curTur?closeShop():openTurret()});
 bindHold($('tChat'),()=>{},()=>openChat());
 bindHold($('tShop'),()=>{shopOpen?closeShop():openShop()});
 $('hud').addEventListener('touchstart',()=>{},{passive:true});
@@ -1032,12 +1132,26 @@ function fireGun(it){
  const end=h?h.d:tm,e=[o[0]+d[0]*end,o[1]+d[1]*end,o[2]+d[2]*end];
  const st=[o[0]+d[0]*.8-d[2]*.15,o[1]+d[1]*.8-.14,o[2]+d[2]*.8+d[0]*.15];
  tracer(st,e);if(n<3)toHost({t:'tr',a:st.map(n=>+n.toFixed(2)),b:e.map(n=>+n.toFixed(2)),w:it.id});
- const dh=rayDrones(o,d,end);if(dh){toHost({t:'drhit',id:dh.id});hitT=.18}
+ const dh=rayDrones(o,d,end);const th=rayTurrets(o,d,end);if(dh){toHost({t:'drhit',id:dh.id});hitT=.18}
+ else if(th){toHost({t:'thit',id:th.id,d:it.dmg});hitT=.18}
  else if(h){toHost({t:'hit',id:h.p.id,d:h.head?it.dmg*2:it.dmg,w:it.id,h:h.head?1:0})}
  else if(r)debris(e[0],e[1],e[2],2,matColor(r.m))}
  const heavy=it.id==='rifle'||it.id==='shotgun';recoil=Math.min(1,recoil+(heavy?1:.35));me.pitch=clamp(me.pitch+(heavy?.03:.009),-1.54,1.54);me.yaw+=(Math.random()-.5)*.006;muzzleT=.04;
 }
 let muzzleT=0;
+function rayTurrets(o,d,max){let best=null,bd=max;const my=P();for(const id in G.turrets){const q=G.turrets[id];if(q.tm===my.team)continue;const r=rayBox(o,d,[q.x-.45,q.y,q.z-.45],[q.x+.45,q.y+1.4,q.z+.45]);if(r!=null&&r<bd){bd=r;best=q}}return best}
+function turretMesh(k,tm){const g=new THREE.Group(),c=k==='t_med'?0xdddddd:k==='t_nade'?0x4a5a35:0x3a3f44,head=new THREE.Group();
+ g.add(box(.8,.2,.8,0x555a50,0,.1,0),box(.2,.75,.2,0x555a50,0,.55,0),box(.82,.06,.82,TEAMS[tm].h,0,.22,0));head.position.y=1.1;head.add(box(.46,.36,.5,c));
+ if(k==='t_med'){head.add(box(.3,.08,.51,0xcc2222),box(.08,.3,.51,0xcc2222))}
+ else if(k==='t_nade'){head.add(box(.2,.2,.65,0x2f3a23,0,.05,-.45))}
+ else head.add(box(.08,.08,.75,0x1b1b1d,0,.03,-.55));
+ g.add(head);g.userData.head=head;
+ const cv=document.createElement('canvas');cv.width=256;cv.height=36;const x=cv.getContext('2d');x.fillStyle='#000a';x.fillRect(0,0,256,36);x.font='bold 22px system-ui';x.textAlign='center';x.fillStyle=TEAMS[tm].c;x.fillText(IT[k].name.replace(' турель',''),128,26);
+ const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));tag.scale.set(1.3,.18,1);tag.position.y=1.65;g.add(tag);return g}
+function updateTurrets(dt){for(const id in G.turrets){const q=G.turrets[id];q.mesh.position.y=lerp(q.mesh.position.y,q.y,Math.min(1,dt*12));let d=(q.yaw||0)-q.ry;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;q.ry+=d*Math.min(1,dt*10);q.head.rotation.y=q.ry}}
+function nearTurret(){const my=P();if(!my||!my.alive)return null;let best=null,bd=3.5;for(const id in G.turrets){const q=G.turrets[id];if(q.tm!==my.team)continue;const d=Math.hypot(q.x-me.x,q.z-me.z);if(d<bd&&Math.abs(q.y-me.y)<3){bd=d;best=q}}return best}
+function turStatus(q){const l=q.l;if(q.k==='t_def')return l.w?`${IT[l.w].name}, патронов ${l.ammo||0}`:'пусто';return (TUR_ITEMS[q.k]||[]).map(i=>IT[i].name+' '+(l[i]||0)).join(', ')}
+function openTurret(){if(shopOpen||Drone||aimOpen||cheatOpen||chatOpen)return;const q=nearTurret();if(!q)return;curTur=q.id;shopOpen=true;scoped=false;$('shop').style.display='flex';exitPointer();renderShop()}
 function rayDrones(o,d,max){let best=null,bd=max;const my=P();for(const id in G.drones){const q=G.drones[id];if(q.tm===my.team)continue;const r=rayBox(o,d,[q.rx-.6,q.ry-.6,q.rz-.6],[q.rx+.6,q.ry+.6,q.rz+.6]);if(r!=null&&r<bd){bd=r;best=q}}return best}
 
 /* ===== FPV-дроны и наведение ракеты ===== */
@@ -1104,6 +1218,9 @@ function updateHeld(dt){
    toHost({t:'drone',k:held,x:+(o[0]+d[0]*1.2).toFixed(2),y:+(o[1]+d[1]*1.2).toFixed(2),z:+(o[2]+d[2]*1.2).toFixed(2),yaw:me.yaw})}
  }else if(k==='bm'){
   if(press&&cd<=0){cd=.5;openAim()}
+ }else if(k==='turret'){
+  if(press&&cd<=0){const o=eye(),d=lookDir(0),r=rayV(o[0],o[1],o[2],d[0],d[1],d[2],5);if(!r||r.ny!==1){toast('Посмотрите на землю рядом с собой',1.2);return}cd=.5;swing=1;
+   toHost({t:'turp',k:held,x:r.x+.5,y:r.y+1,z:r.z+.5,yaw:me.yaw});toast('Подойдите к турели и загрузите её: '+(isTouch?'кнопка ТУР.':'клавиша E'),2)}
  }else if(k==='adren'){
   if(press&&cd<=0){cd=.6;adrenT=8;toHost({t:'adr'});tone(1000,.2,.1,'sine');toast('Адреналин: 8 секунд скорости',1.2)}
  }else if(k==='med'){
@@ -1189,15 +1306,25 @@ function renderBar(){const b=$('bar'),list=barItems(),sig=held+'|'+list.map(i=>i
  const o=$('ores');o.innerHTML=Object.keys(ORES).map(k=>`<span title="${ORES[k].n}" style="color:${ORES[k].c}">■ <b>${Inv.ores[k]||0}</b></span>`).join('');$('money').textContent='$'+Inv.money}
 let shopCat='gun';
 function openShop(){const p=P();if(!p||!p.alive||Drone||aimOpen||cheatOpen||chatOpen)return;if(!nearShop(p)){toast('Магазин работает только на вашей базе',1.6);return}shopOpen=true;scoped=false;$('shop').style.display='flex';exitPointer();renderShop()}
-function closeShop(){if(!shopOpen)return;shopOpen=false;$('shop').style.display='none';if(G.state==='game'&&!G.ended)requestLock()}
+let curTur=null;
+function closeShop(){if(!shopOpen)return;shopOpen=false;curTur=null;$('shop').style.display='none';if(G.state==='game'&&!G.ended)requestLock()}
 function renderShop(){
  if(!shopOpen)return;
  $('shopMoney').textContent='$'+Inv.money;
+ $('shopTitle').textContent=curTur?'Загрузка турели':'Магазин базы';$('tabs').style.display=curTur?'none':'';$('sellAll').style.display=curTur?'none':'';
  const t=$('tabs');t.textContent='';CATS.forEach(([c,n])=>{const b=document.createElement('button');b.textContent=n;if(c===shopCat)b.className='on';b.onclick=()=>{shopCat=c;renderShop()};t.appendChild(b)});
  const g=$('items');g.textContent='';
  const card=(title,desc,own,buyTxt,buyFn,buyDis,sellTxt,sellFn,sellDis)=>{const d=document.createElement('div');d.className='it';const b=document.createElement('b');b.textContent=title;const p=document.createElement('p');p.textContent=desc;const o=document.createElement('p');o.textContent=own;const r=document.createElement('div');r.className='row';
   if(buyFn){const x=document.createElement('button');x.className='pri';x.textContent=buyTxt;x.disabled=buyDis;x.onclick=buyFn;r.appendChild(x)}
-  const y=document.createElement('button');y.textContent=sellTxt;y.disabled=sellDis;y.onclick=sellFn;r.appendChild(y);d.append(b,p,o,r);g.appendChild(d)};
+  if(sellFn){const y=document.createElement('button');y.textContent=sellTxt;y.disabled=sellDis;y.onclick=sellFn;r.appendChild(y)}d.append(b,p,o,r);g.appendChild(d)};
+ if(curTur){const q=G.turrets[curTur];if(!q)return;const tl=(a,v,all)=>()=>toHost({t:'tl',id:q.id,a,v,all});
+  card(IT[q.k].name,'Прочность '+Math.ceil(q.hp)+' из 150',turStatus(q),'Забрать всё',tl('out'),false,q.o===G.myId?'Поднять турель':'Чужая турель',tl('pick'),q.o!==G.myId);
+  if(q.k==='t_def'){const guns=ITEMS.filter(i=>i.kind==='gun'&&Inv.inv[i.id]>0);
+   guns.forEach(i=>card(i.name,'Урон турели зависит от оружия','Заменит оружие в турели',q.l.w?'Заменить':'Положить',tl('w',i.id),false));
+   if(!guns.length&&!q.l.w){const d=document.createElement('p');d.className='note';d.textContent='Нет оружия: купите пистолет, автомат, винтовку или дробовик.';g.appendChild(d)}
+   if(q.l.w){const a=IT[q.l.w].ammo,n=Inv.ammo[a]||0;card('Патроны: '+IT[q.l.w].name,'В запасе у вас: '+n,'В турели: '+(q.l.ammo||0),'+ пачка',tl('am'),n<=0,'Все',tl('am',null,true),n<=0)}}
+  else TUR_ITEMS[q.k].forEach(i=>{const n=Inv.inv[i]||0;card(IT[i].name,'У вас: '+n,'В турели: '+(q.l[i]||0),'+1',tl('it',i),n<=0,'Все',tl('it',i,true),n<=0)});
+  return}
  if(shopCat==='ore'){Object.keys(ORES).forEach(k=>{const o=ORES[k],n=Inv.ores[k]||0;card(o.n,`$${o.p} за блок`,`В рюкзаке: ${n}`,null,null,0,`Продать за $${n*o.p}`,()=>toHost({t:'sellOre',ore:k}),n===0)});return}
  ITEMS.filter(i=>i.cat===shopCat).forEach(it=>{
   const isAmmo=it.kind==='ammo',own=isAmmo?(Inv.ammo[it.ammo]||0):(Inv.inv[it.id]||0),uniq=['gun','rpg','knife','tool'].includes(it.kind);
@@ -1239,6 +1366,8 @@ function updateUI(dt){
  const dead=$('dead');if(!pl.alive){dead.style.display='flex';if(pl.lives>0){$('deadTxt').textContent='Вы погибли';$('deadSub').textContent=`Осталось жизней: ${pl.lives}. Возрождение на базе через несколько секунд. Руда досталась врагу.`}else{$('deadTxt').textContent='Жизни закончились';$('deadSub').textContent='Наблюдаете за боем'}}else dead.style.display='none';
  // Подсказки
  const h=$('hint');const near=pl.alive&&nearShop(pl);
+ const nt=nearTurret();$('tTur').style.visibility=nt?'visible':'hidden';
+ if(nt&&!shopOpen){h.style.display='block';h.textContent=`${isTouch?'Кнопка ТУР.':'E'}: ${IT[nt.k].name} (${turStatus(nt)})`}else
  if(near&&!shopOpen){h.style.display='block';h.textContent=isTouch?'Вы на базе: магазин открыт (кнопка МАГ.)':'Вы на базе: B открывает магазин'}else if(!mineTarget)h.style.display='none';
  $('tShop').style.opacity=near?1:.35;
  $('lock').style.display=(!isTouch&&!locked&&!shopOpen&&!aimOpen&&!cheatOpen&&!chatOpen&&pl.alive&&!G.ended&&G.state==='game')?'flex':'none';
@@ -1296,9 +1425,29 @@ function aimAt(){const o=eye(),my=P();let best=null,bs=.5;
   if(c>bs&&l<130&&!rayV(o[0],o[1],o[2],dx/l,dy/l,dz/l,l)){bs=c;best=[dx,dy,dz,l]}}
  if(best){me.yaw=Math.atan2(-best[0],-best[2]);me.pitch=Math.asin(best[1]/best[3])}}
 
+/* ===== Обучение ===== */
+const K=(pc,tc)=>isTouch?tc:pc;
+const TUT=[
+ ['Цель боя',`<p>До 4 команд сражаются на одной карте. У каждого игрока есть жизни, после смерти он возрождается на базе. Побеждает последняя команда, у которой остались живые игроки.</p><p>Играть можно даже 1 на 1. Время боя, жизни и частоту событий хост выбирает в лобби.</p>`],
+ ['Управление',K(`<ul><li><b>WASD</b>: движение, <b>Shift</b>: бег, <b>Пробел</b>: прыжок</li><li><b>ЛКМ</b>: огонь или действие, <b>ПКМ</b>: прицел винтовки и бросок ножа</li><li><b>R</b>: перезарядка, <b>1–9</b> или колесо: смена предмета</li><li><b>B</b>: магазин, <b>E</b>: загрузка турели, <b>Tab</b>: счёт</li><li><b>T</b>: чат, <b>V</b>: микрофон, <b>Y</b>: голос всем или команде</li></ul>`,`<ul><li>Левая часть экрана: джойстик. Правая: обзор</li><li><b>ОГОНЬ</b> зажимается, и пальцем на нём тоже можно вести прицел</li><li>Проведите по плашке оружия влево или вправо, чтобы сменить предмет</li><li><b>МАГ.</b>: магазин, <b>ТУР.</b>: загрузка турели, <b>ЧАТ</b>: чат</li><li>Значок ⚙ двигает кнопки и меняет их размер</li></ul>`)],
+ ['Добыча и деньги',`<p>В начале у вас только базовая кирка. Возьмите её и ${K('зажмите ЛКМ','держите ОГОНЬ')} на блоке.</p><ul><li>Уголь и железо: базовая кирка</li><li>Золото: кирка ур.1</li><li>Кристаллы: кирка ур.2 или бур</li></ul><p>Чем ближе к горе в центре, тем дороже руда. Руду продают в магазине, при смерти она достаётся убийце.</p>`],
+ ['Магазин',`<p>Магазин работает только на вашей базе, под навесом с цветом команды. Там можно купить и продать оружие, патроны, броню, взрывчатку, дроны, ракету и турели.</p><p>Оружие покупается без патронов сверх первого магазина: не забудьте вкладку «Патроны».</p>`],
+ ['Взрывы и пещеры',`<p>Гора окружена траншеями, внутри неё сеть пещер. Землю можно разрушать: РПГ, гранаты, мины и шахтёрский заряд оставляют воронки, а кирка и бур прорывают ходы.</p><p>FPV-дрон управляется от первого лица, но ваше тело в это время беззащитно. Баллистическая ракета наводится по карте.</p>`],
+ ['Турели',`<p>Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите ${K('E','ТУР.')}, чтобы загрузить.</p><ul><li><b>Защитная</b>: положите оружие и патроны, стреляет по врагам</li><li><b>Медицинская</b>: аптечки или адреналин, лечит союзников рядом</li><li><b>Метательная</b>: гранаты, флешки или дым, метает во врагов</li></ul><p>Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.</p>`],
+ ['Зона и события',`<p>После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.</p><p>Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.</p>`],
+ ['Друзья и голос',`<p>Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.</p><p>Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.</p><button id="tutPlay" class="pri">Потренироваться с ботом</button>`],
+];
+let tutI=0;
+function tutRender(){$('tutStep').textContent=`Шаг ${tutI+1} из ${TUT.length}`;$('tutTitle').textContent=TUT[tutI][0];$('tutBody').innerHTML=TUT[tutI][1];$('tutPrev').disabled=tutI===0;$('tutNext').disabled=tutI===TUT.length-1;
+ const pl=$('tutPlay');if(pl)pl.onclick=()=>{initAudio();$('tut').style.display='none';createRoom();const id='bot'+(G.nid++);addPlayer(id,'Бот-1',firstFreeTeam(),true);pushRoster();hostStart()}}
+$('btnTut').onclick=()=>{tutI=0;tutRender();$('tut').style.display='flex'};
+$('tutClose').onclick=()=>{$('tut').style.display='none'};
+$('tutPrev').onclick=()=>{if(tutI>0){tutI--;tutRender()}};
+$('tutNext').onclick=()=>{if(tutI<TUT.length-1){tutI++;tutRender()}};
+
 /* ===== Настройка кнопок на телефоне ===== */
-const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar'];
-const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов'};
+const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar','tTur'];
+const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов',tTur:'Загрузка турели'};
 const LAY_KEY='shtolni-layout-v1';
 let LAY={},layoutOn=false,laySel=null,layDrag=null,layHudPrev='';
 try{LAY=JSON.parse(localStorage.getItem(LAY_KEY))||{}}catch(e){LAY={}}
@@ -1334,7 +1483,7 @@ function frame(now){
   if(!G.host&&!G.ended)G.time+=dt;
   if(G.host)hostTick(dt);
   stepProjs(dt);updatePlacedVisual(dt);
-  updateMe(dt);updateAvatars(dt);updateDrones(dt);updateFx(dt);
+  updateMe(dt);updateAvatars(dt);updateDrones(dt);updateTurrets(dt);updateFx(dt);
   zoneTex.offset.x+=dt*.03;
   let n=0;for(const k of dirty){buildChunk(k);dirty.delete(k);if(++n>=12)break}
   updateUI(dt);
@@ -1349,7 +1498,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
