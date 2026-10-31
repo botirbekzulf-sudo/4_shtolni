@@ -186,10 +186,12 @@ input{border-radius:0}
     <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
   <p id="netNote" class="note"></p>
   <div id="teamsEl" class="teams"></div>
-  <div class="row seg"><span>Карта:</span><button id="m0" data-m="0">Равнина</button><button id="m1" data-m="1">Пустыня</button>
+  <div class="row seg"><span>Карта:</span><button id="m0" data-m="0">Равнина</button><button id="m1" data-m="1">Пустыня</button><button id="m2" data-m="2">Город</button><button id="m3" data-m="3">Джунгли</button><button id="m4" data-m="4">Горы</button>
     <span id="botCtl" class="row"><span>Боты:</span><button id="botAdd">Добавить</button><button id="botDel">Убрать</button></span>
     <button id="btnStart" class="pri" style="margin-left:auto">Начать бой</button></div>
-  <div class="row seg"><span>Время до сужения зоны:</span><span id="zsSeg" class="row"></span></div>
+  <div class="row seg"><span>Режим:</span><span id="modeSeg" class="row"></span></div>
+  <p id="modeInfo" class="note"></p>
+  <div class="row seg"><span id="zsLabel">Время до сужения зоны:</span><span id="zsSeg" class="row"></span></div>
   <div class="row seg"><span>Жизни:</span><span id="lvSeg" class="row"></span></div>
   <div class="row seg"><span>Случайные события:</span><span id="evSeg" class="row"></span></div>
   <p id="lobbyMsg" class="note"></p>
@@ -258,16 +260,25 @@ if(isTouch)document.body.classList.add('touch');
 
 /* ===== Константы ===== */
 const W=128,H=48,CS=16,CX=W/2,CZ=W/2;
-const AIR=0,TOP=1,DIRT=2,STONE=3,BED=4,COAL=5,IRON=6,GOLD=7,CRYS=8,WOOD=9,SANDB=10,TEAM0=11;
+const AIR=0,TOP=1,DIRT=2,STONE=3,BED=4,COAL=5,IRON=6,GOLD=7,CRYS=8,WOOD=9,SANDB=10,TEAM0=11,LEAF=15,TRUNK=16;
+const MAP_NAMES=['Равнина','Пустыня','Город','Джунгли','Горы'];
+const PAL=[
+ {top:[92,152,62],side:[130,110,70],dirt:[124,90,58],stone:[122,124,128],leaf:[60,120,50],grass:1,sky:['#3f8ad6','#c9e4f2'],fog:0xc9e4f2,near:.35},
+ {top:[226,190,120],side:[214,172,105],dirt:[190,145,88],stone:[168,118,84],leaf:[120,140,70],grass:0,sky:['#5e96c7','#e4c79b'],fog:0xe4c79b,near:.35},
+ {top:[72,74,80],side:[96,92,88],dirt:[112,102,90],stone:[150,150,156],leaf:[70,110,60],grass:0,sky:['#6d7f92','#c3c9cf'],fog:0xc3c9cf,near:.3},
+ {top:[58,118,48],side:[100,84,54],dirt:[92,68,44],stone:[92,104,92],leaf:[34,92,40],grass:1,sky:['#4a8f88','#b6d6b0'],fog:0xa9cda5,near:.2},
+ {top:[104,132,82],side:[110,104,90],dirt:[98,88,76],stone:[112,114,122],leaf:[236,242,248],grass:1,sky:['#4f86c6','#dfeaf4'],fog:0xdfeaf4,near:.4},
+];
+const rgbHex=c=>c[0]<<16|c[1]<<8|c[2];
 const TIME_OPTS=[60,120,180,300,600],LIFE_OPTS=[1,2,3,5,10],EV_OPTS=[30,60,90];
 let ZONE_START=120,MAX_LIVES=3,EV_INT=60;
 const ZONE_DUR=100,ZONE_R0=92,ZONE_R1=5;
-const zoneR=t=>t<ZONE_START?ZONE_R0:lerp(ZONE_R0,ZONE_R1,clamp((t-ZONE_START)/ZONE_DUR,0,1));
+const zoneR=t=>G.mode!=='br'||t<ZONE_START?ZONE_R0:lerp(ZONE_R0,ZONE_R1,clamp((t-ZONE_START)/ZONE_DUR,0,1));
 const TEAMS=[{n:'Красные',c:'#e5484d',h:0xe5484d},{n:'Синие',c:'#3b82f6',h:0x3b82f6},{n:'Зелёные',c:'#3fb950',h:0x3fb950},{n:'Жёлтые',c:'#eab308',h:0xeab308}];
 const BASES=[[18,18],[110,18],[18,110],[110,110]];
 const ORES={coal:{n:'Уголь',m:COAL,p:8,c:'#9aa0a6'},iron:{n:'Железо',m:IRON,p:18,c:'#e0a080'},gold:{n:'Золото',m:GOLD,p:40,c:'#ffd24a'},crystal:{n:'Кристаллы',m:CRYS,p:90,c:'#6fe7ff'}};
 const MAT_ORE={[COAL]:'coal',[IRON]:'iron',[GOLD]:'gold',[CRYS]:'crystal'};
-const HARD={[TOP]:.25,[DIRT]:.3,[SANDB]:.3,[STONE]:.7,[COAL]:.5,[IRON]:.8,[GOLD]:1,[CRYS]:1.3};
+const HARD={[TOP]:.25,[DIRT]:.3,[SANDB]:.3,[LEAF]:.12,[TRUNK]:.4,[STONE]:.7,[COAL]:.5,[IRON]:.8,[GOLD]:1,[CRYS]:1.3};
 const NEED={[GOLD]:1,[CRYS]:2};
 const ITEMS=[
  {id:'pick0',cat:'mine',kind:'tool',price:0,name:'Кирка базовая',d:'Уголь и железо',tier:0,speed:1},
@@ -322,7 +333,7 @@ const V=new Uint8Array(W*W*H), topY=new Uint8Array(W*W);
 const vi=(x,y,z)=>x+z*W+y*W*W;
 const getV=(x,y,z)=>(x<0||z<0||x>=W||z>=W||y>=H)?AIR:y<0?BED:V[vi(x,y,z)];
 const solid=(x,y,z)=>(x<0||z<0||x>=W||z>=W)?true:y<0?true:y>=H?false:V[vi(x,y,z)]!==AIR;
-const breakable=m=>m!==AIR&&m!==BED&&m!==WOOD&&m<TEAM0;
+const breakable=m=>m!==AIR&&m!==BED&&m!==WOOD&&!(m>=TEAM0&&m<TEAM0+4);
 
 function genWorld(seed,map){
  const R=rng(seed),n=mkNoise(seed+7);
@@ -331,17 +342,19 @@ function genWorld(seed,map){
  const hs=new Int16Array(W*W),tr=new Uint8Array(W*W);
  for(let z=0;z<W;z++)for(let x=0;x<W;x++){
   const dx=x+.5-CX,dz=z+.5-CZ,r=Math.hypot(dx,dz),a=Math.atan2(dz,dx);
-  let h=13+(fbm(x/26,z/26)-.5)*(map?9:7);
-  if(map)h+=Math.sin(x*.13+fbm(x/30,z/30)*5)*1.5;
-  const m=(map?34:30)*Math.exp(-(r*r)/(23*23));
+  let h=13+(fbm(x/(map===4?32:26),z/(map===4?32:26))-.5)*[7,9,1.5,11,30][map];
+  if(map===1)h+=Math.sin(x*.13+fbm(x/30,z/30)*5)*1.5;
+  if(map===4)h+=Math.abs(fbm(x/14+9,z/14)-.5)*14;
+  const m=[30,34,22,30,36][map]*Math.exp(-(r*r)/(23*23));
   h+=m*(.78+.5*fbm(x/9,z/9));
   let d=1e9;
   const r1=36+tri(a*5)*2.5,r2=50+tri(a*4)*2.5;
   d=Math.min(Math.abs(r-r1),Math.abs(r-r2));
   if(r>32&&r<53)for(let k=0;k<8;k++){const ak=k*Math.PI/4+Math.PI/8;d=Math.min(d,r*Math.abs(Math.sin(a-ak))+(Math.cos(a-ak)<0?99:0))}
   let hh=Math.round(h);
+  if(map===2)d=99;
   if(d<1.5){hh=Math.round(h)-3;tr[x+z*W]=1}else if(d<2.5)hh+=1;
-  for(const b of BASES){const bd=Math.hypot(x+.5-b[0],z+.5-b[1]);if(bd<16){const t=clamp((16-bd)/4,0,1);hh=Math.round(lerp(hh,13,t));tr[x+z*W]=0}}
+  for(const b of BASES){const bd=Math.hypot(x+.5-b[0],z+.5-b[1]);const bR=map===4?30:16;if(bd<bR){const t=clamp((bR-bd)/(bR-12),0,1);hh=Math.round(lerp(hh,13,t));tr[x+z*W]=0}}
   hs[x+z*W]=clamp(hh,4,H-4);
  }
  V.fill(0);
@@ -350,6 +363,7 @@ function genWorld(seed,map){
   for(let y=0;y<h;y++){
    let m=STONE;
    if(y<2)m=BED;else if(y===h-1)m=tr[x+z*W]?DIRT:(r<17&&h>24?STONE:TOP);else if(y>=h-4)m=(r<20&&h>24)?STONE:DIRT;
+   if(map===4&&y>=h-4&&!tr[x+z*W]&&r>=17){if(h>29)m=y===h-1?LEAF:STONE;else if(h>21)m=STONE}
    V[vi(x,y,z)]=m;
   }
  }
@@ -373,6 +387,24 @@ function genWorld(seed,map){
  // Выходы руды на поверхность
  for(let i=0;i<120;i++){const x=Math.floor(R()*W),z=Math.floor(R()*W),r=Math.hypot(x-CX,z-CZ);let skip=false;for(const b of BASES)if(Math.hypot(x-b[0],z-b[1])<12)skip=true;if(skip||tr[x+z*W])continue;const m=pick(r);
   for(let k=0;k<7;k++){const ox=clamp(x+Math.floor(R()*4)-1,0,W-1),oz=clamp(z+Math.floor(R()*4)-1,0,W-1),h=hs[ox+oz*W];if(h<H-3&&V[vi(ox,h-1,oz)]!==AIR){V[vi(ox,h-1,oz)]=m;if(R()<.6)V[vi(ox,h,oz)]=m}}}
+ const nearBase=(x,z,d)=>BASES.some(b=>Math.hypot(x-b[0],z-b[1])<d);
+ if(map===2){ // Городские кварталы: дома с дверями, окнами и лестницами
+  for(let gz=7;gz<W-10;gz+=15)for(let gx=7;gx<W-10;gx+=15){const w=9+Math.floor(R()*3),dp=9+Math.floor(R()*3),cx=gx+w/2,cz=gz+dp/2;
+   if(nearBase(cx,cz,24)||Math.hypot(cx-CX,cz-CZ)<28)continue;
+   const y0=hs[Math.floor(cx)+Math.floor(cz)*W]-1,fl=1+Math.floor(R()*4),top=Math.min(H-2,y0+fl*4);
+   for(let z=gz;z<gz+dp;z++)for(let x=gx;x<gx+w;x++)for(let y=y0;y<=top;y++){const edge=x===gx||z===gz||x===gx+w-1||z===gz+dp-1,floor=(y-y0)%4===0;
+    let m=edge||floor?STONE:AIR;
+    if(edge&&!floor&&(y-y0)%4===2&&(x+z)%3===0)m=AIR;
+    V[vi(x,y,z)]=m}
+   for(let y=y0+1;y<=y0+3;y++){const mx=gx+(w>>1),mz=gz+(dp>>1);for(const q of[0,1]){V[vi(mx+q,y,gz)]=AIR;V[vi(mx+q,y,gz+dp-1)]=AIR;V[vi(gx,y,mz+q)]=AIR;V[vi(gx+w-1,y,mz+q)]=AIR}}
+   for(let f=0;f<fl;f++){const yb=y0+f*4;for(let k=0;k<3;k++)for(const q of[1,2]){for(let y=yb+1;y<=yb+1+k;y++)V[vi(gx+1+k,y,gz+q)]=STONE;V[vi(gx+1+k,yb+4,gz+q)]=AIR;V[vi(gx+1+k,yb+5,gz+q)]=AIR}}
+  }}
+ if(map===3){ // Джунгли: деревья и кусты
+  const tree=(x,z,ht)=>{const y0=hs[x+z*W];if(y0+ht+3>=H)return;for(let y=y0;y<y0+ht;y++)V[vi(x,y,z)]=TRUNK;const r=2+Math.floor(R()*2),cy=y0+ht;
+   for(let dy=-1;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const px=x+dx,pz=z+dz,py=cy+dy;if(px<0||pz<0||px>=W||pz>=W||py>=H)continue;if(dx*dx+dy*dy+dz*dz<=r*r+1&&V[vi(px,py,pz)]===AIR)V[vi(px,py,pz)]=LEAF}};
+  for(let i=0;i<300;i++){const x=2+Math.floor(R()*(W-4)),z=2+Math.floor(R()*(W-4));if(nearBase(x,z,15)||tr[x+z*W]||Math.hypot(x-CX,z-CZ)<7)continue;tree(x,z,5+Math.floor(R()*7))}
+  for(let i=0;i<260;i++){const x=Math.floor(R()*W),z=Math.floor(R()*W);if(nearBase(x,z,13)||tr[x+z*W])continue;const y=hs[x+z*W];if(y<H-2&&V[vi(x,y,z)]===AIR)V[vi(x,y,z)]=LEAF}
+ }
  // Базы с навесом магазина и флагом
  BASES.forEach((b,t)=>{const[bx,bz]=b,g=13;
   for(let dz=-11;dz<=11;dz++)for(let dx=-11;dx<=11;dx++){if(dx*dx+dz*dz>121)continue;for(let y=g;y<H;y++)V[vi(bx+dx,y,bz+dz)]=AIR;for(let y=g-3;y<g;y++)V[vi(bx+dx,y,bz+dz)]=y===g-1?TOP:DIRT}
@@ -401,20 +433,20 @@ const atlasCv=document.createElement('canvas');atlasCv.width=atlasCv.height=64;
 const atlas=new THREE.CanvasTexture(atlasCv);atlas.magFilter=atlas.minFilter=THREE.NearestFilter;atlas.generateMipmaps=false;
 const worldMat=new THREE.MeshBasicMaterial({map:atlas,vertexColors:true});
 const T_TOP=0,T_SIDE=1;
-const TILE={[TOP]:0,[DIRT]:2,[STONE]:3,[BED]:4,[COAL]:5,[IRON]:6,[GOLD]:7,[CRYS]:8,[WOOD]:9,[SANDB]:10,11:11,12:12,13:13,14:14};
+const TILE={[TOP]:0,[DIRT]:2,[STONE]:3,[BED]:4,[COAL]:5,[IRON]:6,[GOLD]:7,[CRYS]:8,[WOOD]:9,[SANDB]:10,11:11,12:12,13:13,14:14,[LEAF]:15,[TRUNK]:9};
 function paintAtlas(map){
  const g=atlasCv.getContext('2d'),r=rng(99);
- const pal=map?{top:[226,190,120],side:[214,172,105],dirt:[190,145,88],stone:[168,118,84]}:{top:[92,152,62],side:[130,110,70],dirt:[124,90,58],stone:[122,124,128]};
+ const pal=PAL[map];
  const tile=(i,base,spots,sc,grassTop)=>{const tx=(i%4)*16,ty=Math.floor(i/4)*16;
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const j=1+(r()-.5)*.16;let c=base;
    if(grassTop&&y<4+((x*7)%3))c=pal.top;
    if(spots&&r()<sc)c=spots;
    g.fillStyle=`rgb(${c[0]*j|0},${c[1]*j|0},${c[2]*j|0})`;g.fillRect(tx+x,ty+y,1,1)}
  };
- tile(0,pal.top);tile(1,pal.side,null,0,!map);tile(2,pal.dirt);tile(3,pal.stone);tile(4,[50,50,56]);
+ tile(0,pal.top);tile(1,pal.side,null,0,pal.grass);tile(2,pal.dirt);tile(3,pal.stone);tile(4,[50,50,56]);
  tile(5,pal.stone,[48,48,52],.22);tile(6,pal.stone,[226,160,120],.28);tile(7,pal.stone,[255,212,70],.32);tile(8,[70,90,120],[110,235,255],.42);
  tile(9,[120,84,48],[96,66,36],.2);tile(10,[205,180,125],[170,145,95],.25);
- TEAMS.forEach((t,i)=>{const c=new THREE.Color(t.h);tile(11+i,[c.r*255,c.g*255,c.b*255])});
+ TEAMS.forEach((t,i)=>{const c=new THREE.Color(t.h);tile(11+i,[c.r*255,c.g*255,c.b*255])});tile(15,pal.leaf);
  atlas.needsUpdate=true;
 }
 const FACES=[
@@ -473,7 +505,7 @@ function carveBoom(px,py,pz,r){
   if(dx*dx+dy*dy+dz*dz<rr*rr&&breakable(V[vi(x,y,z)])){if(cnt++%(r>6?25:3)===0)debris(x+.5,y+.5,z+.5,3,matColor(V[vi(x,y,z)]));setV(x,y,z,AIR)}
  }
 }
-function matColor(m){return m===TOP?(G.map?0xe2be78:0x5c983e):m===DIRT?(G.map?0xbe9158:0x7c5a3a):m===COAL?0x222222:m===IRON?0xe2a078:m===GOLD?0xffd446:m===CRYS?0x6eebff:m===SANDB?0xcdb47d:(G.map?0xa87654:0x7a7c80)}
+function matColor(m){const pal=PAL[G.map];return m===TOP?rgbHex(pal.top):m===DIRT?rgbHex(pal.dirt):m===COAL?0x222222:m===IRON?0xe2a078:m===GOLD?0xffd446:m===CRYS?0x6eebff:m===SANDB?0xcdb47d:m===LEAF?rgbHex(pal.leaf):m===TRUNK?0x78542f:rgbHex(pal.stone)}
 function rayV(ox,oy,oz,dx,dy,dz,max){
  let x=Math.floor(ox),y=Math.floor(oy),z=Math.floor(oz);
  const sx=dx>0?1:-1,sy=dy>0?1:-1,sz=dz>0?1:-1;
@@ -503,10 +535,10 @@ function moveEnt(e,dt){
 /* ===== Небо и зона ===== */
 const skyCv=document.createElement('canvas');skyCv.width=4;skyCv.height=128;
 const skyTex=new THREE.CanvasTexture(skyCv);scene.background=skyTex;
-function paintSky(map){const g=skyCv.getContext('2d'),gr=g.createLinearGradient(0,0,0,128);
- if(map){gr.addColorStop(0,'#5e96c7');gr.addColorStop(.7,'#e4c79b')}else{gr.addColorStop(0,'#3f8ad6');gr.addColorStop(.7,'#c9e4f2')}
+function paintSky(map){const g=skyCv.getContext('2d'),gr=g.createLinearGradient(0,0,0,128),pal=PAL[map];
+ gr.addColorStop(0,pal.sky[0]);gr.addColorStop(.7,pal.sky[1]);
  g.fillStyle=gr;g.fillRect(0,0,4,128);skyTex.needsUpdate=true;
- scene.fog=new THREE.Fog(map?0xe4c79b:0xc9e4f2,FOG_FAR*.35,FOG_FAR)}
+ scene.fog=new THREE.Fog(pal.fog,FOG_FAR*pal.near,FOG_FAR)}
 const zoneCv=document.createElement('canvas');zoneCv.width=64;zoneCv.height=64;{const g=zoneCv.getContext('2d');const gr=g.createLinearGradient(0,0,0,64);gr.addColorStop(0,'#a855f700');gr.addColorStop(1,'#a855f7aa');g.fillStyle=gr;g.fillRect(0,0,64,64);g.fillStyle='#e9d5ff66';for(let i=0;i<8;i++)g.fillRect(0,i*8,64,1)}
 const zoneTex=new THREE.CanvasTexture(zoneCv);zoneTex.wrapS=THREE.RepeatWrapping;zoneTex.repeat.set(30,1);
 const zoneMesh=new THREE.Mesh(new THREE.CylinderGeometry(1,1,70,64,1,true),new THREE.MeshBasicMaterial({map:zoneTex,transparent:true,side:THREE.DoubleSide,depthWrite:false,fog:false}));
@@ -566,7 +598,7 @@ let vmItem=null,vmCur=new THREE.Group();vmRoot.add(vmCur);
 const muzzle=new THREE.Sprite(new THREE.SpriteMaterial({map:softTex,color:0xffd27a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));muzzle.scale.setScalar(.25);muzzle.position.set(0,.02,-.75);muzzle.visible=false;vmRoot.add(muzzle);
 function setVm(id){if(vmItem===id)return;vmItem=id;vmRoot.remove(vmCur);vmCur=vmModel(id);vmRoot.add(vmCur)}
 function makeAvatar(p){
- const g=new THREE.Group(),c=TEAMS[p.team].h,skin=0xd9b08c;
+ const g=new THREE.Group(),c=p.zombie?0x4d7c3a:TEAMS[p.team].h,skin=p.zombie?0x8fae6d:0xd9b08c;
  const mat=new THREE.MeshBasicMaterial({color:c}),dk=new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(.6)});
  const torso=box(.46,.62,.24,0,0,1.03,0,mat),head=box(.3,.3,.3,skin,0,1.52,0),helm=box(.33,.13,.33,0,0,1.65,0,dk);
  const legL=box(.18,.72,.2,0,-.12,.36,0,dk),legR=box(.18,.72,.2,0,.12,.36,0,dk);
@@ -576,13 +608,13 @@ function makeAvatar(p){
  const pivot=(m)=>{const q=new THREE.Group();q.position.set(m.position.x,.72,0);m.position.set(0,-.36,0);q.add(m);return q};
  const lL=pivot(legL),lR=pivot(legR);
  g.add(torso,head,helm,lL,lR,armL,armR);
- const cv=document.createElement('canvas');cv.width=256;cv.height=40;const x=cv.getContext('2d');x.font='bold 26px system-ui';x.textAlign='center';x.fillStyle='#000a';x.fillRect(0,0,256,40);x.fillStyle=TEAMS[p.team].c;x.fillText(p.name,128,29);
+ const cv=document.createElement('canvas');cv.width=256;cv.height=40;const x=cv.getContext('2d');x.font='bold 26px system-ui';x.textAlign='center';x.fillStyle='#000a';x.fillRect(0,0,256,40);x.fillStyle=p.zombie?'#a3e07a':TEAMS[p.team].c;x.fillText(p.name,128,29);
  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false,transparent:true}));tag.scale.set(1.6,.25,1);tag.position.y=2.05;g.add(tag);
  g.userData={lL,lR,armR,gun,walk:0};const mt=P();if(mt&&p.team!==mt.team)g.traverse(o=>o.layers.enable(1));scene.add(g);return g}
 function removeAvatar(p){if(p.av){scene.remove(p.av);p.av=null}}
 
 /* ===== Состояние ===== */
-const G={state:'menu',map:0,seed:0,time:0,P:{},order:[],host:false,myId:null,placed:{},projs:{},drones:{},turrets:{},pickups:{},nid:1,ended:false};
+const G={mode:'br',state:'menu',map:0,seed:0,time:0,P:{},order:[],host:false,myId:null,placed:{},projs:{},drones:{},turrets:{},pickups:{},nid:1,ended:false};
 const me={x:0,y:0,z:0,vx:0,vy:0,vz:0,ground:false,yaw:0,pitch:0,camY:0};
 let Inv={money:0,inv:{pick0:1},ores:{coal:0,iron:0,gold:0,crystal:0},ammo:{pistol:0,ak:0,rifle:0,rpg:0,shotgun:0}};
 let held='pick0';const mags={};
@@ -675,12 +707,12 @@ function sendTo(id,m){if(id===G.myId)recv(m);else{const c=Net.conns[id]&&Net.con
 function myName(){return($('nick').value.trim()||'Боец'+Math.floor(Math.random()*90+10)).slice(0,14)}
 function firstFreeTeam(){const c=[0,0,0,0];G.order.forEach(id=>c[G.P[id].team]++);let b=0;for(let i=1;i<4;i++)if(c[i]<c[b])b=i;return b}
 function addPlayer(id,name,team,bot){G.P[id]={id,name,team,bot,hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,vc:'all',priv:G.host?newPriv():null};if(!G.order.includes(id))G.order.push(id)}
-function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc}})}}
+function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,mode:G.mode,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc}})}}
 function pushRoster(){bcast(rosterMsg())}
 function playerLeft(id){delete Net.conns[id];const p=G.P[id];if(!p)return;
  if(G.state==='game'){p.lives=0;if(p.alive){p.alive=false;p.hp=0;bcast({t:'die',id,by:null,w:'вышел'})}bcast({t:'gone',id});checkWin()}
  else{delete G.P[id];G.order=G.order.filter(x=>x!==id);pushRoster()}}
-function enterLobby(){G.state='lobby';$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='none';$('lobby').style.display='flex';$('roomCode').textContent=G.code;$('botCtl').style.display=G.host?'':'none';$('btnStart').style.display=G.host?'':'none';$('m0').disabled=$('m1').disabled=!G.host;renderLobby()}
+function enterLobby(){G.state='lobby';$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='none';$('lobby').style.display='flex';$('roomCode').textContent=G.code;$('botCtl').style.display=G.host?'':'none';$('btnStart').style.display=G.host?'':'none';for(let i=0;i<5;i++)$('m'+i).disabled=!G.host;renderLobby()}
 function renderLobby(){
  const el=$('teamsEl');el.textContent='';
  TEAMS.forEach((t,i)=>{const d=document.createElement('div');d.className='team';d.style.setProperty('--c',t.c);
@@ -692,12 +724,13 @@ function renderLobby(){
  seg('zsSeg',TIME_OPTS,ZONE_START,v=>(v/60)+' мин',v=>({t:'cfg',zs:v}));
  seg('evSeg',EV_OPTS,EV_INT,v=>v===30?'30 сек':v===60?'1 мин':'1:30',v=>({t:'cfg',ev:v}));
  seg('lvSeg',LIFE_OPTS,MAX_LIVES,v=>String(v),v=>({t:'cfg',lv:v}));
- $('m0').classList.toggle('on',G.map===0);$('m1').classList.toggle('on',G.map===1);
+ for(let i=0;i<5;i++)$('m'+i).classList.toggle('on',G.map===i);
+ seg('modeSeg',MODE_IDS,G.mode,v=>MODES[v].n,v=>({t:'cfg',mode:v}));$('zsLabel').textContent=G.mode==='br'?'Время до сужения зоны:':G.mode==='zombie'?'Сколько продержаться:':'Длительность боя:';$('modeInfo').textContent=MODES[G.mode].d;
  const teams=new Set(G.order.map(id=>G.P[id].team));
- $('btnStart').disabled=teams.size<2;
- $('lobbyMsg').textContent=teams.size<2?'Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.':'';
+ const needT=G.mode==='zombie'?1:2;$('btnStart').disabled=teams.size<needT;
+ $('lobbyMsg').textContent=teams.size<needT?'Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.':G.mode==='zombie'?'В этом режиме все игроки и боты воюют вместе, выбор команды не важен.':'';
 }
-['m0','m1'].forEach(id=>$(id).onclick=()=>toHost({t:'map',map:+$(id).dataset.m}));
+['m0','m1','m2','m3','m4'].forEach(id=>$(id).onclick=()=>toHost({t:'map',map:+$(id).dataset.m}));
 $('botAdd').onclick=()=>{const n=G.order.filter(i=>G.P[i].bot).length;if(n>=11)return;const id='bot'+(G.nid++);addPlayer(id,'Бот-'+(n+1),firstFreeTeam(),true);pushRoster()};
 $('botDel').onclick=()=>{const b=[...G.order].reverse().find(i=>G.P[i].bot);if(b){delete G.P[b];G.order=G.order.filter(x=>x!==b);pushRoster()}};
 $('btnStart').onclick=()=>hostStart();
@@ -709,6 +742,7 @@ try{const q=new URLSearchParams(location.search).get('room');if(q)$('joinCode').
 function hostStart(){
  G.seed=Math.floor(Math.random()*1e9);
  G.order.forEach(id=>{const p=G.P[id];Object.assign(p,{hp:100,lives:MAX_LIVES,alive:true,kills:0,priv:newPriv(),respawnAt:0,invuln:0});});
+ G.order.forEach(id=>{const p=G.P[id];p.team0=p.team;if(G.mode==='zombie')p.team=0});
  bcast({t:'start',seed:G.seed,map:G.map,pl:rosterMsg().pl});
  G.order.forEach(id=>pushInv(id));
 }
@@ -721,8 +755,8 @@ function handleHost(id,m){
  switch(m.t){
  case 'hello':if(G.state!=='lobby'){return}if(G.P[id]){pushRoster();break}addPlayer(id,String(m.name||'Боец').slice(0,14),firstFreeTeam(),false);pushRoster();break;
  case 'team':if(p&&G.state==='lobby'&&m.team>=0&&m.team<4){p.team=m.team;pushRoster()}break;
- case 'map':if(id===G.myId&&G.state==='lobby'){G.map=m.map?1:0;pushRoster()}break;
- case 'cfg':if(id===G.myId&&G.state==='lobby'){if(TIME_OPTS.includes(m.zs))ZONE_START=m.zs;if(LIFE_OPTS.includes(m.lv))MAX_LIVES=m.lv;if(EV_OPTS.includes(m.ev))EV_INT=m.ev;pushRoster()}break;
+ case 'map':if(id===G.myId&&G.state==='lobby'){G.map=clamp(m.map|0,0,4);pushRoster()}break;
+ case 'cfg':if(id===G.myId&&G.state==='lobby'){if(TIME_OPTS.includes(m.zs))ZONE_START=m.zs;if(LIFE_OPTS.includes(m.lv))MAX_LIVES=m.lv;if(EV_OPTS.includes(m.ev))EV_INT=m.ev;if(MODES[m.mode])G.mode=m.mode;pushRoster()}break;
  case 'vc':if(p){p.vc=m.v==='team'?'team':'all';pushRoster()}break;
  case 'p':if(p&&p.alive){p.x=m.x;p.y=m.y;p.z=m.z;p.yaw=m.yaw;p.pitch=m.pitch;p.item=m.i}break;
  case 'buy':hBuy(p,m.id);break;
@@ -746,7 +780,7 @@ function handleHost(id,m){
  case 'drhit':{const q=G.drones[m.id];if(q&&p&&p.alive&&p.team!==q.tm)droneBoom(q,q.x,q.y,q.z);break}
  case 'bm':if(p&&p.alive&&p.priv.inv.bm>0){p.priv.inv.bm--;pushInv(id);const x=clamp(+m.x,1,W-2),z=clamp(+m.z,1,W-2);spawnProj(p,'bm',x,surfaceY(x,z)+120,z,0,-20,0)}break;
  case 'ammo':if(p){const a=p.priv.ammo;a[m.a]=Math.max(0,(a[m.a]||0)-m.n);pushInv(id)}break;
- case 'back':if(id===G.myId)bcast({t:'lobby'});break;
+ case 'back':if(id===G.myId){G.order.filter(i=>G.P[i].zombie).forEach(i=>delete G.P[i]);G.order=G.order.filter(i=>G.P[i]);G.order.forEach(i=>{const q=G.P[i];if(q.team0!=null)q.team=q.team0});bcast({t:'lobby'});pushRoster()}break;
  }
 }
 function hBuy(p,iid){const it=IT[iid];if(!p||!it||!p.alive||!nearShop(p))return;const v=p.priv;if(v.money<it.price||it.price<=0)return;
@@ -824,13 +858,13 @@ function damage(t,d,by,w,head){
  if(t.priv&&t.priv.armor>0&&!head&&w!=='zone'){const v=t.priv,ab=Math.min(d*IT[v.armorId].absorb,v.armor);d-=ab;v.armor-=ab;if(v.armor<=0){v.armor=0;v.armorId=null}pushInv(t.id)}
  t.hp-=d;
  bcast({t:'dmg',id:t.id,by:by?by.id:null,d:Math.round(d),h:head?1:0,x:by?by.x:null,z:by?by.z:null});
- if(t.hp<=0){t.hp=0;t.alive=false;t.lives--;if(by&&by.id!==t.id){by.kills++;if(by.priv){by.priv.money+=50;Object.keys(t.priv.ores).forEach(k=>{by.priv.ores[k]+=t.priv.ores[k]});pushInv(by.id)}}
+ if(t.hp<=0){t.hp=0;t.alive=false;if(!infLives())t.lives--;if(by&&by.id!==t.id){by.kills++;if(by.priv){by.priv.money+=50;Object.keys(t.priv.ores).forEach(k=>{by.priv.ores[k]+=t.priv.ores[k]});pushInv(by.id)}}
   t.priv.ores={coal:0,iron:0,gold:0,crystal:0};t.priv.armor=0;t.priv.armorId=null;pushInv(t.id);
   bcast({t:'die',id:t.id,by:by?by.id:null,w:w||''});
   if(t.lives>0)t.respawnAt=G.time+4;else t.respawnAt=0;checkWin();sendState()}
 }
 function checkWin(){
- if(G.ended||G.state!=='game')return;const alive=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.lives>0||p.alive)alive.add(p.team)});
+ if(G.ended||G.state!=='game')return;if(G.mode==='zombie'){if(!G.order.some(id=>{const p=G.P[id];return !p.zombie&&(p.lives>0||p.alive)}))endMatch(1,'Зомби победили');return}const alive=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.lives>0||p.alive)alive.add(p.team)});
  if(alive.size<=1){const team=alive.size?[...alive][0]:-1;bcast({t:'end',team,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}}
 function sendState(){bcast({t:'st',time:+G.time.toFixed(2),pl:G.order.map(id=>{const p=G.P[id];return[id,Math.ceil(p.hp),p.lives,p.alive?1:0,p.kills]})})}
 function doBoom(x,y,z,k,oid,tm,yaw){
@@ -852,7 +886,7 @@ function recv(m){
  const R=H_R[m.t];if(R)R(m);
 }
 const H_R={
- roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
+ roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;G.mode=m.mode;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
   if(G.state==='lobby')renderLobby();Voice.onRoster()},
  start(m){startMatch(m)},
  s(m){m.a.forEach(q=>{if(q[0]===G.myId)return;const p=G.P[q[0]];if(!p)return;p.x=q[1];p.y=q[2];p.z=q[3];p.yaw=q[4];p.pitch=q[5];p.item=q[6]});(m.tu||[]).forEach(q=>{const u=G.turrets[q[0]];if(u){u.y=q[1];u.yaw=q[2]}});(m.d||[]).forEach(q=>{const d=G.drones[q[0]];if(d&&d.o!==G.myId){d.x=q[1];d.y=q[2];d.z=q[3];d.yaw=q[4]}})},
@@ -865,6 +899,11 @@ const H_R={
  proj(m){const pr={...m,t:0,mesh:null};if(m.k==='bm'){bmWarn(pr)}const c=m.k==='bm'?0xd9dde0:m.k==='rpg'?0x4a5a35:m.k==='knife'?0xc8ccd0:m.k==='flash'?0xdddddd:m.k==='smoke'?0x888888:0x3f4f2e;pr.mesh=m.k==='bm'?box(1,5,1,c):box(m.k==='knife'?.06:.2,m.k==='knife'?.06:.2,m.k==='knife'?.35:(m.k==='rpg'?.6:.2),c);pr.mesh.position.set(m.x,m.y,m.z);scene.add(pr.mesh);G.projs[m.id]=pr;if(m.k==='rpg')sfx.rocket(vol(m.x,m.y,m.z))},
  rm(m){const pr=G.projs[m.id];if(pr){scene.remove(pr.mesh);if(pr.beam)scene.remove(pr.beam);delete G.projs[m.id]}},
  boom(m){onBoom(m)},
+ fl(m){G.score=m.sc;m.f.forEach(q=>{const f=G.flags[q[0]];if(f){f.x=q[1];f.y=q[2];f.z=q[3];f.c=q[4];f.home=!!q[5]}});if(m.msg){toast(m.msg,2);addChat(esc(m.msg))}},
+ ks(m){G.score=m.sc;if(G.hillO!==m.o&&m.o>=0)toast('Гору держат: '+TEAMS[m.o].n,1.5);G.hillO=m.o},
+ zw(m){G.wave=m.w;toast('Волна '+m.w,2);tone(180,.6,.18,'sawtooth')},
+ zadd(m){const p={id:m.id,name:'Зомби',team:1,bot:true,zombie:true,hp:m.hp,lives:1,alive:true,kills:0,x:m.x,y:m.y,z:m.z,yaw:0,pitch:0,item:0,vc:'all',vx:0,vy:0,vz:0,ground:false,priv:G.host?newPriv():null,b:{cd:0,stuck:0,lastX:m.x,lastZ:m.z}};G.P[m.id]=p;G.order.push(m.id);p.av=makeAvatar(p)},
+ zrm(m){const p=G.P[m.id];if(p){removeAvatar(p);delete G.P[m.id];G.order=G.order.filter(i=>i!==m.id)}},
  turadd(m){const q={...m,l:{w:null,ammo:0},mesh:null,head:null,ry:m.yaw||0};delete q.t;const g=turretMesh(m.k,m.tm);q.mesh=g;q.head=g.userData.head;g.position.set(m.x,m.y,m.z);scene.add(g);G.turrets[m.id]=q},
  tus(m){const q=G.turrets[m.id];if(q){q.hp=m.hp;q.l=m.l;if(curTur===m.id)renderShop()}},
  turrm(m){const q=G.turrets[m.id];if(q){scene.remove(q.mesh);delete G.turrets[m.id];if(curTur===m.id)closeShop()}},
@@ -909,17 +948,18 @@ function onBoom(m){
 function startMatch(m){
  $('load').style.display='flex';
  setTimeout(()=>{
-  G.seed=m.seed;G.map=m.map;G.time=0;G.ended=false;G.state='game';
+  m.pl.forEach(q=>{const p=G.P[q.id];if(p)p.team=q.team});G.seed=m.seed;G.map=m.map;G.time=0;G.ended=false;G.state='game';
   Object.values(G.projs).forEach(q=>scene.remove(q.mesh));Object.values(G.placed).forEach(q=>scene.remove(q.mesh));Object.values(G.pickups).forEach(q=>scene.remove(q.mesh));Object.values(G.drones).forEach(q=>scene.remove(q.mesh));Object.values(G.projs).forEach(q=>{if(q.beam)scene.remove(q.beam)});G.projs={};G.placed={};G.pickups={};Object.values(G.turrets).forEach(q=>scene.remove(q.mesh));G.turrets={};G.drones={};Drone=null;adrenT=0;G.evT={};G.evN={};G.evQ=[];G.evNext=EV_INT;G.evLast=-1;envMode=0;worldMat.color.setScalar(1);scene.background=skyTex;$('chatLog').textContent='';
   for(const k in mags)delete mags[k];held='pick0';
-  clearChunks();genWorld(m.seed,m.map);paintAtlas(m.map);paintSky(m.map);buildAll();bakeMap();
+  clearChunks();genWorld(m.seed,m.map);paintAtlas(m.map);paintSky(m.map);scene.background=skyTex;buildAll();bakeMap();
   const cnt=[0,0,0,0];
   G.order.forEach(id=>{const p=G.P[id];removeAvatar(p);Object.assign(p,{hp:100,lives:MAX_LIVES,alive:true,kills:0,invuln:0,respawnAt:0});const s=spawnPos(p.team,cnt[p.team]++);Object.assign(p,s);p.rx=undefined;p.spawnI=cnt[p.team]-1;
    if(id===G.myId){me.x=s.x;me.y=s.y;me.z=s.z;me.camY=s.y;me.vx=me.vy=me.vz=0;faceCenter()}else p.av=makeAvatar(p);
    if(p.bot)Object.assign(p,{vx:0,vy:0,vz:0,ground:false,b:{cd:0,nade:15+Math.random()*20,stuck:0,lastX:s.x,lastZ:s.z,wander:Math.random()*6.28,dig:0}})});
+  modeInit();
   const pl=P();$('lobby').style.display='none';$('end').style.display='none';$('load').style.display='none';$('hud').style.display='block';
   $('touch').style.display=isTouch?'block':'none';
-  renderBar();toast(`Копайте руду! Зона сожмётся через ${Math.floor(ZONE_START/60)}:00`,3);
+  renderBar();toast(MODES[G.mode].tip(),3);
   if(!isTouch)requestLock();
   try{if(navigator.wakeLock)navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}
  },30);
@@ -930,8 +970,8 @@ function showEnd(m){
  G.ended=true;exitPointer();closeShop();closeAim();endDrone();
  m.pl.forEach(q=>{const p=G.P[q[0]];if(p){p.kills=q[1];p.lives=q[2]}});
  const t=m.team>=0?TEAMS[m.team]:null;const mine=P()&&P().team===m.team;
- $('endTitle').textContent=t?(mine?'Победа! ':'')+t.n+' выжили':'Ничья: выживших нет';$('endTitle').style.color=t?t.c:'';
- const tb=document.createElement('table');tb.innerHTML='<tr><th>Игрок</th><th>Команда</th><th>Убийства</th><th>Жизни</th></tr>'+G.order.map(id=>{const p=G.P[id];return`<tr><td>${esc(p.name)}</td><td style="color:${TEAMS[p.team].c}">${TEAMS[p.team].n}</td><td>${p.kills}</td><td>${p.lives}</td></tr>`}).join('');
+ $('endTitle').textContent=m.title?((t&&mine?'Победа! ':'')+m.title):t?(mine?'Победа! ':'')+t.n+' выжили':'Ничья: выживших нет';$('endTitle').style.color=t?t.c:'';
+ const tb=document.createElement('table');tb.innerHTML='<tr><th>Игрок</th><th>Команда</th><th>Убийства</th><th>Жизни</th></tr>'+G.order.filter(id=>!G.P[id].zombie).map(id=>{const p=G.P[id];return`<tr><td>${esc(p.name)}</td><td style="color:${TEAMS[p.team].c}">${TEAMS[p.team].n}</td><td>${p.kills}</td><td>${p.lives}</td></tr>`}).join('');
  $('endTable').textContent='';$('endTable').appendChild(tb);
  $('btnBack').style.display=G.host?'':'none';$('endNote').textContent=G.host?'':'Ждём, пока хост вернёт всех в лобби.';$('end').style.display='flex';
 }
@@ -948,7 +988,7 @@ function hostTick(dt){
  G.order.forEach(id=>{const p=G.P[id];
   if(!p.alive&&p.lives>0&&p.respawnAt&&G.time>=p.respawnAt){p.respawnAt=0;p.alive=true;p.hp=100;p.invuln=G.time+2;const s=spawnPos(p.team,p.spawnI||0);Object.assign(p,s);if(p.bot){p.vx=p.vy=p.vz=0}bcast({t:'spawn',id,x:s.x,y:s.y,z:s.z})}
   if(p.bot&&p.alive)botTick(p,dt)});
- eventsTick();turretsTick(dt);
+ eventsTick();turretsTick(dt);modeTick(dt);
  // Дроны: пилот погиб или батарея села
  for(const id in G.drones){const q=G.drones[id],o=G.P[q.o];q.t+=dt;if(!o||!o.alive)bcast({t:'rmd',id:q.id});else if(q.t>IT[q.k].batt+2)droneBoom(q,q.x,q.y,q.z)}
  // Расставленная взрывчатка
@@ -1031,16 +1071,86 @@ function updateEnv(){const m=evOn('night')?1:evOn('fog')?2:0;if(m===envMode)retu
  if(!m){paintSky(G.map);scene.background=skyTex;worldMat.color.setScalar(1);return}
  const c=m===1?0x05070d:0xb8bcc0;scene.background=new THREE.Color(c);scene.fog=new THREE.Fog(c,m===1?8:3,m===1?50:26);worldMat.color.setScalar(m===1?.45:.85)}
 
+/* ===== Режимы ===== */
+const MODES={
+ br:{n:'Последняя команда',d:'Классика: у всех ограниченные жизни, зона сжимается, побеждает последняя живая команда.',tip:()=>`Копайте руду! Зона сожмётся через ${Math.floor(ZONE_START/60)}:00`},
+ ctf:{n:'Захват флага',d:'Унесите вражеский флаг на свою базу, пока ваш флаг на месте. Победа за 3 захвата или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Принесите вражеский флаг на свою базу'},
+ zombie:{n:'Зомби',d:'Все вместе против волн зомби. Продержитесь выбранное время. Волны каждые 20 секунд и всё сильнее.',tip:()=>'Продержитесь до конца таймера'},
+ koth:{n:'Царь горы',d:'Удерживайте вершину горы: каждая секунда без врагов на ней даёт очко. Победа за 60 очков или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Займите вершину горы и удержите её'},
+};
+const MODE_IDS=['br','ctf','zombie','koth'],CTF_WIN=3,KOTH_WIN=60,Z_MAX=24;
+function infLives(){return G.mode==='ctf'||G.mode==='koth'}
+function endMatch(team,title){if(G.ended)return;bcast({t:'end',team,title,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}
+function endByScore(){let best=-1,top=-1,tie=false;for(const t in G.score){const v=G.score[t];if(v>top){top=v;best=+t;tie=false}else if(v===top)tie=true}
+ if(best<0||tie)endMatch(-1,'Ничья: счёт равный');else endMatch(best,TEAMS[best].n+': счёт '+top)}
+function modeInit(){
+ (G.modeMeshes||[]).forEach(o=>scene.remove(o));G.modeMeshes=[];G.flags={};G.score={};G.wave=0;G.nextWave=4;G.hillT=0;G.hillO=-1;G.hill=null;
+ const teams=[...new Set(G.order.map(id=>G.P[id].team))];teams.forEach(t=>G.score[t]=0);
+ if(G.mode==='ctf')teams.forEach(t=>{const b=BASES[t],dx=Math.sign(CX-b[0]),dz=Math.sign(CZ-b[1]),x=b[0]-dx*6+.5,z=b[1]-dz*6+.5,y=surfaceY(x,z);
+  const g=new THREE.Group();g.add(box(.1,2.6,.1,0xdddddd,0,1.3,0),box(.9,.55,.06,TEAMS[t].h,.45,2.3,0));scene.add(g);G.modeMeshes.push(g);
+  G.flags[t]={team:t,hx:x,hy:y,hz:z,x,y,z,c:null,home:true,dropT:0,mesh:g}});
+ if(G.mode==='koth'){let top=0;for(let dz=-4;dz<=4;dz++)for(let dx=-4;dx<=4;dx++)top=Math.max(top,surfaceY(CX+dx,CZ+dz));G.hill={x:CX,y:top,z:CZ,r:9};
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(9,9,14,32,1,true),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.22,side:THREE.DoubleSide,depthWrite:false,fog:false}));m.position.set(CX,top+4,CZ);scene.add(m);G.modeMeshes.push(m);G.hill.mesh=m}
+}
+const flagState=msg=>({t:'fl',msg,sc:G.score,f:Object.values(G.flags).map(f=>[f.team,+f.x.toFixed(2),+f.y.toFixed(2),+f.z.toFixed(2),f.c,f.home?1:0])});
+function modeTick(dt){
+ if(G.mode==='br')return;
+ if(G.mode==='ctf'){let chg=null;const fl=Object.values(G.flags);
+  fl.forEach(f=>{if(f.c){const c=G.P[f.c];if(!c||!c.alive){if(c){f.x=c.x;f.y=surfaceY(c.x,c.z);f.z=c.z}f.c=null;f.home=false;f.dropT=G.time;chg='Флаг брошен: '+TEAMS[f.team].n}}
+   else if(!f.home&&G.time-f.dropT>20){f.x=f.hx;f.y=f.hy;f.z=f.hz;f.home=true;chg='Флаг вернулся на базу: '+TEAMS[f.team].n}});
+  G.order.forEach(id=>{const p=G.P[id];if(!p.alive)return;const carrying=fl.find(f=>f.c===id);
+   fl.forEach(f=>{if(f.c||Math.hypot(p.x-f.x,p.z-f.z)>2||Math.abs(p.y-f.y)>3)return;
+    if(f.team!==p.team){if(!carrying){f.c=id;f.home=false;chg=p.name+' взял флаг: '+TEAMS[f.team].n}}
+    else if(!f.home){f.x=f.hx;f.y=f.hy;f.z=f.hz;f.home=true;chg=p.name+' вернул свой флаг'}});
+   const own=G.flags[p.team];
+   if(carrying&&own&&own.home&&Math.hypot(p.x-own.hx,p.z-own.hz)<3){carrying.c=null;carrying.x=carrying.hx;carrying.y=carrying.hy;carrying.z=carrying.hz;carrying.home=true;G.score[p.team]++;chg=p.name+' захватил флаг!';if(p.priv){p.priv.money+=150;pushInv(id)}}});
+  if(chg)bcast(flagState(chg));
+  for(const t in G.score)if(G.score[t]>=CTF_WIN){endMatch(+t,TEAMS[t].n+' захватили '+CTF_WIN+' флага');return}
+ }
+ if(G.mode==='koth'){G.hillT-=dt;if(G.hillT<=0){G.hillT=1;const h=G.hill,on=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.alive&&Math.hypot(p.x-h.x,p.z-h.z)<h.r&&p.y>h.y-10)on.add(p.team)});
+   let o=-1;if(on.size===1){o=[...on][0];G.score[o]++}else if(on.size>1)o=-2;bcast({t:'ks',sc:G.score,o});
+   for(const t in G.score)if(G.score[t]>=KOTH_WIN){endMatch(+t,TEAMS[t].n+': цари горы');return}}}
+ if(G.mode==='zombie'){
+  G.order.filter(id=>G.P[id].zombie&&!G.P[id].alive).forEach(id=>bcast({t:'zrm',id}));
+  if(G.time>=ZONE_START){endMatch(0,'Выжившие продержались');return}
+  if(G.time>=G.nextWave){G.nextWave=G.time+20;G.wave++;const humans=G.order.map(id=>G.P[id]).filter(p=>!p.zombie&&p.alive),alive=G.order.filter(id=>G.P[id].zombie).length;
+   if(humans.length){const n=Math.min(3+G.wave*2+humans.length-1,Z_MAX-alive);bcast({t:'zw',w:G.wave});
+    for(let i=0;i<n;i++){const h=humans[Math.floor(Math.random()*humans.length)],a=Math.random()*6.283,d=32+Math.random()*14,x=clamp(h.x+Math.cos(a)*d,2,W-3),z=clamp(h.z+Math.sin(a)*d,2,W-3);
+     bcast({t:'zadd',id:'z'+(G.nid++),x,y:surfaceY(x,z)+.2,z,hp:40+G.wave*10})}}}
+  return}
+ if(G.time>=ZONE_START)endByScore();
+}
+function modeGoal(p){
+ if(G.mode==='koth')return G.hill;
+ if(G.mode==='ctf'){const fl=Object.values(G.flags),mine=fl.find(f=>f.c===p.id);if(mine){const o=G.flags[p.team];return o?{x:o.hx,z:o.hz}:null}
+  const lost=G.flags[p.team];if(lost&&!lost.home&&!lost.c)return lost;
+  let best=null,bd=1e9;fl.forEach(f=>{if(f.team!==p.team&&!f.c){const d=Math.hypot(f.x-p.x,f.z-p.z);if(d<bd){bd=d;best=f}}});return best}
+ return null}
+function zTick(p,dt){const b=p.b;b.cd-=dt;let t=null,bd=1e9;G.order.forEach(id=>{const q=G.P[id];if(q.alive&&!q.zombie){const d=Math.hypot(q.x-p.x,q.z-p.z);if(d<bd){bd=d;t=q}}});
+ if(!t){p.vx=p.vz=0;moveEnt(p,dt);return}
+ const dx=(t.x-p.x)/(bd||1),dz=(t.z-p.z)/(bd||1),sp=bd<1.2?0:Math.min(4.6+G.wave*.3,8);p.vx=dx*sp;p.vz=dz*sp;p.yaw=Math.atan2(-dx,-dz);
+ b.stuck+=dt;if(b.stuck>.8){const moved=Math.hypot(p.x-b.lastX,p.z-b.lastZ);b.lastX=p.x;b.lastZ=p.z;b.stuck=0;if(moved<1&&sp>0){if(p.ground)p.vy=8.5;const fx=Math.floor(p.x+dx*1.1),fz=Math.floor(p.z+dz*1.1),fy=Math.floor(p.y),c=[];for(let j=0;j<3;j++)if(breakable(getV(fx,fy+j,fz)))c.push([fx,fy+j,fz]);if(c.length)bcast({t:'vxs',c})}}
+ moveEnt(p,dt);
+ if(bd<1.9&&Math.abs(t.y-p.y)<2&&b.cd<=0){b.cd=.8;damage(t,10+G.wave*1.5,p,'зомби')}}
+function modeTxt(){const m=G.mode;if(m==='ctf')return 'захват флага: до '+CTF_WIN;
+ if(m==='koth')return 'гора: '+(G.hillO>=0?TEAMS[G.hillO].n:G.hillO===-2?'спорная':'свободна')+' · до '+KOTH_WIN;
+ if(m==='zombie')return 'волна '+(G.wave||0)+' · зомби '+G.order.filter(id=>G.P[id].zombie&&G.P[id].alive).length;return ''}
+function updateMode(dt){
+ for(const t in G.flags){const f=G.flags[t];let x=f.x,y=f.y,z=f.z;if(f.c){const c=G.P[f.c];if(c){const own=f.c===G.myId;x=own?me.x:(c.rx!=null?c.rx:c.x);y=(own?me.y:(c.ry!=null?c.ry:c.y))+.9;z=own?me.z:(c.rz!=null?c.rz:c.z)}}f.mesh.position.set(x,y,z);f.mesh.rotation.y+=dt*.6}
+ if(G.hill&&G.hill.mesh)G.hill.mesh.material.color.set(G.hillO>=0?TEAMS[G.hillO].h:G.hillO===-2?0xff5533:0xffffff)}
+
 /* ===== Боты ===== */
 function botTick(p,dt){
+ if(p.zombie){zTick(p,dt);return}
  const b=p.b;b.cd-=dt;b.nade-=dt;
  const tier=G.time<20?0:G.time<70?1:2;p.item=ITEM_IDX[tier===0?'pick0':tier===1?'pistol':'ak'];
  let target=null,best=1e9;G.order.forEach(id=>{const t=G.P[id];if(t.alive&&t.team!==p.team){const d=Math.hypot(t.x-p.x,t.z-p.z);if(d<best){best=d;target=t}}});
  let gx=CX,gz=CZ;const zr=zoneR(G.time),rc=Math.hypot(p.x-CX,p.z-CZ);
  if(rc>zr-4){gx=CX;gz=CZ}else if(target&&(G.time>25||best<25)){gx=target.x;gz=target.z}else{b.wander+=dt*(Math.sin(G.time+p.x)*.8);gx=p.x+Math.cos(b.wander)*10;gz=p.z+Math.sin(b.wander)*10}
+ const goal=modeGoal(p);if(goal){gx=goal.x;gz=goal.z}
  let dx=gx-p.x,dz=gz-p.z;const d=Math.hypot(dx,dz)||1;dx/=d;dz/=d;
  const see=target&&best<45&&!rayV(p.x,p.y+1.5,p.z,(target.x-p.x)/Math.hypot(target.x-p.x,target.y-p.y,target.z-p.z),(target.y-p.y)/Math.hypot(target.x-p.x,target.y-p.y,target.z-p.z),(target.z-p.z)/Math.hypot(target.x-p.x,target.y-p.y,target.z-p.z),Math.hypot(target.x-p.x,target.y-p.y,target.z-p.z)-.3);
- const hold=see&&best<16&&tier>0;const sp=hold?0:6.2;
+ const hold=see&&best<16&&tier>0&&!goal;const sp=hold?0:6.2;
  p.vx=dx*sp;p.vz=dz*sp;
  if(see)p.yaw=Math.atan2(-(target.x-p.x),-(target.z-p.z));else p.yaw=Math.atan2(-dx,-dz);
  // Застрял: прыжок, потом копаем вперёд
@@ -1290,7 +1400,7 @@ function updateAvatars(dt){
   const sp=Math.hypot(p.rx-px,p.rz-pz)/Math.max(dt,.001),u=a.userData;u.walk+=sp*dt*1.5;const sw=Math.sin(u.walk*2)*Math.min(.9,sp/6);
   u.lL.rotation.x=sw;u.lR.rotation.x=-sw;
   u.armR.rotation.x=1.3+(p.pitch||0)*.7;
-  const it=ITEMS[p.item];u.gun.visible=it&&['gun','rpg','tool'].includes(it.kind);
+  const it=ITEMS[p.item];u.gun.visible=!p.zombie&&it&&['gun','rpg','tool'].includes(it.kind);
  });
 }
 
@@ -1337,12 +1447,14 @@ function renderShop(){
 }
 $('shopClose').onclick=closeShop;$('sellAll').onclick=()=>toHost({t:'sellOre'});
 function livesTxt(n){n=Math.max(0,n);return MAX_LIVES>5?'♥ '+n+'/'+MAX_LIVES:'♥'.repeat(n)+'♡'.repeat(Math.max(0,MAX_LIVES-n))}
-function renderScore(){const h=[...G.order].sort((a,b)=>G.P[a].team-G.P[b].team||G.P[b].kills-G.P[a].kills).map(id=>{const p=G.P[id];return`<tr><td style="color:${TEAMS[p.team].c}">${esc(p.name)}</td><td>${p.lives>0?livesTxt(p.lives):'выбыл'}</td><td>${p.kills}</td></tr>`}).join('');$('score').innerHTML=`<table><tr><th>Игрок</th><th>Жизни</th><th>Убийства</th></tr>${h}</table>`}
+function renderScore(){const h=G.order.filter(id=>!G.P[id].zombie).sort((a,b)=>G.P[a].team-G.P[b].team||G.P[b].kills-G.P[a].kills).map(id=>{const p=G.P[id];return`<tr><td style="color:${TEAMS[p.team].c}">${esc(p.name)}</td><td>${p.lives>0?livesTxt(p.lives):'выбыл'}</td><td>${p.kills}</td></tr>`}).join('');$('score').innerHTML=`<table><tr><th>Игрок</th><th>Жизни</th><th>Убийства</th></tr>${h}</table>`}
 const mapCv=$('map'),mapG=mapCv.getContext('2d');let mapBase=null;
-function bakeMap(){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),im=g.createImageData(128,128);for(let z=0;z<W;z++)for(let x=0;x<W;x++){const h=topY[x+z*W],m=h>0?V[vi(x,h-1,z)]:0,i=(x+z*W)*4,k=.55+h/50;let c=G.map?[210,172,110]:[92,140,62];if(m===STONE)c=[130,125,120];if(m===DIRT)c=[90,70,50];if(m>=COAL&&m<=CRYS)c=[ORES.coal,ORES.iron,ORES.gold,ORES.crystal].map(o=>[parseInt(o.c.slice(1,3),16),parseInt(o.c.slice(3,5),16),parseInt(o.c.slice(5,7),16)])[m-COAL];im.data[i]=c[0]*k;im.data[i+1]=c[1]*k;im.data[i+2]=c[2]*k;im.data[i+3]=255}g.putImageData(im,0,0);mapBase=c}
+function bakeMap(){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d'),im=g.createImageData(128,128);for(let z=0;z<W;z++)for(let x=0;x<W;x++){const h=topY[x+z*W],m=h>0?V[vi(x,h-1,z)]:0,i=(x+z*W)*4,k=.55+h/50;let c=PAL[G.map].top;if(m===STONE)c=PAL[G.map].stone;if(m===DIRT)c=PAL[G.map].dirt;if(m===LEAF)c=PAL[G.map].leaf;if(m===TRUNK)c=[120,84,47];if(m>=COAL&&m<=CRYS)c=[ORES.coal,ORES.iron,ORES.gold,ORES.crystal].map(o=>[parseInt(o.c.slice(1,3),16),parseInt(o.c.slice(3,5),16),parseInt(o.c.slice(5,7),16)])[m-COAL];im.data[i]=c[0]*k;im.data[i+1]=c[1]*k;im.data[i+2]=c[2]*k;im.data[i+3]=255}g.putImageData(im,0,0);mapBase=c}
 function drawMap(){if(!mapBase)return;const g=mapG;g.drawImage(mapBase,0,0);const pl=P();if(!pl)return;
  BASES.forEach((b,i)=>{if(G.order.some(id=>G.P[id].team===i)){g.fillStyle=TEAMS[i].c;g.fillRect(b[0]-3,b[1]-3,6,6)}});
  const r=zoneR(G.time);g.strokeStyle='#c084fc';g.lineWidth=2;g.beginPath();g.arc(CX,CZ,r,0,7);g.stroke();
+ for(const t in G.flags){const f=G.flags[t];const c=f.c&&G.P[f.c];g.fillStyle=TEAMS[t].c;g.strokeStyle='#fff';g.lineWidth=1;g.beginPath();g.rect((c?c.x:f.x)-3,(c?c.z:f.z)-3,6,6);g.fill();g.stroke()}
+ if(G.hill){g.strokeStyle=G.hillO>=0?TEAMS[G.hillO].c:'#fff';g.lineWidth=2;g.beginPath();g.arc(G.hill.x,G.hill.z,G.hill.r,0,7);g.stroke()}
  for(const id in G.projs){const q=G.projs[id];if(q.k==='bm'){g.strokeStyle='#ff2a2a';g.beginPath();g.arc(q.x,q.z,EXP.bm.dr,0,7);g.stroke()}}
  G.order.forEach(id=>{const p=G.P[id];if(!p.alive||id===G.myId||(p.team!==pl.team&&!CH.wh&&!evOn('reveal')))return;g.fillStyle=TEAMS[p.team].c;g.beginPath();g.arc(p.x,p.z,3,0,7);g.fill()});
  g.save();g.translate(me.x,me.z);g.rotate(-me.yaw);g.fillStyle='#fff';g.beginPath();g.moveTo(0,-6);g.lineTo(4,4);g.lineTo(-4,4);g.fill();g.restore()}
@@ -1353,17 +1465,17 @@ function updateUI(dt){
  const pl=P();if(!pl)return;
  const t=G.time,tm=$('timer'),zt=$('zoneTxt');
  const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
- if(t<ZONE_START){tm.textContent=fmt(ZONE_START-t);zt.textContent='до сужения зоны';zt.className=''}else{tm.textContent=fmt(Math.max(0,ZONE_START+ZONE_DUR-t));zt.textContent=t<ZONE_START+ZONE_DUR?'зона сужается':'зона сжалась';zt.className='bad'}
+ if(G.mode!=='br'){tm.textContent=fmt(Math.max(0,ZONE_START-t));zt.textContent=modeTxt();zt.className=''}else if(t<ZONE_START){tm.textContent=fmt(ZONE_START-t);zt.textContent='до сужения зоны';zt.className=''}else{tm.textContent=fmt(Math.max(0,ZONE_START+ZONE_DUR-t));zt.textContent=t<ZONE_START+ZONE_DUR?'зона сужается':'зона сжалась';zt.className='bad'}
  const out=Math.hypot(me.x-CX,me.z-CZ)>zoneR(t)&&pl.alive;$('zoneVig').style.opacity=out?1:0;if(out&&uiT>-1)zt.textContent='Вы вне зоны! Бегите к центру';
- zoneMesh.visible=t>=ZONE_START-15;const zr=zoneR(t);zoneMesh.scale.set(zr,1,zr);
- const tp=$('tpills');tp.textContent='';TEAMS.forEach((tt,i)=>{const pp=G.order.map(id=>G.P[id]).filter(p=>p.team===i);if(!pp.length)return;const s=document.createElement('span');s.style.background=tt.c;const l=pp.reduce((a,p)=>a+p.lives,0);s.textContent=l;s.title=tt.n;if(l===0)s.style.opacity=.3;tp.appendChild(s)});
- $('lives').textContent=livesTxt(pl.lives);$('hpTxt').textContent=Math.ceil(pl.hp);$('hpBar').firstChild.style.width=Math.min(100,pl.hp)+'%';$('hpBar').firstChild.style.background=pl.hp>50?'var(--green)':pl.hp>25?'var(--amber)':'var(--red)';
+ zoneMesh.visible=G.mode==='br'&&t>=ZONE_START-15;const zr=zoneR(t);zoneMesh.scale.set(zr,1,zr);
+ const tp=$('tpills');tp.textContent='';TEAMS.forEach((tt,i)=>{const pp=G.order.map(id=>G.P[id]).filter(p=>p.team===i&&!p.zombie);if(!pp.length)return;const s=document.createElement('span');s.style.background=tt.c;const l=pp.reduce((a,p)=>a+p.lives,0);s.textContent=infLives()||G.mode==='ctf'?(G.score[i]||0):l;s.title=tt.n;if(l===0)s.style.opacity=.3;tp.appendChild(s)});
+ $('lives').textContent=infLives()?'♥ ∞':livesTxt(pl.lives);$('hpTxt').textContent=Math.ceil(pl.hp);$('hpBar').firstChild.style.width=Math.min(100,pl.hp)+'%';$('hpBar').firstChild.style.background=pl.hp>50?'var(--green)':pl.hp>25?'var(--amber)':'var(--red)';
  const av=IT[Inv.armorId];$('arBar').style.display=av?'block':'none';if(av)$('arBar').firstChild.style.width=(Inv.armor/av.ap*100)+'%';$('adrTxt').textContent=adrenT>0?'Адреналин '+Math.ceil(adrenT)+' с':'';
  const it=IT[held];$('itemName').textContent=it?it.name:'';
  if(it&&it.mag){$('ammoNow').textContent=reloadT>0?'…':(mags[held]||0);$('ammoRes').textContent='/ '+(Inv.ammo[it.ammo]||0)}else if(it&&it.kind!=='tool'&&it.kind!=='knife'){$('ammoNow').textContent='×'+(Inv.inv[held]||0);$('ammoRes').textContent=''}else{$('ammoNow').textContent='';$('ammoRes').textContent=''}
  $('fpv').style.display=Drone?'block':'none';if(Drone)$('fpvTxt').textContent=`${IT[Drone.k].name}: батарея ${Math.max(0,Math.ceil(IT[Drone.k].batt-Drone.t))} с. ${isTouch?'ОГОНЬ':'ЛКМ'}: взрыв`;
  $('evTxt').textContent=Object.keys(G.evT||{}).filter(evOn).map(f=>G.evN[f]+' '+Math.ceil(G.evT[f]-G.time)+' с').join(' · ');
- const dead=$('dead');if(!pl.alive){dead.style.display='flex';if(pl.lives>0){$('deadTxt').textContent='Вы погибли';$('deadSub').textContent=`Осталось жизней: ${pl.lives}. Возрождение на базе через несколько секунд. Руда досталась врагу.`}else{$('deadTxt').textContent='Жизни закончились';$('deadSub').textContent='Наблюдаете за боем'}}else dead.style.display='none';
+ const dead=$('dead');if(!pl.alive){dead.style.display='flex';if(pl.lives>0){$('deadTxt').textContent='Вы погибли';$('deadSub').textContent=`${infLives()?'':'Осталось жизней: '+pl.lives+'. '}Возрождение на базе через несколько секунд. Руда досталась врагу.`}else{$('deadTxt').textContent='Жизни закончились';$('deadSub').textContent='Наблюдаете за боем'}}else dead.style.display='none';
  // Подсказки
  const h=$('hint');const near=pl.alive&&nearShop(pl);
  const nt=nearTurret();$('tTur').style.visibility=nt?'visible':'hidden';
@@ -1435,6 +1547,7 @@ const TUT=[
  ['Взрывы и пещеры',`<p>Гора окружена траншеями, внутри неё сеть пещер. Землю можно разрушать: РПГ, гранаты, мины и шахтёрский заряд оставляют воронки, а кирка и бур прорывают ходы.</p><p>FPV-дрон управляется от первого лица, но ваше тело в это время беззащитно. Баллистическая ракета наводится по карте.</p>`],
  ['Турели',`<p>Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите ${K('E','ТУР.')}, чтобы загрузить.</p><ul><li><b>Защитная</b>: положите оружие и патроны, стреляет по врагам</li><li><b>Медицинская</b>: аптечки или адреналин, лечит союзников рядом</li><li><b>Метательная</b>: гранаты, флешки или дым, метает во врагов</li></ul><p>Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.</p>`],
  ['Зона и события',`<p>После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.</p><p>Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.</p>`],
+ ['Режимы и карты',`<ul><li><b>Последняя команда</b>: ограниченные жизни и сжимающаяся зона</li><li><b>Захват флага</b>: подойдите к чужому флагу, чтобы взять его, и донесите до своего. Свой брошенный флаг возвращается касанием</li><li><b>Зомби</b>: все вместе против волн, продержитесь до конца таймера</li><li><b>Царь горы</b>: стойте на вершине без врагов и набирайте очки</li></ul><p>Карты: равнина, пустыня, город с домами, джунгли с деревьями и высокие горы. Режим и карту выбирает хост в лобби.</p>`],
  ['Друзья и голос',`<p>Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.</p><p>Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.</p><button id="tutPlay" class="pri">Потренироваться с ботом</button>`],
 ];
 let tutI=0;
@@ -1483,7 +1596,7 @@ function frame(now){
   if(!G.host&&!G.ended)G.time+=dt;
   if(G.host)hostTick(dt);
   stepProjs(dt);updatePlacedVisual(dt);
-  updateMe(dt);updateAvatars(dt);updateDrones(dt);updateTurrets(dt);updateFx(dt);
+  updateMe(dt);updateAvatars(dt);updateDrones(dt);updateTurrets(dt);updateMode(dt);updateFx(dt);
   zoneTex.offset.x+=dt*.03;
   let n=0;for(const k of dirty){buildChunk(k);dirty.delete(k);if(++n>=12)break}
   updateUI(dt);
@@ -1498,7 +1611,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={MODES,PAL,TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
