@@ -88,20 +88,23 @@ body.touch #vitals{bottom:auto;top:92px;width:140px}body.touch #ammo{bottom:auto
 #chatLog{position:absolute;left:max(8px,env(safe-area-inset-left));bottom:84px;width:min(44vw,380px);display:grid;gap:2px;font-size:13px}
 #chatLog div{background:#0008;padding:1px 6px;border-radius:3px;overflow-wrap:anywhere}
 body.touch #chatLog{bottom:auto;top:176px}
-#chatBox{position:fixed;z-index:21;left:50%;bottom:64px;transform:translateX(-50%);width:min(92vw,460px);display:none}
-body.touch #chatBox{bottom:auto;top:max(8px,env(safe-area-inset-top))}
+#chatWrap{position:fixed;z-index:21;left:50%;bottom:64px;transform:translateX(-50%);width:min(94vw,560px);display:none;gap:6px;background:#0e120cf2;border:1px solid var(--amber);padding:6px}
+#chatWrap input{flex:1;min-width:0;width:auto}#chatWrap button{flex:none;padding:8px 10px}
+body.touch #chatWrap{bottom:auto;top:max(4px,env(safe-area-inset-top))}
 #cheat{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;background:#0008}
 #cheatBox{background:#171b15;border:1px solid var(--amber);border-radius:6px;padding:12px 14px;width:min(100%,320px);display:grid;gap:10px}
 #cheatBox h2{color:var(--amber)}#cheatBox label{display:flex;gap:8px;align-items:center;cursor:pointer}#cheatBox input{width:20px;height:20px;flex:none}
 #tChat{right:max(196px,calc(env(safe-area-inset-right) + 196px));top:max(8px,env(safe-area-inset-top));border-radius:6px}
 body.touch #bar,body.touch #micBtn{z-index:3}
 body.touch #hint{bottom:104px}
-body.touch #ammo{top:auto;right:auto;left:calc(50% + 100px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);padding:2px 8px;white-space:nowrap}
+body.touch #ammo{top:auto;right:auto;left:calc(50% + 122px);bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);padding:2px 8px;white-space:nowrap}
 body.touch #itemName{display:none}
-#tWpn{position:absolute;z-index:3;left:50%;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);transform:translateX(-50%);width:190px;height:42px;padding:0 6px;pointer-events:auto;touch-action:none;background:#000a;border:1px solid #fff5;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.touch #ammo b{font-size:20px}
+body.edit #ammo{min-width:60px;min-height:30px;outline:1px dashed #fff8}
+#tWpn{position:absolute;z-index:3;left:50%;bottom:calc(max(8px,env(safe-area-inset-bottom)) + 44px);transform:translateX(-50%);width:230px;height:42px;padding:0 6px;pointer-events:auto;touch-action:none;background:#000a;border:1px solid #fff5;border-radius:6px;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #tSet{right:max(262px,calc(env(safe-area-inset-right) + 262px));top:max(8px,env(safe-area-inset-top));border-radius:6px;font-size:22px}
 body.edit #hud{z-index:40;background:#1b2019e6}
-body.edit #hud>*:not(#touch):not(#bar):not(#micBtn){display:none!important}
+body.edit #hud>*:not(#touch):not(#bar):not(#micBtn):not(#ammo){display:none!important}
 body.edit #joyZone,body.edit #lookZone{display:none}
 body.edit #touch{display:block!important}
 body.edit .tb,body.edit #tWpn,body.edit #bar,body.edit #micBtn{visibility:visible!important;opacity:1!important;outline:1px dashed #fff8;outline-offset:2px}
@@ -246,7 +249,7 @@ input{border-radius:0}
   <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B).</p></div></div>
 </div>
 
-<input id="chatBox" maxlength="120" placeholder="Сообщение. Enter: отправить, Esc: отмена" aria-label="Сообщение в чат" autocomplete="off">
+<form id="chatWrap"><input id="chatBox" maxlength="120" placeholder="Сообщение" aria-label="Сообщение в чат" autocomplete="off" enterkeyhint="send"><button id="chatSend" type="submit" class="pri">Отправить</button><button id="chatCancel" type="button">Отмена</button></form>
 
 <div id="cheat"><div id="cheatBox"><h2>Чит-меню</h2>
   <label><input type="checkbox" id="chFly">Полёт (взгляд и W, Пробел вверх, C вниз)</label>
@@ -354,6 +357,12 @@ const HATS=[
  {id:'h_top',n:'Цилиндр',p:250,b:[[.26,.34,.26,0x18181b,0,.33,0],[.27,.05,.27,0xb91c1c,0,.2,0],[.44,.03,.44,0x18181b,0,.16,0]]},
  {id:'h_horns',n:'Рога викинга',p:300,b:[[.34,.12,.34,0x9ca3af,0,.2,0],[.06,.22,.06,0xf1e6c8,-.22,.3,0],[.06,.22,.06,0xf1e6c8,.22,.3,0]]},
  {id:'h_crown',n:'Корона',p:500,b:[[.32,.08,.32,0xfacc15,0,.2,0],[.06,.1,.06,0xfacc15,-.13,.29,-.13],[.06,.1,.06,0xfacc15,.13,.29,-.13],[.06,.1,.06,0xfacc15,-.13,.29,.13],[.06,.1,.06,0xfacc15,.13,.29,.13]]},
+ {id:'h_beanie',n:'Шапка-бини',p:70,b:[[.34,.13,.34,0xdc2626,0,.2,0],[.08,.06,.08,0xfafafa,0,.3,0]]},
+ {id:'h_chef',n:'Колпак повара',p:110,b:[[.3,.28,.3,0xfafafa,0,.29,0]]},
+ {id:'h_miner',n:'Шахтёрская каска',p:140,b:[[.36,.14,.36,0xeab308,0,.2,0],[.1,.08,.04,0xfff7c2,0,.2,-.2]]},
+ {id:'h_viking',n:'Шлем рыцаря',p:220,b:[[.36,.34,.36,0x9ca3af,0,.09,0],[.28,.03,.02,0x111111,0,.05,-.19],[.04,.14,.3,0xb91c1c,0,.32,0]]},
+ {id:'h_wizard',n:'Колпак мага',p:280,b:[[.4,.03,.4,0x4c1d95,0,.16,0],[.26,.14,.26,0x4c1d95,0,.24,0],[.15,.14,.15,0x4c1d95,0,.38,0],[.06,.12,.06,0xfacc15,0,.5,0]]},
+ {id:'h_ears',n:'Кошачьи ушки',p:180,b:[[.08,.1,.05,0xf472b6,-.1,.2,0],[.08,.1,.05,0xf472b6,.1,.2,0]]},
  {id:'h_halo',n:'Нимб',p:600,b:[[.36,.03,.06,0xfff3a0,0,.36,-.15],[.36,.03,.06,0xfff3a0,0,.36,.15],[.06,.03,.3,0xfff3a0,-.15,.36,0],[.06,.03,.3,0xfff3a0,.15,.36,0]]},
 ];
 const SUITS=[
@@ -364,6 +373,12 @@ const SUITS=[
  {id:'s_tux',n:'Смокинг',p:300,body:0x202024,legs:0x111114},
  {id:'s_astro',n:'Космонавт',p:350,body:0xe5e7eb,legs:0xc4c8ce},
  {id:'s_neon',n:'Неон',p:450,body:0xd946ef,legs:0x22d3ee},
+ {id:'s_snow',n:'Зимний',p:120,body:0xe2e8f0,legs:0x94a3b8},
+ {id:'s_jungle',n:'Джунгли',p:120,body:0x166534,legs:0x3f6212},
+ {id:'s_police',n:'Спецназ',p:220,body:0x1e3a8a,legs:0x172554},
+ {id:'s_clown',n:'Клоун',p:260,body:0xf97316,legs:0x7c3aed},
+ {id:'s_lava',n:'Лавовый',p:520,body:0xdc2626,legs:0x7f1d1d},
+ {id:'s_ice',n:'Ледяной',p:520,body:0x67e8f9,legs:0x0891b2},
  {id:'s_gold',n:'Золотой',p:800,body:0xeab308,legs:0xb78a06},
 ];
 const BACKS=[
@@ -371,6 +386,9 @@ const BACKS=[
  {id:'b_tank',n:'Кислородные баллоны',p:150,b:[[.13,.46,.13,0x9ca3af,-.1,1.08,.19],[.13,.46,.13,0x9ca3af,.1,1.08,.19]]},
  {id:'b_cape',n:'Плащ',p:200,b:[[.44,.85,.04,0xb91c1c,0,.92,.16]]},
  {id:'b_flag',n:'Знамя',p:250,b:[[.04,1.1,.04,0x777777,.12,1.4,.17],[.3,.2,.02,0xf0b429,.28,1.82,.17]]},
+ {id:'b_sword',n:'Меч за спиной',p:180,b:[[.06,1,.03,0xcbd5e1,.14,1.2,.17],[.22,.05,.05,0x78350f,.14,1.5,.17]]},
+ {id:'b_jet',n:'Реактивный ранец',p:350,b:[[.14,.5,.14,0x64748b,-.11,1.08,.2],[.14,.5,.14,0x64748b,.11,1.08,.2],[.1,.12,.1,0xf97316,-.11,.78,.2],[.1,.12,.1,0xf97316,.11,.78,.2]]},
+ {id:'b_demon',n:'Крылья демона',p:600,b:[[.5,.5,.03,0x450a0a,-.32,1.2,.18],[.5,.5,.03,0x450a0a,.32,1.2,.18]]},
  {id:'b_wings',n:'Крылья',p:500,b:[[.5,.5,.03,0xf5f5f5,-.32,1.2,.18],[.5,.5,.03,0xf5f5f5,.32,1.2,.18]]},
 ];
 const CLASS_LIST=[
@@ -385,6 +403,12 @@ const CLASS_LIST=[
  {id:'pilot',n:'Оператор дронов',p:400,d:'Пистолет и FPV-дроны. Каждые 30 секунд получает новый дрон ур.1.',hp:90,spd:1,kit:{pistol:1,fpv1:2,fpv2:1},ammo:{pistol:48}},
  {id:'ninja',n:'Ниндзя',p:450,d:'Быстрый и прыгучий. Нож бьёт вдвое сильнее, а брошенный сразу возвращается. 3 дымовые.',hp:85,spd:1.25,jump:11,kit:{knife:1,smoke:3},ammo:{}},
  {id:'vampire',n:'Вампир',p:500,d:'Автомат. Каждая рана врага лечит на 30% от нанесённого урона.',hp:100,spd:1,kit:{ak:1},ammo:{ak:120}},
+ {id:'grenadier',n:'Гренадёр',p:300,d:'Пистолет и 5 гранат М-67. Каждые 20 секунд получает новую гранату.',hp:100,spd:1,kit:{pistol:1,m67:5},ammo:{pistol:48}},
+ {id:'cowboy',n:'Ковбой',p:250,d:'Пистолет бьёт на 60% сильнее, бег на 10% быстрее. В наборе ещё нож.',hp:95,spd:1.1,kit:{pistol:1,knife:1},ammo:{pistol:96}},
+ {id:'sentinel',n:'Часовой',p:400,d:'Автомат, метательная турель и 3 М-67. Держит позицию вместе с турелью.',hp:110,spd:.95,kit:{ak:1,t_nade:1,m67:3},ammo:{ak:120}},
+ {id:'acrobat',n:'Акробат',p:350,d:'Дробовик, очень высокий прыжок и бег на 15% быстрее, но 85 здоровья.',hp:85,spd:1.15,jump:13,kit:{shotgun:1},ammo:{shotgun:36}},
+ {id:'berserk',n:'Берсерк',p:450,d:'Дробовик и 120 здоровья. Когда здоровья меньше 50, наносит на 50% больше урона.',hp:120,spd:1.05,kit:{shotgun:1},ammo:{shotgun:36}},
+ {id:'rocketeer',n:'Ракетчик',p:550,d:'РПГ-7 и 10 ракет, каждые 15 секунд новая ракета. 90 здоровья, бег на 10% медленнее.',hp:90,spd:.9,kit:{rpg:1},ammo:{rpg:10}},
  {id:'sapper',n:'Минёр',p:350,d:'Пистолет, клейморы и мины. Каждые 20 секунд получает новую мину.',hp:100,spd:1,kit:{pistol:1,claymore:2,mine:3},ammo:{pistol:48}},
 ];
 const CLS={};CLASS_LIST.forEach(c=>CLS[c.id]=c);
@@ -810,7 +834,9 @@ $('botDel').onclick=()=>{const b=[...G.order].reverse().find(i=>G.P[i].bot);if(b
 $('btnStart').onclick=()=>hostStart();
 $('btnCreate').onclick=()=>{initAudio();createRoom()};
 $('btnJoin').onclick=()=>{initAudio();const c=$('joinCode').value.trim().toUpperCase();if(c.length!==5){$('menuErr').textContent='В коде 5 символов.';return}joinRoom(c)};
-$('btnCopy').onclick=()=>{const u=location.href.split('?')[0]+'?room='+G.code;const done=()=>{$('btnCopy').textContent='Скопировано'};if(navigator.clipboard)navigator.clipboard.writeText(u).then(done,()=>{$('netNote').textContent=u});else $('netNote').textContent=u};
+const IS_APP=!!window.Capacitor||location.protocol==='file:'||/Electron/.test(navigator.userAgent);
+if(IS_APP)$('btnCopy').textContent='Скопировать код';
+$('btnCopy').onclick=()=>{const u=IS_APP?G.code:location.href.split('?')[0]+'?room='+G.code;const done=()=>{$('btnCopy').textContent='Скопировано'};if(navigator.clipboard)navigator.clipboard.writeText(u).then(done,()=>{$('netNote').textContent=u});else $('netNote').textContent=u};
 try{const q=new URLSearchParams(location.search).get('room');if(q)$('joinCode').value=q;const s=localStorage.getItem('nick');if(s)$('nick').value=s;$('nick').addEventListener('change',()=>{try{localStorage.setItem('nick',$('nick').value)}catch(e){}})}catch(e){}
 
 function hostStart(){
@@ -930,7 +956,7 @@ function damage(t,d,by,w,head){
  if(by&&by.id!==t.id&&by.team===t.team)return;
  if(t.invuln&&G.time<t.invuln)return;
  if(w!=='zone'){if(evOn('truce'))return;if(evOn('dmg2'))d*=2;
-  const bc=classOf(by);if(bc){if(bc.id==='sniper'&&w==='rifle')d*=1.25;if(bc.id==='ninja'&&w==='knife')d*=2;if(bc.id==='bomber'&&by===t&&EXP[w])return}}
+  const bc=classOf(by);if(bc){if(bc.id==='sniper'&&w==='rifle')d*=1.25;if(bc.id==='cowboy'&&w==='pistol')d*=1.6;if(bc.id==='berserk'&&by.hp<50)d*=1.5;if(bc.id==='ninja'&&w==='knife')d*=2;if(bc.id==='bomber'&&by===t&&EXP[w])return}}
  if(t.priv&&t.priv.armor>0&&!head&&w!=='zone'){const v=t.priv,ab=Math.min(d*IT[v.armorId].absorb,v.armor);d-=ab;v.armor-=ab;if(v.armor<=0){v.armor=0;v.armorId=null}pushInv(t.id)}
  t.hp-=d;
  if(by&&by!==t&&by.alive&&G.mode==='classes'&&by.cls==='vampire')by.hp=Math.min(maxHP(by),by.hp+d*.3);
@@ -1180,7 +1206,9 @@ function modeTick(dt){
  if(G.mode==='classes'){G.clsT=(G.clsT||0)-dt;if(G.clsT<=0){G.clsT=1;G.clsN=(G.clsN||0)+1;G.order.forEach(id=>{const p=G.P[id];if(!p.alive||p.bot)return;
     if(p.cls==='medic'&&p.hp<maxHP(p))p.hp=Math.min(maxHP(p),p.hp+3);
     if(p.cls==='pilot'&&G.clsN%30===0){p.priv.inv.fpv1=(p.priv.inv.fpv1||0)+1;pushInv(id)}
-    if(p.cls==='sapper'&&G.clsN%20===0){p.priv.inv.mine=(p.priv.inv.mine||0)+1;pushInv(id)}})}
+    if(p.cls==='sapper'&&G.clsN%20===0){p.priv.inv.mine=(p.priv.inv.mine||0)+1;pushInv(id)}
+    if(p.cls==='grenadier'&&G.clsN%20===0){p.priv.inv.m67=(p.priv.inv.m67||0)+1;pushInv(id)}
+    if(p.cls==='rocketeer'&&G.clsN%15===0){p.priv.ammo.rpg=(p.priv.ammo.rpg||0)+1;pushInv(id)}})}
   for(const t in G.score)if(G.score[t]>=CLASS_WIN){endMatch(+t,TEAMS[t].n+': '+CLASS_WIN+' убийств');return}}
  if(G.mode==='ctf'){let chg=null;const fl=Object.values(G.flags);
   fl.forEach(f=>{if(f.c){const c=G.P[f.c];if(!c||!c.alive){if(c){f.x=c.x;f.y=surfaceY(c.x,c.z);f.z=c.z}f.c=null;f.home=false;f.dropT=G.time;chg='Флаг брошен: '+TEAMS[f.team].n}}
@@ -1496,7 +1524,7 @@ function updateAvatars(dt){
 let toastTm=0;function toast(s,sec){const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toastTm);toastTm=setTimeout(()=>t.style.opacity=0,(sec||2)*1000)}
 function addFeed(h){const d=document.createElement('div');d.innerHTML=h;const f=$('feed');f.appendChild(d);while(f.children.length>4)f.removeChild(f.firstChild);setTimeout(()=>d.remove(),5000)}
 let barSig='';
-function renderBar(){const b=$('bar'),list=barItems(),sig=held+'|'+list.map(i=>i.id+Inv.inv[i.id]).join();$('tWpn').textContent='◀ '+(IT[held]?IT[held].name:'')+' ▶';
+function renderBar(){const b=$('bar'),list=barItems(),sig=held+'|'+list.map(i=>i.id+Inv.inv[i.id]).join();{const it=IT[held];$('tWpn').textContent='◀ '+(it&&it.mag?(reloadT>0?'…':(mags[held]||0))+' / '+(Inv.ammo[it.ammo]||0)+' · ':'')+(it?it.name:'')+' ▶'}
  // Панель пересобирается только при изменении, иначе касание теряется
  if(sig!==barSig){barSig=sig;b.textContent='';list.forEach((it,i)=>{const x=document.createElement('button');if(it.id===held)x.className='on';
   const cnt=it.mag?'':Inv.inv[it.id]>1?'×'+Inv.inv[it.id]:'';x.innerHTML=`<small>${i+1}</small>${esc(it.name.replace('Кирка ','').replace('Армейский ','').replace('Шахтёрский ','').replace(' граната','').replace('Песчаная ',''))} ${cnt}`;
@@ -1606,17 +1634,18 @@ const CH={fly:false,aim:false,wh:false,ammo:false};
 let chatOpen=false,cheatOpen=false;
 const chatEl=$('chatBox');
 function addChat(h){const d=document.createElement('div');d.innerHTML=h;const l=$('chatLog');l.appendChild(d);while(l.children.length>6)l.removeChild(l.firstChild);setTimeout(()=>d.remove(),12000)}
-function openChat(){if(chatOpen||G.state!=='game'||G.ended)return;chatOpen=true;for(const k in keys)keys[k]=false;chatEl.value='';chatEl.style.display='block';chatEl.focus()}
-function closeChat(){if(!chatOpen)return;chatOpen=false;chatEl.blur();chatEl.style.display='none';if(!locked&&!cheatOpen&&!shopOpen&&!aimOpen&&G.state==='game'&&!G.ended)requestLock()}
+function openChat(){if(chatOpen||G.state!=='game'||G.ended)return;chatOpen=true;for(const k in keys)keys[k]=false;chatEl.value='';$('chatWrap').style.display='flex';chatEl.focus()}
+function closeChat(){if(!chatOpen)return;chatOpen=false;chatEl.blur();$('chatWrap').style.display='none';if(!locked&&!cheatOpen&&!shopOpen&&!aimOpen&&G.state==='game'&&!G.ended)requestLock()}
 function openCheat(){cheatOpen=true;exitPointer();$('cheat').style.display='flex'}
 function closeCheat(){if(!cheatOpen)return;cheatOpen=false;$('cheat').style.display='none';if(G.state==='game'&&!G.ended)requestLock()}
-chatEl.addEventListener('keydown',e=>{e.stopPropagation();
- if(e.code==='Escape'){e.preventDefault();closeChat();return}
- if(e.code!=='Enter'&&e.code!=='NumpadEnter')return;e.preventDefault();
- const v=chatEl.value.trim();
- if(v.toLowerCase()==='/cheat'){chatOpen=false;chatEl.blur();chatEl.style.display='none';openCheat();return}
+function chatSubmit(){const v=chatEl.value.trim();
+ if(v.toLowerCase()==='/cheat'){chatOpen=false;chatEl.blur();$('chatWrap').style.display='none';openCheat();return}
  if(v.startsWith('/'))addChat('Неизвестная команда');else if(v)toHost({t:'chat',s:v});
- closeChat()});
+ closeChat()}
+chatEl.addEventListener('keydown',e=>{e.stopPropagation();if(e.code==='Escape'||e.key==='Escape'){e.preventDefault();closeChat()}});
+// На телефонах Enter приходит без e.code, поэтому отправляем через форму
+$('chatWrap').addEventListener('submit',e=>{e.preventDefault();chatSubmit()});
+$('chatCancel').onclick=closeChat;
 [['chFly','fly'],['chAim','aim'],['chWh','wh'],['chAmmo','ammo']].forEach(([id,k])=>$(id).addEventListener('change',e=>{CH[k]=e.target.checked}));
 $('cheatClose').onclick=closeCheat;
 function aimAt(){const o=eye(),my=P();let best=null,bs=.5;
@@ -1673,7 +1702,7 @@ const TUT=[
  ['Турели',`<p>Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите ${K('E','ТУР.')}, чтобы загрузить.</p><ul><li><b>Защитная</b>: положите оружие и патроны, стреляет по врагам</li><li><b>Медицинская</b>: аптечки или адреналин, лечит союзников рядом</li><li><b>Метательная</b>: гранаты, флешки или дым, метает во врагов</li></ul><p>Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.</p>`],
  ['Зона и события',`<p>После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.</p><p>Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.</p>`],
  ['Режимы и карты',`<ul><li><b>Последняя команда</b>: ограниченные жизни и сжимающаяся зона</li><li><b>Захват флага</b>: подойдите к чужому флагу, чтобы взять его, и донесите до своего. Свой брошенный флаг возвращается касанием</li><li><b>Зомби</b>: все вместе против волн, продержитесь до конца таймера</li><li><b>Царь горы</b>: стойте на вершине без врагов и набирайте очки</li></ul><p>Карты: равнина, пустыня, город с домами, джунгли с деревьями и высокие горы. Режим и карту выбирает хост в лобби.</p>`],
- ['Монеты, гардероб и классы',`<p>После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.</p><p>В <b>гардеробе</b> на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 12 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.</p>`],
+ ['Монеты, гардероб и классы',`<p>После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.</p><p>В <b>гардеробе</b> на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 18 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.</p>`],
  ['Друзья и голос',`<p>Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.</p><p>Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.</p><button id="tutPlay" class="pri">Потренироваться с ботом</button>`],
 ];
 let tutI=0;
@@ -1685,8 +1714,8 @@ $('tutPrev').onclick=()=>{if(tutI>0){tutI--;tutRender()}};
 $('tutNext').onclick=()=>{if(tutI<TUT.length-1){tutI++;tutRender()}};
 
 /* ===== Настройка кнопок на телефоне ===== */
-const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar','tTur'];
-const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов',tTur:'Загрузка турели'};
+const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar','tTur','ammo'];
+const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов',tTur:'Загрузка турели',ammo:'Счётчик патронов'};
 const LAY_KEY='shtolni-layout-v1';
 let LAY={},layoutOn=false,laySel=null,layDrag=null,layHudPrev='';
 try{LAY=JSON.parse(localStorage.getItem(LAY_KEY))||{}}catch(e){LAY={}}

@@ -1,0 +1,73 @@
+name: Сборка приложений
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Подготовка проекта
+        working-directory: app
+        run: |
+          npm install
+          npm run prepare-web
+          npm run android-project
+      - name: Сборка APK и AAB
+        working-directory: app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug bundleRelease
+      - name: Подпись AAB
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          AAB=app/android/app/build/outputs/bundle/release/app-release.aab
+          if [ -z "$KEYSTORE" ]; then
+            echo "Ключ не задан: AAB без подписи, в Google Play его загрузить нельзя"
+            exit 0
+          fi
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          jarsigner -keystore "$RUNNER_TEMP/upload.jks" -storepass "$STORE_PASSWORD" -keypass "$KEY_PASSWORD" "$AAB" "$KEY_ALIAS"
+          rm -f "$RUNNER_TEMP/upload.jks"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-test-apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-play-aab
+          path: app/android/app/build/outputs/bundle/release/app-release.aab
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Сборка
+        working-directory: app
+        shell: bash
+        run: |
+          set -e
+          npm install
+          npm run prepare-web
+          npm run windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: app/dist/*.exe
