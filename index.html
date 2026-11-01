@@ -156,6 +156,19 @@ input{border-radius:0}
 #tabs button{white-space:nowrap}
 #lock div{border-radius:0;clip-path:var(--cut)}
 @media(max-height:430px){.screen{align-items:flex-start;padding-block:8px}.card{gap:8px}.ridge{height:24vh}#tutBody{min-height:0;font-size:13px}.seg>span:first-child{min-width:0}}
+[hidden]{display:none!important}
+.coins{margin:0;font:400 18px var(--disp);color:var(--amber)}
+.scrTitle{font-size:24px;color:var(--amber)}
+.statGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.statGrid div{background:#1d2319;border:1px solid #ffffff1a;padding:8px}.statGrid b{display:block;font:400 22px var(--disp);font-variant-numeric:tabular-nums}.statGrid span{color:var(--dim);font-size:12px}
+.storeCard{max-width:880px;background:#171c14f5;border:1px solid var(--edge);padding:12px;clip-path:var(--cut)}
+.storeBody{display:flex;gap:12px;align-items:flex-start;min-width:0}
+#pv{flex:none;width:clamp(120px,24vw,220px);height:auto;background:radial-gradient(circle at 50% 70%,#39432f,#10130f);border:1px solid var(--edge)}
+.storeMain{flex:1;min-width:0;display:grid;gap:8px}
+#storeTabs{gap:4px}#storeTabs button.on{background:var(--amber);color:#1c1503;border-color:var(--amber)}
+#storeItems{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;max-height:min(58vh,420px);overflow:auto;touch-action:pan-y}
+#storeItems .it.on{border-color:var(--amber)}
+@media(max-height:430px){#storeItems{max-height:48vh}}
 </style>
 </head>
 <body>
@@ -170,8 +183,9 @@ input{border-radius:0}
     <input id="nick" maxlength="14" placeholder="Боец">
     <button id="btnCreate" class="pri">Создать комнату</button>
     <div class="row"><input id="joinCode" maxlength="5" placeholder="Код комнаты" style="text-transform:uppercase" aria-label="Код комнаты"><button id="btnJoin">Войти</button></div>
+    <p id="menuCoins" class="coins"></p>
     <p id="menuErr" class="note err"></p>
-    <div class="row"><button id="btnTut">Обучение</button><button class="layoutOpen" hidden>Настроить кнопки</button></div>
+    <div class="row"><button id="btnTut">Обучение</button><button id="btnStats">Статистика</button><button id="btnStore">Гардероб</button><button class="layoutOpen" hidden>Настроить кнопки</button></div>
   </div>
 </div></div>
 
@@ -183,7 +197,7 @@ input{border-radius:0}
 <div id="lobby" class="screen" style="display:none"><div class="card">
   <div class="row"><div><p class="sub">Код комнаты</p><div id="roomCode" class="code">-----</div></div>
     <button id="btnCopy">Скопировать ссылку</button>
-    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
+    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyStore">Гардероб</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
   <p id="netNote" class="note"></p>
   <div id="teamsEl" class="teams"></div>
   <div class="row seg"><span>Карта:</span><button id="m0" data-m="0">Равнина</button><button id="m1" data-m="1">Пустыня</button><button id="m2" data-m="2">Город</button><button id="m3" data-m="3">Джунгли</button><button id="m4" data-m="4">Горы</button>
@@ -191,10 +205,19 @@ input{border-radius:0}
     <button id="btnStart" class="pri" style="margin-left:auto">Начать бой</button></div>
   <div class="row seg"><span>Режим:</span><span id="modeSeg" class="row"></span></div>
   <p id="modeInfo" class="note"></p>
+  <div id="classRow" class="row seg" hidden><span>Ваш класс:</span><span id="classSeg" class="row"></span></div>
+  <p id="classInfo" class="note" hidden></p>
   <div class="row seg"><span id="zsLabel">Время до сужения зоны:</span><span id="zsSeg" class="row"></span></div>
   <div class="row seg"><span>Жизни:</span><span id="lvSeg" class="row"></span></div>
   <div class="row seg"><span>Случайные события:</span><span id="evSeg" class="row"></span></div>
   <p id="lobbyMsg" class="note"></p>
+</div></div>
+
+<div id="stats" class="screen" style="display:none"><div class="card tutCard"><h2 class="scrTitle">Статистика</h2><div id="statGrid" class="statGrid"></div><p class="note">Статистика и монеты хранятся в этом браузере на этом устройстве. За каждое убийство минус каждая смерть в бою дают по $20, но за бой нельзя уйти в минус.</p><div class="row"><button id="statsClose">Назад</button></div></div></div>
+
+<div id="store" class="screen" style="display:none"><div class="card storeCard">
+  <div class="row"><h2 class="scrTitle">Гардероб</h2><span id="storeCoins" class="coins" style="margin-left:auto"></span><button id="storeClose">Назад</button></div>
+  <div class="storeBody"><canvas id="pv" width="220" height="280" aria-label="Предпросмотр бойца"></canvas><div class="storeMain"><div id="storeTabs" class="row"></div><div id="storeItems"></div></div></div>
 </div></div>
 
 <div id="load">Роем траншеи…</div>
@@ -319,6 +342,53 @@ const ITEMS=[
 const IT={};ITEMS.forEach(i=>IT[i.id]=i);
 const CATS=[['gun','Оружие'],['use','Расходники'],['armor','Броня'],['def','Защита'],['boom','Взрывное'],['strike','Ударные'],['ammo','Патроны'],['mine','Добыча'],['ore','Продать ресурсы']];
 const EXP={tboom:{r:.8,dr:0,d:0},quake:{r:2.6,dr:0,d:0},rpg:{r:3.6,dr:6,d:110},m67:{r:2.6,dr:6,d:100},mine:{r:2.6,dr:4,d:120},claymore:{r:1.6,dr:8,d:110,cone:1},charge:{r:6.2,dr:7.5,d:130},fpv1:{r:2.5,dr:5,d:90},fpv2:{r:3.5,dr:6,d:120},fpv3:{r:5,dr:8,d:160},bm:{r:11,dr:18,d:300},flash:{r:0,dr:0,d:0},smoke:{r:0,dr:0,d:0}};
+
+/* ===== Кастомизация и классы ===== */
+const HATS=[
+ {id:'h_helmet',n:'Армейская каска',p:60,b:[[.36,.14,.36,0x4a5a35,0,.2,0],[.42,.03,.42,0x4a5a35,0,.13,0]]},
+ {id:'h_cap',n:'Кепка',p:60,b:[[.32,.1,.32,0x2563eb,0,.2,0],[.26,.03,.2,0x1d4ed8,0,.16,-.24]]},
+ {id:'h_bowler',n:'Котелок',p:100,b:[[.28,.15,.28,0x1b1b1d,0,.24,0],[.44,.03,.44,0x1b1b1d,0,.16,0]]},
+ {id:'h_ushanka',n:'Ушанка',p:120,b:[[.36,.16,.36,0x5b4632,0,.22,0],[.05,.2,.26,0x5b4632,-.2,.05,0],[.05,.2,.26,0x5b4632,.2,.05,0]]},
+ {id:'h_cowboy',n:'Ковбойская шляпа',p:150,b:[[.26,.17,.26,0x8a5a2b,0,.25,0],[.6,.03,.6,0x8a5a2b,0,.16,0]]},
+ {id:'h_pirate',n:'Пиратская треуголка',p:200,b:[[.5,.14,.22,0x18181b,0,.22,0],[.1,.08,.02,0xeeeeee,0,.22,-.12]]},
+ {id:'h_top',n:'Цилиндр',p:250,b:[[.26,.34,.26,0x18181b,0,.33,0],[.27,.05,.27,0xb91c1c,0,.2,0],[.44,.03,.44,0x18181b,0,.16,0]]},
+ {id:'h_horns',n:'Рога викинга',p:300,b:[[.34,.12,.34,0x9ca3af,0,.2,0],[.06,.22,.06,0xf1e6c8,-.22,.3,0],[.06,.22,.06,0xf1e6c8,.22,.3,0]]},
+ {id:'h_crown',n:'Корона',p:500,b:[[.32,.08,.32,0xfacc15,0,.2,0],[.06,.1,.06,0xfacc15,-.13,.29,-.13],[.06,.1,.06,0xfacc15,.13,.29,-.13],[.06,.1,.06,0xfacc15,-.13,.29,.13],[.06,.1,.06,0xfacc15,.13,.29,.13]]},
+ {id:'h_halo',n:'Нимб',p:600,b:[[.36,.03,.06,0xfff3a0,0,.36,-.15],[.36,.03,.06,0xfff3a0,0,.36,.15],[.06,.03,.3,0xfff3a0,-.15,.36,0],[.06,.03,.3,0xfff3a0,.15,.36,0]]},
+];
+const SUITS=[
+ {id:'s_camo',n:'Камуфляж',p:100,body:0x4d5d3a,legs:0x3d4a2e},
+ {id:'s_desert',n:'Песчаный',p:100,body:0xb9975b,legs:0x8f7344},
+ {id:'s_miner',n:'Шахтёр',p:150,body:0xe08a1e,legs:0x2e3a55},
+ {id:'s_ninja',n:'Ниндзя',p:200,body:0x18181b,legs:0x0f0f12},
+ {id:'s_tux',n:'Смокинг',p:300,body:0x202024,legs:0x111114},
+ {id:'s_astro',n:'Космонавт',p:350,body:0xe5e7eb,legs:0xc4c8ce},
+ {id:'s_neon',n:'Неон',p:450,body:0xd946ef,legs:0x22d3ee},
+ {id:'s_gold',n:'Золотой',p:800,body:0xeab308,legs:0xb78a06},
+];
+const BACKS=[
+ {id:'b_pack',n:'Рюкзак',p:80,b:[[.36,.42,.14,0x5b4632,0,1.08,.2]]},
+ {id:'b_tank',n:'Кислородные баллоны',p:150,b:[[.13,.46,.13,0x9ca3af,-.1,1.08,.19],[.13,.46,.13,0x9ca3af,.1,1.08,.19]]},
+ {id:'b_cape',n:'Плащ',p:200,b:[[.44,.85,.04,0xb91c1c,0,.92,.16]]},
+ {id:'b_flag',n:'Знамя',p:250,b:[[.04,1.1,.04,0x777777,.12,1.4,.17],[.3,.2,.02,0xf0b429,.28,1.82,.17]]},
+ {id:'b_wings',n:'Крылья',p:500,b:[[.5,.5,.03,0xf5f5f5,-.32,1.2,.18],[.5,.5,.03,0xf5f5f5,.32,1.2,.18]]},
+];
+const CLASS_LIST=[
+ {id:'assault',n:'Штурмовик',p:0,d:'Автомат и 2 гранаты М-67. Надёжный класс на любой случай.',hp:100,spd:1,kit:{ak:1,m67:2},ammo:{ak:120}},
+ {id:'sniper',n:'Снайпер',p:150,d:'Винтовка и нож, винтовка бьёт на 25% сильнее, но здоровья всего 80.',hp:80,spd:1,kit:{rifle:1,knife:1},ammo:{rifle:30}},
+ {id:'medic',n:'Медик',p:200,d:'Пистолет, аптечки, адреналин и медтурель. Сам восстанавливает 3 здоровья в секунду.',hp:100,spd:1,kit:{pistol:1,medkit:3,adren:2,t_med:1},ammo:{pistol:48}},
+ {id:'engineer',n:'Инженер',p:250,d:'Пистолет, автомат для турели, защитная турель и песчаные стенки.',hp:100,spd:1,kit:{pistol:1,ak:1,t_def:1,sandwall:4},ammo:{pistol:48,ak:120}},
+ {id:'bomber',n:'Подрывник',p:300,d:'РПГ-7, гранаты и шахтёрские заряды. Свои взрывы ему не вредят.',hp:100,spd:1,kit:{rpg:1,m67:3,charge:2},ammo:{rpg:5}},
+ {id:'tank',n:'Танк',p:350,d:'Дробовик, жилет ур.3 и 150 здоровья, но ходит на 20% медленнее.',hp:150,spd:.8,kit:{shotgun:1},ammo:{shotgun:36},vest:'vest3'},
+ {id:'scout',n:'Разведчик',p:250,d:'Бегает на 30% быстрее, видит врагов на мини-карте. Пистолет, нож и 3 флешки.',hp:85,spd:1.3,kit:{pistol:1,knife:1,flash:3},ammo:{pistol:48}},
+ {id:'miner',n:'Шахтёр',p:200,d:'Бур, заряды и пистолет. Получает вдвое больше руды.',hp:100,spd:1,kit:{drill:1,pistol:1,charge:3},ammo:{pistol:48}},
+ {id:'pilot',n:'Оператор дронов',p:400,d:'Пистолет и FPV-дроны. Каждые 30 секунд получает новый дрон ур.1.',hp:90,spd:1,kit:{pistol:1,fpv1:2,fpv2:1},ammo:{pistol:48}},
+ {id:'ninja',n:'Ниндзя',p:450,d:'Быстрый и прыгучий. Нож бьёт вдвое сильнее, а брошенный сразу возвращается. 3 дымовые.',hp:85,spd:1.25,jump:11,kit:{knife:1,smoke:3},ammo:{}},
+ {id:'vampire',n:'Вампир',p:500,d:'Автомат. Каждая рана врага лечит на 30% от нанесённого урона.',hp:100,spd:1,kit:{ak:1},ammo:{ak:120}},
+ {id:'sapper',n:'Минёр',p:350,d:'Пистолет, клейморы и мины. Каждые 20 секунд получает новую мину.',hp:100,spd:1,kit:{pistol:1,claymore:2,mine:3},ammo:{pistol:48}},
+];
+const CLS={};CLASS_LIST.forEach(c=>CLS[c.id]=c);
+const COS_ALL={};[...HATS,...SUITS,...BACKS].forEach(c=>COS_ALL[c.id]=c);
 
 /* ===== Шум и случайность ===== */
 function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -599,7 +669,8 @@ const muzzle=new THREE.Sprite(new THREE.SpriteMaterial({map:softTex,color:0xffd2
 function setVm(id){if(vmItem===id)return;vmItem=id;vmRoot.remove(vmCur);vmCur=vmModel(id);vmRoot.add(vmCur)}
 function makeAvatar(p){
  const g=new THREE.Group(),c=p.zombie?0x4d7c3a:TEAMS[p.team].h,skin=p.zombie?0x8fae6d:0xd9b08c;
- const mat=new THREE.MeshBasicMaterial({color:c}),dk=new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(.6)});
+ const cos=p.zombie?{}:(p.cos||{}),su=COS_ALL[cos.suit],hat=COS_ALL[cos.hat],bk=COS_ALL[cos.back];
+ const mat=new THREE.MeshBasicMaterial({color:su?su.body:c}),dk=new THREE.MeshBasicMaterial({color:su?su.legs:new THREE.Color(c).multiplyScalar(.6)});
  const torso=box(.46,.62,.24,0,0,1.03,0,mat),head=box(.3,.3,.3,skin,0,1.52,0),helm=box(.33,.13,.33,0,0,1.65,0,dk);
  const legL=box(.18,.72,.2,0,-.12,.36,0,dk),legR=box(.18,.72,.2,0,.12,.36,0,dk);
  const armL=box(.14,.6,.16,0,-.32,1.05,0,mat),armR=new THREE.Group();armR.position.set(.32,1.3,0);armR.add(box(.14,.55,.16,0,0,-.25,0,mat));
@@ -608,6 +679,9 @@ function makeAvatar(p){
  const pivot=(m)=>{const q=new THREE.Group();q.position.set(m.position.x,.72,0);m.position.set(0,-.36,0);q.add(m);return q};
  const lL=pivot(legL),lR=pivot(legR);
  g.add(torso,head,helm,lL,lR,armL,armR);
+ if(su)g.add(box(.48,.13,.26,TEAMS[p.team].h,0,1.24,0));
+ if(hat){helm.visible=false;hat.b.forEach(q=>g.add(box(q[0],q[1],q[2],q[3],q[4],1.52+q[5],q[6])))}
+ if(bk)bk.b.forEach(q=>g.add(box(q[0],q[1],q[2],q[3],q[4],q[5],q[6])));
  const cv=document.createElement('canvas');cv.width=256;cv.height=40;const x=cv.getContext('2d');x.font='bold 26px system-ui';x.textAlign='center';x.fillStyle='#000a';x.fillRect(0,0,256,40);x.fillStyle=p.zombie?'#a3e07a':TEAMS[p.team].c;x.fillText(p.name,128,29);
  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false,transparent:true}));tag.scale.set(1.6,.25,1);tag.position.y=2.05;g.add(tag);
  g.userData={lL,lR,armR,gun,walk:0};const mt=P();if(mt&&p.team!==mt.team)g.traverse(o=>o.layers.enable(1));scene.add(g);return g}
@@ -707,12 +781,12 @@ function sendTo(id,m){if(id===G.myId)recv(m);else{const c=Net.conns[id]&&Net.con
 function myName(){return($('nick').value.trim()||'Боец'+Math.floor(Math.random()*90+10)).slice(0,14)}
 function firstFreeTeam(){const c=[0,0,0,0];G.order.forEach(id=>c[G.P[id].team]++);let b=0;for(let i=1;i<4;i++)if(c[i]<c[b])b=i;return b}
 function addPlayer(id,name,team,bot){G.P[id]={id,name,team,bot,hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,vc:'all',priv:G.host?newPriv():null};if(!G.order.includes(id))G.order.push(id)}
-function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,mode:G.mode,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc}})}}
+function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,mode:G.mode,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc,cos:p.cos,cls:p.cls}})}}
 function pushRoster(){bcast(rosterMsg())}
 function playerLeft(id){delete Net.conns[id];const p=G.P[id];if(!p)return;
  if(G.state==='game'){p.lives=0;if(p.alive){p.alive=false;p.hp=0;bcast({t:'die',id,by:null,w:'вышел'})}bcast({t:'gone',id});checkWin()}
  else{delete G.P[id];G.order=G.order.filter(x=>x!==id);pushRoster()}}
-function enterLobby(){G.state='lobby';$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='none';$('lobby').style.display='flex';$('roomCode').textContent=G.code;$('botCtl').style.display=G.host?'':'none';$('btnStart').style.display=G.host?'':'none';for(let i=0;i<5;i++)$('m'+i).disabled=!G.host;renderLobby()}
+function enterLobby(){G.state='lobby';$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='none';$('lobby').style.display='flex';$('roomCode').textContent=G.code;$('botCtl').style.display=G.host?'':'none';$('btnStart').style.display=G.host?'':'none';for(let i=0;i<5;i++)$('m'+i).disabled=!G.host;toHost(profMsg());renderLobby()}
 function renderLobby(){
  const el=$('teamsEl');el.textContent='';
  TEAMS.forEach((t,i)=>{const d=document.createElement('div');d.className='team';d.style.setProperty('--c',t.c);
@@ -725,7 +799,7 @@ function renderLobby(){
  seg('evSeg',EV_OPTS,EV_INT,v=>v===30?'30 сек':v===60?'1 мин':'1:30',v=>({t:'cfg',ev:v}));
  seg('lvSeg',LIFE_OPTS,MAX_LIVES,v=>String(v),v=>({t:'cfg',lv:v}));
  for(let i=0;i<5;i++)$('m'+i).classList.toggle('on',G.map===i);
- seg('modeSeg',MODE_IDS,G.mode,v=>MODES[v].n,v=>({t:'cfg',mode:v}));$('zsLabel').textContent=G.mode==='br'?'Время до сужения зоны:':G.mode==='zombie'?'Сколько продержаться:':'Длительность боя:';$('modeInfo').textContent=MODES[G.mode].d;
+ seg('modeSeg',MODE_IDS,G.mode,v=>MODES[v].n,v=>({t:'cfg',mode:v}));$('zsLabel').textContent=G.mode==='br'?'Время до сужения зоны:':G.mode==='zombie'?'Сколько продержаться:':'Длительность боя:';$('modeInfo').textContent=MODES[G.mode].d;renderClassRow();
  const teams=new Set(G.order.map(id=>G.P[id].team));
  const needT=G.mode==='zombie'?1:2;$('btnStart').disabled=teams.size<needT;
  $('lobbyMsg').textContent=teams.size<needT?'Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.':G.mode==='zombie'?'В этом режиме все игроки и боты воюют вместе, выбор команды не важен.':'';
@@ -744,7 +818,7 @@ function hostStart(){
  G.order.forEach(id=>{const p=G.P[id];Object.assign(p,{hp:100,lives:MAX_LIVES,alive:true,kills:0,priv:newPriv(),respawnAt:0,invuln:0});});
  G.order.forEach(id=>{const p=G.P[id];p.team0=p.team;if(G.mode==='zombie')p.team=0});
  bcast({t:'start',seed:G.seed,map:G.map,pl:rosterMsg().pl});
- G.order.forEach(id=>pushInv(id));
+ G.order.forEach(id=>{const p=G.P[id];if(p.bot)p.cls=CLASS_LIST[Math.floor(Math.random()*CLASS_LIST.length)].id;if(G.mode==='classes')applyKit(p);pushInv(id)});
 }
 
 /* ===== Сообщения хосту ===== */
@@ -765,9 +839,10 @@ function handleHost(id,m){
  case 'hit':{const t=G.P[m.id];if(p&&p.alive&&t)damage(t,clamp(m.d,0,160),p,m.w,m.h);break}
  case 'tr':bcast({t:'tr',a:m.a,b:m.b,w:m.w,id});break;
  case 'mine':hMine(p,m);break;
- case 'med':if(p&&p.alive&&p.priv.inv.medkit>0&&p.hp<100){p.priv.inv.medkit--;p.hp=Math.max(p.hp,Math.min(100,p.hp+60));pushInv(id)}break;
- case 'adr':if(p&&p.alive&&p.priv.inv.adren>0){p.priv.inv.adren--;p.hp=Math.max(p.hp,Math.min(100,p.hp+25));pushInv(id)}break;
+ case 'med':if(p&&p.alive&&p.priv.inv.medkit>0&&p.hp<maxHP(p)){p.priv.inv.medkit--;p.hp=Math.max(p.hp,Math.min(maxHP(p),p.hp+60));pushInv(id)}break;
+ case 'adr':if(p&&p.alive&&p.priv.inv.adren>0){p.priv.inv.adren--;p.hp=Math.max(p.hp,Math.min(maxHP(p),p.hp+25));pushInv(id)}break;
  case 'chat':if(p)bcast({t:'chat',id,s:String(m.s||'').slice(0,120)});break;
+ case 'prof':if(p&&G.state==='lobby'){p.cos=m.cos||{};p.cls=CLS[m.cls]?m.cls:'assault';pushRoster()}break;
  case 'turp':hTurPlace(p,m);break;
  case 'tl':hTurLoad(p,m);break;
  case 'thit':{const q=G.turrets[m.id];if(q&&p&&p.alive&&p.team!==q.tm)turHurt(q,clamp(m.d,0,160));break}
@@ -794,14 +869,14 @@ function hSellOre(p,o){if(!p||!p.alive||!nearShop(p))return;const v=p.priv;(o?[o
 function hMine(p,m){if(!p||!p.alive)return;const tool=IT[m.tool];if(!tool||tool.kind!=='tool'||!(p.priv.inv[m.tool]>0))return;
  const cells=[[m.x,m.y,m.z]];
  if(m.tool==='drill')for(const[dx,dy,dz]of[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,-1,0]])cells.push([m.x+dx,m.y+dy,m.z+dz]);
- const out=[];cells.forEach(c=>{const v=getV(c[0],c[1],c[2]);if(!breakable(v))return;if((NEED[v]||0)>tool.tier)return;const o=MAT_ORE[v];if(o)p.priv.ores[o]++;out.push(c)});
+ const out=[];cells.forEach(c=>{const v=getV(c[0],c[1],c[2]);if(!breakable(v))return;if((NEED[v]||0)>tool.tier)return;const o=MAT_ORE[v];if(o)p.priv.ores[o]+=classOf(p)&&p.cls==='miner'?2:1;out.push(c)});
  if(out.length){bcast({t:'vxs',c:out});pushInv(p.id)}}
 function hWall(p,m){if(!p||!p.alive||!(p.priv.inv.sandwall>0))return;const yaw=m.yaw,sx=Math.abs(Math.cos(yaw))>Math.abs(Math.sin(yaw))?1:0,sz=1-sx;const out=[];
  for(let i=-1;i<=1;i++)for(let j=0;j<2;j++){const x=m.x+i*sx,y=m.y+j,z=m.z+i*sz;if(getV(x,y,z)!==AIR||x<0||z<0||x>=W||z>=W||y>=H)continue;
   let blocked=false;for(const id of G.order){const q=G.P[id];if(q.alive&&Math.abs(q.x-x-.5)<.8&&Math.abs(q.z-z-.5)<.8&&q.y<y+1&&q.y+PH>y)blocked=true}if(!blocked)out.push([x,y,z,SANDB])}
  if(!out.length)return;p.priv.inv.sandwall--;pushInv(p.id);bcast({t:'vset',c:out})}
 function hThrow(p,m){if(!p||!p.alive)return;const v=p.priv;
- if(m.k==='rpg'){}else{if(!(v.inv[m.k]>0))return;v.inv[m.k]--;pushInv(p.id)}
+ if(m.k==='rpg'){}else{if(!(v.inv[m.k]>0))return;if(!(m.k==='knife'&&classOf(p)&&p.cls==='ninja'))v.inv[m.k]--;pushInv(p.id)}
  spawnProj(p,m.k,m.x,m.y,m.z,m.vx,m.vy,m.vz)}
 function spawnProj(p,k,x,y,z,vx,vy,vz){bcast({t:'proj',id:G.nid++,k,x,y,z,vx,vy,vz,o:p.id,tm:p.team})}
 function hPlace(p,m){if(!p||!p.alive||!(p.priv.inv[m.k]>0))return;p.priv.inv[m.k]--;pushInv(p.id);
@@ -833,9 +908,9 @@ function turretsTick(dt){
   const seeable=(t,max)=>{const dx=t.x-ex,dy=t.y+1.1-ey,dz=t.z-ez,d=Math.hypot(dx,dy,dz)||1;return d<=max&&!rayV(ex,ey,ez,dx/d,dy/d,dz/d,d-.3)?d:0};
   if(q.k==='t_med'){
    if(q.cd>0||!(l.medkit>0||l.adren>0))continue;
-   for(const pid of G.order){const t=G.P[pid];if(t.alive&&t.team===q.tm&&t.hp<100&&t.hp<bd&&Math.hypot(t.x-ex,t.z-ez)<8){bd=t.hp;best=t}}
+   for(const pid of G.order){const t=G.P[pid];if(t.alive&&t.team===q.tm&&t.hp<maxHP(t)&&t.hp<bd&&Math.hypot(t.x-ex,t.z-ez)<8){bd=t.hp;best=t}}
    if(!best)continue;const big=l.medkit>0&&(best.hp<=60||!(l.adren>0));if(big)l.medkit--;else l.adren--;
-   best.hp=Math.max(best.hp,Math.min(100,best.hp+(big?60:25)));q.cd=2;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));
+   best.hp=Math.max(best.hp,Math.min(maxHP(best),best.hp+(big?60:25)));q.cd=2;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));
    bcast({t:'tr',a:[ex,ey,ez],b:[best.x,best.y+1,best.z],w:'',id:'tur',c:0x4ade80});turSync(q);sendState();continue}
   const range=q.k==='t_nade'?28:35;
   for(const pid of G.order){const t=G.P[pid];if(!t.alive||t.team===q.tm)continue;const d=Math.hypot(t.x-ex,t.y+1.1-ey,t.z-ez);if(d<bd&&d<=range&&(q.k==='t_nade'?d>=6:seeable(t,range))){bd=d;best=t}}
@@ -854,11 +929,13 @@ function damage(t,d,by,w,head){
  if(!t.alive||G.ended)return;
  if(by&&by.id!==t.id&&by.team===t.team)return;
  if(t.invuln&&G.time<t.invuln)return;
- if(w!=='zone'){if(evOn('truce'))return;if(evOn('dmg2'))d*=2}
+ if(w!=='zone'){if(evOn('truce'))return;if(evOn('dmg2'))d*=2;
+  const bc=classOf(by);if(bc){if(bc.id==='sniper'&&w==='rifle')d*=1.25;if(bc.id==='ninja'&&w==='knife')d*=2;if(bc.id==='bomber'&&by===t&&EXP[w])return}}
  if(t.priv&&t.priv.armor>0&&!head&&w!=='zone'){const v=t.priv,ab=Math.min(d*IT[v.armorId].absorb,v.armor);d-=ab;v.armor-=ab;if(v.armor<=0){v.armor=0;v.armorId=null}pushInv(t.id)}
  t.hp-=d;
+ if(by&&by!==t&&by.alive&&G.mode==='classes'&&by.cls==='vampire')by.hp=Math.min(maxHP(by),by.hp+d*.3);
  bcast({t:'dmg',id:t.id,by:by?by.id:null,d:Math.round(d),h:head?1:0,x:by?by.x:null,z:by?by.z:null});
- if(t.hp<=0){t.hp=0;t.alive=false;if(!infLives())t.lives--;if(by&&by.id!==t.id){by.kills++;if(by.priv){by.priv.money+=50;Object.keys(t.priv.ores).forEach(k=>{by.priv.ores[k]+=t.priv.ores[k]});pushInv(by.id)}}
+ if(t.hp<=0){t.hp=0;t.alive=false;if(!infLives())t.lives--;if(by&&by.id!==t.id){by.kills++;if(G.mode==='classes'&&G.score[by.team]!=null){G.score[by.team]++;bcast({t:'ks',sc:G.score,o:-1})}if(by.priv){by.priv.money+=50;Object.keys(t.priv.ores).forEach(k=>{by.priv.ores[k]+=t.priv.ores[k]});pushInv(by.id)}}
   t.priv.ores={coal:0,iron:0,gold:0,crystal:0};t.priv.armor=0;t.priv.armorId=null;pushInv(t.id);
   bcast({t:'die',id:t.id,by:by?by.id:null,w:w||''});
   if(t.lives>0)t.respawnAt=G.time+4;else t.respawnAt=0;checkWin();sendState()}
@@ -886,13 +963,13 @@ function recv(m){
  const R=H_R[m.t];if(R)R(m);
 }
 const H_R={
- roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;G.mode=m.mode;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
+ roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;G.mode=m.mode;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc,cos:q.cos,cls:q.cls});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
   if(G.state==='lobby')renderLobby();Voice.onRoster()},
  start(m){startMatch(m)},
  s(m){m.a.forEach(q=>{if(q[0]===G.myId)return;const p=G.P[q[0]];if(!p)return;p.x=q[1];p.y=q[2];p.z=q[3];p.yaw=q[4];p.pitch=q[5];p.item=q[6]});(m.tu||[]).forEach(q=>{const u=G.turrets[q[0]];if(u){u.y=q[1];u.yaw=q[2]}});(m.d||[]).forEach(q=>{const d=G.drones[q[0]];if(d&&d.o!==G.myId){d.x=q[1];d.y=q[2];d.z=q[3];d.yaw=q[4]}})},
  p(){},
  st(m){G.time=G.host?G.time:lerp(G.time,m.time,Math.abs(G.time-m.time)>1?1:.2);m.pl.forEach(q=>{const p=G.P[q[0]];if(!p)return;p.hp=q[1];p.lives=q[2];p.alive=!!q[3];p.kills=q[4]})},
- inv(m){const had=Inv.inv;Inv=m.v;for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag&&mags[id]==null)mags[id]=IT[id].mag;if(!(Inv.inv[held]>0))held='pick0';renderBar();renderShop()},
+ inv(m){const had=Inv.inv;Inv=m.v;for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag&&mags[id]==null)mags[id]=IT[id].mag;if(!(Inv.inv[held]>0))held='pick0';kitSelect();renderBar();renderShop()},
  vxs(m){m.c.forEach(c=>{const v=getV(c[0],c[1],c[2]);if(v){debris(c[0]+.5,c[1]+.5,c[2]+.5,2,matColor(v));setV(c[0],c[1],c[2],AIR)}});minePending=0;},
  vset(m){m.c.forEach(c=>setV(c[0],c[1],c[2],c[3]))},
  tr(m){if(m.id===G.myId)return;tracer(m.a,m.b,m.c);if(sfx[m.w])sfx[m.w](vol(m.a[0],m.a[1],m.a[2]))},
@@ -921,8 +998,8 @@ const H_R={
  dmg(m){const my=m.id===G.myId;const t=G.P[m.id];if(t&&!G.host)t.hp=Math.max(0,t.hp-m.d);
   if(my){vigT=.5;sfx.hurt()}if(m.by===G.myId&&!my){hitT=.18;$('hit').style.background=m.h?'':'';sfx.hit()}},
  die(m){const t=G.P[m.id],b=G.P[m.by];if(!t)return;t.alive=false;t.hp=0;if(m.w!=='вышел')t.lives=t.lives;addFeed((b&&b!==t?nameC(b)+' ▸ ':'')+nameC(t)+(m.w&&m.w!=='вышел'?' ('+wName(m.w)+')':m.w==='вышел'?' вышел':''));
-  if(m.id===G.myId){G.deadAt=performance.now();adrenT=0;closeShop();closeAim()}if(t.av)t.av.visible=false},
- spawn(m){const t=G.P[m.id];if(!t)return;t.alive=true;t.hp=100;t.x=m.x;t.y=m.y;t.z=m.z;t.rx=undefined;
+  if(m.id===G.myId){G.deadAt=performance.now();adrenT=0;G.myDeaths=(G.myDeaths||0)+1;closeShop();closeAim()}if(t.av)t.av.visible=false},
+ spawn(m){const t=G.P[m.id];if(!t)return;t.alive=true;t.hp=maxHP(t);t.x=m.x;t.y=m.y;t.z=m.z;t.rx=undefined;
   if(m.id===G.myId){me.x=m.x;me.y=m.y;me.z=m.z;me.vx=me.vy=me.vz=0;me.camY=m.y;faceCenter();requestLock()}if(t.av)t.av.visible=m.id!==G.myId},
  gone(m){const t=G.P[m.id];if(t){t.alive=false;t.lives=0;removeAvatar(t)}},
  end(m){showEnd(m)},
@@ -950,7 +1027,7 @@ function startMatch(m){
  setTimeout(()=>{
   m.pl.forEach(q=>{const p=G.P[q.id];if(p)p.team=q.team});G.seed=m.seed;G.map=m.map;G.time=0;G.ended=false;G.state='game';
   Object.values(G.projs).forEach(q=>scene.remove(q.mesh));Object.values(G.placed).forEach(q=>scene.remove(q.mesh));Object.values(G.pickups).forEach(q=>scene.remove(q.mesh));Object.values(G.drones).forEach(q=>scene.remove(q.mesh));Object.values(G.projs).forEach(q=>{if(q.beam)scene.remove(q.beam)});G.projs={};G.placed={};G.pickups={};Object.values(G.turrets).forEach(q=>scene.remove(q.mesh));G.turrets={};G.drones={};Drone=null;adrenT=0;G.evT={};G.evN={};G.evQ=[];G.evNext=EV_INT;G.evLast=-1;envMode=0;worldMat.color.setScalar(1);scene.background=skyTex;$('chatLog').textContent='';
-  for(const k in mags)delete mags[k];held='pick0';
+  for(const k in mags)delete mags[k];held='pick0';for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag)mags[id]=IT[id].mag;
   clearChunks();genWorld(m.seed,m.map);paintAtlas(m.map);paintSky(m.map);scene.background=skyTex;buildAll();bakeMap();
   const cnt=[0,0,0,0];
   G.order.forEach(id=>{const p=G.P[id];removeAvatar(p);Object.assign(p,{hp:100,lives:MAX_LIVES,alive:true,kills:0,invuln:0,respawnAt:0});const s=spawnPos(p.team,cnt[p.team]++);Object.assign(p,s);p.rx=undefined;p.spawnI=cnt[p.team]-1;
@@ -973,7 +1050,7 @@ function showEnd(m){
  $('endTitle').textContent=m.title?((t&&mine?'Победа! ':'')+m.title):t?(mine?'Победа! ':'')+t.n+' выжили':'Ничья: выживших нет';$('endTitle').style.color=t?t.c:'';
  const tb=document.createElement('table');tb.innerHTML='<tr><th>Игрок</th><th>Команда</th><th>Убийства</th><th>Жизни</th></tr>'+G.order.filter(id=>!G.P[id].zombie).map(id=>{const p=G.P[id];return`<tr><td>${esc(p.name)}</td><td style="color:${TEAMS[p.team].c}">${TEAMS[p.team].n}</td><td>${p.kills}</td><td>${p.lives}</td></tr>`}).join('');
  $('endTable').textContent='';$('endTable').appendChild(tb);
- $('btnBack').style.display=G.host?'':'none';$('endNote').textContent=G.host?'':'Ждём, пока хост вернёт всех в лобби.';$('end').style.display='flex';
+ $('btnBack').style.display=G.host?'':'none';const award=awardMatch(m);$('endNote').textContent=(award?award+' ':'')+(G.host?'':'Ждём, пока хост вернёт всех в лобби.');$('end').style.display='flex';
 }
 $('btnBack').onclick=()=>toHost({t:'back'});
 
@@ -986,7 +1063,7 @@ function hostTick(dt){
  zoneTickT-=dt;if(zoneTickT<=0){zoneTickT=.5;const r=zoneR(G.time),k=clamp((G.time-ZONE_START)/ZONE_DUR,0,1);
   G.order.forEach(id=>{const p=G.P[id];if(p.alive&&Math.hypot(p.x-CX,p.z-CZ)>r)damage(p,(4+14*k)*.5,null,'zone')})}
  G.order.forEach(id=>{const p=G.P[id];
-  if(!p.alive&&p.lives>0&&p.respawnAt&&G.time>=p.respawnAt){p.respawnAt=0;p.alive=true;p.hp=100;p.invuln=G.time+2;const s=spawnPos(p.team,p.spawnI||0);Object.assign(p,s);if(p.bot){p.vx=p.vy=p.vz=0}bcast({t:'spawn',id,x:s.x,y:s.y,z:s.z})}
+  if(!p.alive&&p.lives>0&&p.respawnAt&&G.time>=p.respawnAt){p.respawnAt=0;p.alive=true;p.hp=maxHP(p);p.invuln=G.time+2;if(G.mode==='classes'){applyKit(p);pushInv(id)}const s=spawnPos(p.team,p.spawnI||0);Object.assign(p,s);if(p.bot){p.vx=p.vy=p.vz=0}bcast({t:'spawn',id,x:s.x,y:s.y,z:s.z})}
   if(p.bot&&p.alive)botTick(p,dt)});
  eventsTick();turretsTick(dt);modeTick(dt);
  // Дроны: пилот погиб или батарея села
@@ -1076,15 +1153,20 @@ const MODES={
  br:{n:'Последняя команда',d:'Классика: у всех ограниченные жизни, зона сжимается, побеждает последняя живая команда.',tip:()=>`Копайте руду! Зона сожмётся через ${Math.floor(ZONE_START/60)}:00`},
  ctf:{n:'Захват флага',d:'Унесите вражеский флаг на свою базу, пока ваш флаг на месте. Победа за 3 захвата или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Принесите вражеский флаг на свою базу'},
  zombie:{n:'Зомби',d:'Все вместе против волн зомби. Продержитесь выбранное время. Волны каждые 20 секунд и всё сильнее.',tip:()=>'Продержитесь до конца таймера'},
+ classes:{n:'Война классов',d:'Команды воюют классами из гардероба. У каждого свой набор и способность, снаряжение пополняется при возрождении. Первая команда с 25 убийствами побеждает, иначе побеждает счёт в конце времени.',tip:()=>'Первая команда с 25 убийствами побеждает'},
  koth:{n:'Царь горы',d:'Удерживайте вершину горы: каждая секунда без врагов на ней даёт очко. Победа за 60 очков или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Займите вершину горы и удержите её'},
 };
-const MODE_IDS=['br','ctf','zombie','koth'],CTF_WIN=3,KOTH_WIN=60,Z_MAX=24;
-function infLives(){return G.mode==='ctf'||G.mode==='koth'}
+const MODE_IDS=['br','ctf','zombie','koth','classes'],CLASS_WIN=25,CTF_WIN=3,KOTH_WIN=60,Z_MAX=24;
+function infLives(){return G.mode==='ctf'||G.mode==='koth'||G.mode==='classes'}
+function classOf(p){return G.mode==='classes'&&p?(CLS[p.cls]||CLS.assault):null}
+function maxHP(p){const c=classOf(p);return c?c.hp:100}
+function applyKit(p){const c=classOf(p);if(!c||!p.priv)return;const v=p.priv;for(const i in c.kit)v.inv[i]=Math.max(v.inv[i]||0,c.kit[i]);for(const a in c.ammo)v.ammo[a]=Math.max(v.ammo[a]||0,c.ammo[a]);if(c.vest&&!v.armorId){v.armorId=c.vest;v.armor=IT[c.vest].ap}}
+function kitSelect(){if(G.mode!=='classes'||G.kitSel||G.state!=='game')return;const f=ITEMS.find(i=>Inv.inv[i.id]>0&&['gun','rpg','knife'].includes(i.kind))||ITEMS.find(i=>Inv.inv[i.id]>0&&i.id==='drill');if(f){G.kitSel=true;held=f.id}}
 function endMatch(team,title){if(G.ended)return;bcast({t:'end',team,title,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}
 function endByScore(){let best=-1,top=-1,tie=false;for(const t in G.score){const v=G.score[t];if(v>top){top=v;best=+t;tie=false}else if(v===top)tie=true}
  if(best<0||tie)endMatch(-1,'Ничья: счёт равный');else endMatch(best,TEAMS[best].n+': счёт '+top)}
 function modeInit(){
- (G.modeMeshes||[]).forEach(o=>scene.remove(o));G.modeMeshes=[];G.flags={};G.score={};G.wave=0;G.nextWave=4;G.hillT=0;G.hillO=-1;G.hill=null;
+ (G.modeMeshes||[]).forEach(o=>scene.remove(o));G.modeMeshes=[];G.flags={};G.score={};G.wave=0;G.nextWave=4;G.hillT=0;G.hillO=-1;G.hill=null;G.clsT=0;G.clsN=0;G.kitSel=false;G.awarded=false;G.myDeaths=0;G.order.forEach(id=>{G.P[id].hp=maxHP(G.P[id])});kitSelect();
  const teams=[...new Set(G.order.map(id=>G.P[id].team))];teams.forEach(t=>G.score[t]=0);
  if(G.mode==='ctf')teams.forEach(t=>{const b=BASES[t],dx=Math.sign(CX-b[0]),dz=Math.sign(CZ-b[1]),x=b[0]-dx*6+.5,z=b[1]-dz*6+.5,y=surfaceY(x,z);
   const g=new THREE.Group();g.add(box(.1,2.6,.1,0xdddddd,0,1.3,0),box(.9,.55,.06,TEAMS[t].h,.45,2.3,0));scene.add(g);G.modeMeshes.push(g);
@@ -1095,6 +1177,11 @@ function modeInit(){
 const flagState=msg=>({t:'fl',msg,sc:G.score,f:Object.values(G.flags).map(f=>[f.team,+f.x.toFixed(2),+f.y.toFixed(2),+f.z.toFixed(2),f.c,f.home?1:0])});
 function modeTick(dt){
  if(G.mode==='br')return;
+ if(G.mode==='classes'){G.clsT=(G.clsT||0)-dt;if(G.clsT<=0){G.clsT=1;G.clsN=(G.clsN||0)+1;G.order.forEach(id=>{const p=G.P[id];if(!p.alive||p.bot)return;
+    if(p.cls==='medic'&&p.hp<maxHP(p))p.hp=Math.min(maxHP(p),p.hp+3);
+    if(p.cls==='pilot'&&G.clsN%30===0){p.priv.inv.fpv1=(p.priv.inv.fpv1||0)+1;pushInv(id)}
+    if(p.cls==='sapper'&&G.clsN%20===0){p.priv.inv.mine=(p.priv.inv.mine||0)+1;pushInv(id)}})}
+  for(const t in G.score)if(G.score[t]>=CLASS_WIN){endMatch(+t,TEAMS[t].n+': '+CLASS_WIN+' убийств');return}}
  if(G.mode==='ctf'){let chg=null;const fl=Object.values(G.flags);
   fl.forEach(f=>{if(f.c){const c=G.P[f.c];if(!c||!c.alive){if(c){f.x=c.x;f.y=surfaceY(c.x,c.z);f.z=c.z}f.c=null;f.home=false;f.dropT=G.time;chg='Флаг брошен: '+TEAMS[f.team].n}}
    else if(!f.home&&G.time-f.dropT>20){f.x=f.hx;f.y=f.hy;f.z=f.hz;f.home=true;chg='Флаг вернулся на базу: '+TEAMS[f.team].n}});
@@ -1134,6 +1221,7 @@ function zTick(p,dt){const b=p.b;b.cd-=dt;let t=null,bd=1e9;G.order.forEach(id=>
  if(bd<1.9&&Math.abs(t.y-p.y)<2&&b.cd<=0){b.cd=.8;damage(t,10+G.wave*1.5,p,'зомби')}}
 function modeTxt(){const m=G.mode;if(m==='ctf')return 'захват флага: до '+CTF_WIN;
  if(m==='koth')return 'гора: '+(G.hillO>=0?TEAMS[G.hillO].n:G.hillO===-2?'спорная':'свободна')+' · до '+KOTH_WIN;
+ if(m==='classes')return 'до '+CLASS_WIN+' убийств';
  if(m==='zombie')return 'волна '+(G.wave||0)+' · зомби '+G.order.filter(id=>G.P[id].zombie&&G.P[id].alive).length;return ''}
 function updateMode(dt){
  for(const t in G.flags){const f=G.flags[t];let x=f.x,y=f.y,z=f.z;if(f.c){const c=G.P[f.c];if(c){const own=f.c===G.myId;x=own?me.x:(c.rx!=null?c.rx:c.x);y=(own?me.y:(c.ry!=null?c.ry:c.y))+.9;z=own?me.z:(c.rz!=null?c.rz:c.z)}}f.mesh.position.set(x,y,z);f.mesh.rotation.y+=dt*.6}
@@ -1334,7 +1422,7 @@ function updateHeld(dt){
  }else if(k==='adren'){
   if(press&&cd<=0){cd=.6;adrenT=8;toHost({t:'adr'});tone(1000,.2,.1,'sine');toast('Адреналин: 8 секунд скорости',1.2)}
  }else if(k==='med'){
-  if(press&&cd<=0){if(P().hp>=100){toast('Здоровье полное',1)}else{cd=.6;toHost({t:'med'});tone(800,.15,.1,'sine')}}
+  if(press&&cd<=0){if(P().hp>=maxHP(P())){toast('Здоровье полное',1)}else{cd=.6;toHost({t:'med'});tone(800,.15,.1,'sine')}}
  }else if(k==='wall'&&press&&cd<=0){
   const o=eye(),d=lookDir(0),r=rayV(o[0],o[1],o[2],d[0],d[1],d[2],7);if(r){cd=.4;toHost({t:'wall',x:r.x+r.nx,y:r.y+r.ny,z:r.z+r.nz,yaw:me.yaw});swing=1}
  }else if(k==='place'&&press&&cd<=0){
@@ -1354,12 +1442,12 @@ function updateMe(dt){
  if(!blocked){fw=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);st=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);if(joy.id!=null){fw=-joy.dy;st=joy.dx}}
  const len=Math.hypot(fw,st);if(len>1){fw/=len;st/=len}
  const sprint=(keys.ShiftLeft||keys.ShiftRight||inp.sprint)&&fw>0;
- adrenT=Math.max(0,adrenT-dt);const sp=(sprint?10.5:7.5)*(scoped?.5:1)*(adrenT>0?1.4:1)*(evOn('speed')?1.5:1);
+ adrenT=Math.max(0,adrenT-dt);const sp=(sprint?10.5:7.5)*(scoped?.5:1)*(adrenT>0?1.4:1)*(evOn('speed')?1.5:1)*(classOf(pl)?classOf(pl).spd:1);
  const sn=Math.sin(me.yaw),cs=Math.cos(me.yaw);
  const wx=(-sn*fw+cs*st)*sp,wz=(-cs*fw-sn*st)*sp;
  const acc=me.ground?14:4;const t=Math.min(1,acc*dt);
  me.vx=lerp(me.vx,wx,t);me.vz=lerp(me.vz,wz,t);
- if(!blocked&&(keys.Space||inp.jump)&&me.ground){me.vy=8.5;me.ground=false}
+ if(!blocked&&(keys.Space||inp.jump)&&me.ground){me.vy=(classOf(pl)&&classOf(pl).jump)||8.5;me.ground=false}
  if(CH.fly&&pl.alive){me.vy=(blocked?0:Math.sin(me.pitch)*fw*sp+((keys.Space||inp.jump)?9:0)-(keys.KeyC?9:0))+gravNow()*dt;if(me.y>H+30)me.vy=Math.min(me.vy,gravNow()*dt)}
  if(pl.alive){moveEnt(me,dt);pl.x=me.x;pl.y=me.y;pl.z=me.z;pl.yaw=Drone?Drone.by:me.yaw;pl.pitch=Drone?Drone.bp:me.pitch;pl.item=ITEM_IDX[held]||0}
  me.camY+=(me.y-me.camY)*Math.min(1,dt*(Math.abs(me.y-me.camY)>1.5?30:18));
@@ -1456,7 +1544,7 @@ function drawMap(){if(!mapBase)return;const g=mapG;g.drawImage(mapBase,0,0);cons
  for(const t in G.flags){const f=G.flags[t];const c=f.c&&G.P[f.c];g.fillStyle=TEAMS[t].c;g.strokeStyle='#fff';g.lineWidth=1;g.beginPath();g.rect((c?c.x:f.x)-3,(c?c.z:f.z)-3,6,6);g.fill();g.stroke()}
  if(G.hill){g.strokeStyle=G.hillO>=0?TEAMS[G.hillO].c:'#fff';g.lineWidth=2;g.beginPath();g.arc(G.hill.x,G.hill.z,G.hill.r,0,7);g.stroke()}
  for(const id in G.projs){const q=G.projs[id];if(q.k==='bm'){g.strokeStyle='#ff2a2a';g.beginPath();g.arc(q.x,q.z,EXP.bm.dr,0,7);g.stroke()}}
- G.order.forEach(id=>{const p=G.P[id];if(!p.alive||id===G.myId||(p.team!==pl.team&&!CH.wh&&!evOn('reveal')))return;g.fillStyle=TEAMS[p.team].c;g.beginPath();g.arc(p.x,p.z,3,0,7);g.fill()});
+ G.order.forEach(id=>{const p=G.P[id];if(!p.alive||id===G.myId||(p.team!==pl.team&&!CH.wh&&!evOn('reveal')&&!(classOf(pl)&&pl.cls==='scout')))return;g.fillStyle=TEAMS[p.team].c;g.beginPath();g.arc(p.x,p.z,3,0,7);g.fill()});
  g.save();g.translate(me.x,me.z);g.rotate(-me.yaw);g.fillStyle='#fff';g.beginPath();g.moveTo(0,-6);g.lineTo(4,4);g.lineTo(-4,4);g.fill();g.restore()}
 let uiT=0;
 function updateUI(dt){
@@ -1469,7 +1557,7 @@ function updateUI(dt){
  const out=Math.hypot(me.x-CX,me.z-CZ)>zoneR(t)&&pl.alive;$('zoneVig').style.opacity=out?1:0;if(out&&uiT>-1)zt.textContent='Вы вне зоны! Бегите к центру';
  zoneMesh.visible=G.mode==='br'&&t>=ZONE_START-15;const zr=zoneR(t);zoneMesh.scale.set(zr,1,zr);
  const tp=$('tpills');tp.textContent='';TEAMS.forEach((tt,i)=>{const pp=G.order.map(id=>G.P[id]).filter(p=>p.team===i&&!p.zombie);if(!pp.length)return;const s=document.createElement('span');s.style.background=tt.c;const l=pp.reduce((a,p)=>a+p.lives,0);s.textContent=infLives()||G.mode==='ctf'?(G.score[i]||0):l;s.title=tt.n;if(l===0)s.style.opacity=.3;tp.appendChild(s)});
- $('lives').textContent=infLives()?'♥ ∞':livesTxt(pl.lives);$('hpTxt').textContent=Math.ceil(pl.hp);$('hpBar').firstChild.style.width=Math.min(100,pl.hp)+'%';$('hpBar').firstChild.style.background=pl.hp>50?'var(--green)':pl.hp>25?'var(--amber)':'var(--red)';
+ $('lives').textContent=infLives()?'♥ ∞':livesTxt(pl.lives);$('hpTxt').textContent=Math.ceil(pl.hp);$('hpBar').firstChild.style.width=Math.min(100,pl.hp/maxHP(pl)*100)+'%';$('hpBar').firstChild.style.background=pl.hp>50?'var(--green)':pl.hp>25?'var(--amber)':'var(--red)';
  const av=IT[Inv.armorId];$('arBar').style.display=av?'block':'none';if(av)$('arBar').firstChild.style.width=(Inv.armor/av.ap*100)+'%';$('adrTxt').textContent=adrenT>0?'Адреналин '+Math.ceil(adrenT)+' с':'';
  const it=IT[held];$('itemName').textContent=it?it.name:'';
  if(it&&it.mag){$('ammoNow').textContent=reloadT>0?'…':(mags[held]||0);$('ammoRes').textContent='/ '+(Inv.ammo[it.ammo]||0)}else if(it&&it.kind!=='tool'&&it.kind!=='knife'){$('ammoNow').textContent='×'+(Inv.inv[held]||0);$('ammoRes').textContent=''}else{$('ammoNow').textContent='';$('ammoRes').textContent=''}
@@ -1537,6 +1625,43 @@ function aimAt(){const o=eye(),my=P();let best=null,bs=.5;
   if(c>bs&&l<130&&!rayV(o[0],o[1],o[2],dx/l,dy/l,dz/l,l)){bs=c;best=[dx,dy,dz,l]}}
  if(best){me.yaw=Math.atan2(-best[0],-best[2]);me.pitch=Math.asin(best[1]/best[3])}}
 
+/* ===== Профиль: статистика, монеты, гардероб ===== */
+const PROF_KEY='shtolni-profile-v1',COIN_PER_KILL=20;
+let PF={coins:0,earned:0,matches:0,wins:0,kills:0,deaths:0,best:0,modeWins:{},owned:{},hat:null,suit:null,back:null,cls:'assault'};
+try{Object.assign(PF,JSON.parse(localStorage.getItem(PROF_KEY))||{})}catch(e){}
+function savePF(){try{localStorage.setItem(PROF_KEY,JSON.stringify(PF))}catch(e){}}
+function profMsg(){return{t:'prof',cos:{hat:PF.hat,suit:PF.suit,back:PF.back},cls:PF.cls}}
+function awardMatch(m){const pl=P();if(!pl||G.awarded)return null;G.awarded=true;const k=pl.kills||0,d=G.myDeaths||0,gain=Math.max(0,k-d)*COIN_PER_KILL;
+ const won=m.team>=0&&pl.team===m.team;PF.matches++;PF.kills+=k;PF.deaths+=d;PF.best=Math.max(PF.best,k);PF.coins+=gain;PF.earned+=gain;if(won){PF.wins++;PF.modeWins[G.mode]=(PF.modeWins[G.mode]||0)+1}savePF();renderCoins();
+ return`Убийства ${k} − смерти ${d} = ${Math.max(0,k-d)} × $${COIN_PER_KILL}: +$${gain} монет. Всего: $${PF.coins}.`}
+function renderCoins(){$('menuCoins').textContent='Монеты: $'+PF.coins;$('storeCoins').textContent='Монеты: $'+PF.coins}
+function renderStats(){const kd=PF.deaths?(PF.kills/PF.deaths).toFixed(2):PF.kills.toFixed(2),wr=PF.matches?Math.round(PF.wins/PF.matches*100):0;
+ const rows=[['Монеты','$'+PF.coins],['Заработано всего','$'+PF.earned],['Боёв',PF.matches],['Побед',PF.wins],['Процент побед',wr+'%'],['Убийств',PF.kills],['Смертей',PF.deaths],['У/С',kd],['Лучший бой, убийств',PF.best]];
+ MODE_IDS.forEach(m=>rows.push(['Побед: '+MODES[m].n,PF.modeWins[m]||0]));
+ const g=$('statGrid');g.textContent='';rows.forEach(([a,b])=>{const d=document.createElement('div'),v=document.createElement('b'),l=document.createElement('span');v.textContent=b;l.textContent=a;d.append(v,l);g.appendChild(d)})}
+$('btnStats').onclick=()=>{renderStats();$('stats').style.display='flex'};$('statsClose').onclick=()=>{$('stats').style.display='none'};
+let storeOpen=false,storeTab='hat',pvR=null,pvS=null,pvC=null,pvA=null;
+const STORE_TABS=[['hat','Шляпы',HATS],['suit','Костюмы',SUITS],['back','Спина',BACKS],['cls','Классы',CLASS_LIST]];
+function pvRefresh(){if(!pvR){try{pvR=new THREE.WebGLRenderer({canvas:$('pv'),alpha:true,antialias:true});pvR.setSize(220,280,false);pvS=new THREE.Scene();pvC=new THREE.PerspectiveCamera(32,220/280,.1,20);pvC.position.set(0,1.15,4.3);pvC.lookAt(0,.98,0)}catch(e){pvR=null;return}}
+ if(pvA)pvS.remove(pvA);pvA=makeAvatar({name:'',team:0,cos:{hat:PF.hat,suit:PF.suit,back:PF.back}});pvS.add(pvA);pvA.traverse(o=>{if(o.isSprite)o.visible=false})}
+function renderPreview(){if(pvR&&pvA){pvA.rotation.y=performance.now()/1400;pvR.render(pvS,pvC)}}
+function storeBuy(it){if(PF.coins<it.p)return;PF.coins-=it.p;PF.owned[it.id]=1;storeEquip(it)}
+function storeEquip(it){const t=storeTab;if(t==='cls')PF.cls=it.id;else PF[t]=PF[t]===it.id?null:it.id;savePF();if(G.state==='lobby'){toHost(profMsg());renderLobby()}renderStore()}
+function renderStore(){renderCoins();const tb=$('storeTabs');tb.textContent='';STORE_TABS.forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;if(k===storeTab)b.className='on';b.onclick=()=>{storeTab=k;renderStore()};tb.appendChild(b)});
+ const list=STORE_TABS.find(x=>x[0]===storeTab)[2],g=$('storeItems');g.textContent='';
+ list.forEach(it=>{const own=it.p===0||PF.owned[it.id],on=storeTab==='cls'?PF.cls===it.id:PF[storeTab]===it.id,d=document.createElement('div');d.className='it'+(on?' on':'');
+  const n=document.createElement('b');n.textContent=it.n;d.appendChild(n);if(it.d){const q=document.createElement('p');q.textContent=it.d;d.appendChild(q)}
+  const r=document.createElement('div'),b=document.createElement('button');r.className='row';
+  if(own){b.textContent=on?(storeTab==='cls'?'Выбран':'Снять'):(storeTab==='cls'?'Выбрать':'Надеть');b.disabled=on&&storeTab==='cls';b.onclick=()=>storeEquip(it)}
+  else{b.className='pri';b.textContent='Купить $'+it.p;b.disabled=PF.coins<it.p;b.onclick=()=>storeBuy(it)}
+  r.appendChild(b);d.appendChild(r);g.appendChild(d)});pvRefresh()}
+const openStore=()=>{storeOpen=true;$('store').style.display='flex';renderStore()};
+$('btnStore').onclick=openStore;$('lobbyStore').onclick=openStore;$('storeClose').onclick=()=>{storeOpen=false;$('store').style.display='none'};
+function renderClassRow(){const on=G.mode==='classes';$('classRow').hidden=!on;$('classInfo').hidden=!on;if(!on)return;const e=$('classSeg');e.textContent='';
+ CLASS_LIST.filter(c=>c.p===0||PF.owned[c.id]).forEach(c=>{const b=document.createElement('button');b.textContent=c.n;if(PF.cls===c.id)b.className='on';b.onclick=()=>{PF.cls=c.id;savePF();toHost(profMsg());renderClassRow()};e.appendChild(b)});
+ $('classInfo').textContent=(CLS[PF.cls]||CLS.assault).d+' Новые классы покупаются в гардеробе.'}
+renderCoins();
+
 /* ===== Обучение ===== */
 const K=(pc,tc)=>isTouch?tc:pc;
 const TUT=[
@@ -1548,6 +1673,7 @@ const TUT=[
  ['Турели',`<p>Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите ${K('E','ТУР.')}, чтобы загрузить.</p><ul><li><b>Защитная</b>: положите оружие и патроны, стреляет по врагам</li><li><b>Медицинская</b>: аптечки или адреналин, лечит союзников рядом</li><li><b>Метательная</b>: гранаты, флешки или дым, метает во врагов</li></ul><p>Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.</p>`],
  ['Зона и события',`<p>После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.</p><p>Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.</p>`],
  ['Режимы и карты',`<ul><li><b>Последняя команда</b>: ограниченные жизни и сжимающаяся зона</li><li><b>Захват флага</b>: подойдите к чужому флагу, чтобы взять его, и донесите до своего. Свой брошенный флаг возвращается касанием</li><li><b>Зомби</b>: все вместе против волн, продержитесь до конца таймера</li><li><b>Царь горы</b>: стойте на вершине без врагов и набирайте очки</li></ul><p>Карты: равнина, пустыня, город с домами, джунгли с деревьями и высокие горы. Режим и карту выбирает хост в лобби.</p>`],
+ ['Монеты, гардероб и классы',`<p>После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.</p><p>В <b>гардеробе</b> на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 12 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.</p>`],
  ['Друзья и голос',`<p>Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.</p><p>Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.</p><button id="tutPlay" class="pri">Потренироваться с ботом</button>`],
 ];
 let tutI=0;
@@ -1591,7 +1717,7 @@ if(isTouch){document.querySelectorAll('.layoutOpen').forEach(b=>{b.hidden=false;
 let last=performance.now();
 function frame(now){
  requestAnimationFrame(frame);
- const dt=Math.min(.05,(now-last)/1000);last=now;
+ const dt=Math.min(.05,(now-last)/1000);last=now;if(storeOpen)renderPreview();
  if(G.state==='game'&&chunks.length){
   if(!G.host&&!G.ended)G.time+=dt;
   if(G.host)hostTick(dt);
@@ -1611,7 +1737,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={MODES,PAL,TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={get PF(){return PF},CLASS_LIST,MODES,PAL,TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
