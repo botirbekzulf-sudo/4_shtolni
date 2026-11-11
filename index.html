@@ -157,8 +157,22 @@ input{border-radius:0}
 #lock div{border-radius:0;clip-path:var(--cut)}
 @media(max-height:430px){.screen{align-items:flex-start;padding-block:8px}.card{gap:8px}.ridge{height:24vh}#tutBody{min-height:0;font-size:13px}.seg>span:first-child{min-width:0}}
 [hidden]{display:none!important}
+.setCard{max-width:560px;gap:10px}.srow{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.srow>span:first-child{color:var(--dim)}.srow input[type=range]{width:min(260px,100%);padding:0}.srow select{font:inherit;color:var(--text);background:#10130f;border:1px solid var(--line);padding:6px}
+.srow .row input{width:min(260px,60vw)}#setInv{width:22px;height:22px}
+.prow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #ffffff14;padding:6px 0}.prow b{flex:1;min-width:120px}.prow button{padding:6px 10px}
+.repForm{display:grid;gap:6px}.repForm textarea{font:inherit;color:var(--text);background:#10130f;border:1px solid var(--line);padding:8px;user-select:text;-webkit-user-select:text}
+#tPl{right:max(330px,calc(env(safe-area-inset-right) + 330px));top:max(8px,env(safe-area-inset-top));border-radius:6px}
+body.touch #tPl{right:auto;left:max(228px,calc(env(safe-area-inset-left) + 228px))}
 .coins{margin:0;font:400 18px var(--disp);color:var(--amber)}
 .scrTitle{font-size:24px;color:var(--amber)}
+.lvlRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.lvlRow b{font:400 20px var(--disp);color:var(--amber)}
+.xpbar{flex:1;min-width:140px;height:10px;background:#ffffff17}.xpbar i{display:block;height:100%;background:var(--amber)}
+.tabsRow{gap:4px}.tabsRow button.on{background:var(--amber);color:#1c1503;border-color:var(--amber)}
+#profBody{display:grid;gap:6px;max-height:min(56vh,440px);overflow:auto;touch-action:pan-y}
+.pcard{display:flex;gap:10px;align-items:center;background:#1d2319;border:1px solid #ffffff1a;padding:8px}.pcard>div{flex:1;min-width:0}.pcard p{margin:2px 0 0;color:var(--dim);font-size:12px}
+.qbar{height:6px;background:#ffffff17;margin-top:6px}.qbar i{display:block;height:100%;background:var(--green)}
+.passGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.ptier{background:#1d2319;border:1px solid #ffffff1a;padding:6px;display:grid;gap:4px;font-size:12px}.ptier b{font:400 16px var(--disp)}.ptier.rare{border-color:var(--amber)}.ptier button{padding:4px}
 .statGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 .statGrid div{background:#1d2319;border:1px solid #ffffff1a;padding:8px}.statGrid b{display:block;font:400 22px var(--disp);font-variant-numeric:tabular-nums}.statGrid span{color:var(--dim);font-size:12px}
 .storeCard{max-width:880px;background:#171c14f5;border:1px solid var(--edge);padding:12px;clip-path:var(--cut)}
@@ -185,7 +199,7 @@ input{border-radius:0}
     <div class="row"><input id="joinCode" maxlength="5" placeholder="Код комнаты" style="text-transform:uppercase" aria-label="Код комнаты"><button id="btnJoin">Войти</button></div>
     <p id="menuCoins" class="coins"></p>
     <p id="menuErr" class="note err"></p>
-    <div class="row"><button id="btnTut">Обучение</button><button id="btnStats">Статистика</button><button id="btnStore">Гардероб</button><button class="layoutOpen" hidden>Настроить кнопки</button></div>
+    <div class="row"><button id="btnTut">Обучение</button><button class="setOpen">Настройки</button><button id="btnStats">Профиль</button><button id="btnStore">Гардероб</button><button class="layoutOpen" hidden>Настроить кнопки</button></div>
   </div>
 </div></div>
 
@@ -197,7 +211,7 @@ input{border-radius:0}
 <div id="lobby" class="screen" style="display:none"><div class="card">
   <div class="row"><div><p class="sub">Код комнаты</p><div id="roomCode" class="code">-----</div></div>
     <button id="btnCopy">Скопировать ссылку</button>
-    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyStore">Гардероб</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
+    <span style="margin-left:auto" class="row"><button id="lobbyMic">Включить микрофон</button><button id="lobbyStore">Гардероб</button><button id="lobbyPlayers">Игроки</button><button class="setOpen">Настройки</button><button id="lobbyVc">Голос: всем</button><button class="layoutOpen" hidden>Настроить кнопки</button></span></div>
   <p id="netNote" class="note"></p>
   <div id="teamsEl" class="teams"></div>
   <div class="row seg"><span>Карта:</span><button id="m0" data-m="0">Равнина</button><button id="m1" data-m="1">Пустыня</button><button id="m2" data-m="2">Город</button><button id="m3" data-m="3">Джунгли</button><button id="m4" data-m="4">Горы</button>
@@ -213,7 +227,13 @@ input{border-radius:0}
   <p id="lobbyMsg" class="note"></p>
 </div></div>
 
-<div id="stats" class="screen" style="display:none"><div class="card tutCard"><h2 class="scrTitle">Статистика</h2><div id="statGrid" class="statGrid"></div><p class="note">Статистика и монеты хранятся в этом браузере на этом устройстве. За каждое убийство минус каждая смерть в бою дают по $20, но за бой нельзя уйти в минус.</p><div class="row"><button id="statsClose">Назад</button></div></div></div>
+<div id="stats" class="screen" style="display:none"><div class="card storeCard">
+  <div class="row"><h2 class="scrTitle">Профиль</h2><span style="margin-left:auto" class="row"><button id="statsClose">Назад</button></span></div>
+  <div class="lvlRow"><b id="profLvl"></b><div class="xpbar"><i id="profBar"></i></div><span id="profXp" class="note"></span></div>
+  <div id="profTabs" class="row tabsRow"></div>
+  <div id="profBody"></div>
+  <p class="note">Прогресс хранится в этом браузере, а при подключённом сервере игры ещё и в облаке. За разницу убийств и смертей в бою дают по $20.</p>
+</div></div>
 
 <div id="store" class="screen" style="display:none"><div class="card storeCard">
   <div class="row"><h2 class="scrTitle">Гардероб</h2><span id="storeCoins" class="coins" style="margin-left:auto"></span><button id="storeClose">Назад</button></div>
@@ -241,9 +261,9 @@ input{border-radius:0}
   <div id="score"></div>
   <div id="touch">
     <div id="joyZone"></div><div id="lookZone"></div><div id="joy"><i></i></div>
-    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tSet" aria-label="Настроить кнопки">⚙</button><button class="tb" id="tTur">ТУР.</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
+    <button class="tb" id="tFire">ОГОНЬ</button><button class="tb" id="tJump">ПРЫЖОК</button><button class="tb" id="tRel">ПАТР.</button><button class="tb" id="tAlt">ОСОБ.</button><button class="tb" id="tSprint">БЕГ</button><button class="tb" id="tShop">МАГ.</button><button class="tb" id="tPl">ИГР.</button><button class="tb" id="tSet" aria-label="Настроить кнопки">⚙</button><button class="tb" id="tTur">ТУР.</button><button class="tb" id="tChat">ЧАТ</button><button id="tWpn" aria-label="Смена предмета: проведите влево или вправо"></button>
   </div>
-  <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B).</p></div></div>
+  <div id="lock"><div><h2>Нажмите, чтобы играть</h2><p class="note">Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B). P: игроки, блокировка и жалобы.</p><button class="setOpen">Настройки</button></div></div>
 </div>
 
 <form id="chatWrap"><input id="chatBox" maxlength="120" placeholder="Сообщение" aria-label="Сообщение в чат" autocomplete="off" enterkeyhint="send"><button id="chatSend" type="submit" class="pri">Отправить</button><button id="chatCancel" type="button">Отмена</button></form>
@@ -251,8 +271,26 @@ input{border-radius:0}
 <div id="layoutPanel"><b id="layName">Коснитесь кнопки и перетащите её</b>
   <label>Размер <input type="range" id="laySize" min="0.6" max="1.8" step="0.05" value="1" disabled></label>
   <label>Джойстик <input type="range" id="layJoy" min="0.6" max="1.8" step="0.05" value="1"></label>
-  <div class="row"><button id="layFlip">Панель вверх/вниз</button><button id="layReset">Сбросить</button><button id="layDone" class="pri">Готово</button></div>
+  <div class="row"><button id="layFlip">Панель вверх/вниз</button><button class="setOpen">Настройки игры</button><button id="layReset">Сбросить</button><button id="layDone" class="pri">Готово</button></div>
 </div>
+
+<div id="plist" class="screen" style="display:none"><div class="card tutCard"><h2 class="scrTitle">Игроки</h2><div id="plistBody"></div><div class="row"><button id="plistClose">Закрыть</button></div></div></div>
+
+<div id="settings" class="screen" style="display:none"><div class="card tutCard setCard"><h2 class="scrTitle">Настройки</h2>
+  <label class="srow"><span>Язык</span><select id="setLang"><option value="ru">Русский</option><option value="en">English</option></select></label>
+  <div class="srow"><span>Графика</span><span class="row seg"><button id="q_low">Низкая</button><button id="q_med">Средняя</button><button id="q_high">Высокая</button></span></div>
+  <label class="srow"><span>Поле зрения <b id="setFovV"></b></span><input type="range" id="setFov" min="60" max="100" step="1"></label>
+  <label class="srow"><span>Чувствительность мыши <b id="setMsV"></b></span><input type="range" id="setMs" min="0.3" max="3" step="0.1"></label>
+  <label class="srow"><span>Чувствительность пальца <b id="setTsV"></b></span><input type="range" id="setTs" min="0.3" max="3" step="0.1"></label>
+  <label class="srow"><span>Чувствительность геймпада <b id="setGsV"></b></span><input type="range" id="setGs" min="0.3" max="3" step="0.1"></label>
+  <label class="srow"><span>Инвертировать вертикаль</span><input type="checkbox" id="setInv"></label>
+  <label class="srow"><span>Громкость <b id="setVolV"></b></span><input type="range" id="setVol" min="0" max="1" step="0.05"></label>
+  <p id="padInfo" class="note"></p>
+  <p class="note">Геймпад: левый стик ходьба, правый обзор, RT огонь, LT прицел или бросок, A прыжок, B перезарядка, X турель или магазин, LB/RB/Y смена предмета, нажатие левого стика бег, Start магазин, Back игроки.</p>
+  <div class="srow"><span>Сервер игры</span><span class="row"><input id="setSrv" placeholder="https://адрес-сервера" autocomplete="off"><button id="setSrvSave">Сохранить</button></span></div>
+  <p id="setSrvMsg" class="note">Свой сервер даёт стабильное подключение, облачное сохранение, рейтинг и жалобы.</p>
+  <div class="row"><button id="settingsClose" class="pri">Готово</button></div>
+</div></div>
 
 <div id="aim"><h2>Выберите цель ракеты на карте</h2><canvas id="aimMap" width="128" height="128"></canvas><button id="aimCancel">Отмена</button></div>
 
@@ -274,6 +312,12 @@ const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>1;
 if(isTouch)document.body.classList.add('touch');
 
 /* ===== Константы ===== */
+// Адрес своего сервера по умолчанию. Пусто: только прямые соединения и резервная связь
+const DEFAULT_SERVER='';
+const SET_KEY='shtolni-settings-v1';
+const S={lang:/^ru|^uk|^be|^kk/i.test(navigator.language||'ru')?'ru':'en',q:'med',fov:75,ms:1,ts:1,gs:1,inv:false,vol:.8,srv:''};
+try{Object.assign(S,JSON.parse(localStorage.getItem(SET_KEY))||{})}catch(e){}
+function saveS(){try{localStorage.setItem(SET_KEY,JSON.stringify(S))}catch(e){}}
 const W=128,H=48,CS=16,CX=W/2,CZ=W/2;
 const AIR=0,TOP=1,DIRT=2,STONE=3,BED=4,COAL=5,IRON=6,GOLD=7,CRYS=8,WOOD=9,SANDB=10,TEAM0=11,LEAF=15,TRUNK=16;
 const MAP_NAMES=['Равнина','Пустыня','Город','Джунгли','Горы'];
@@ -288,7 +332,10 @@ const rgbHex=c=>c[0]<<16|c[1]<<8|c[2];
 const TIME_OPTS=[60,120,180,300,600],LIFE_OPTS=[1,2,3,5,10],EV_OPTS=[30,60,90];
 let ZONE_START=120,MAX_LIVES=3,EV_INT=60;
 const ZONE_DUR=100,ZONE_R0=92,ZONE_R1=5;
-const zoneR=t=>G.mode!=='br'||t<ZONE_START?ZONE_R0:lerp(ZONE_R0,ZONE_R1,clamp((t-ZONE_START)/ZONE_DUR,0,1));
+const zoneMode=()=>G.mode==='br'||G.mode==='ffa';
+const foe=(a,b)=>G.mode==='ffa'?a.id!==b.id:a.team!==b.team;
+const foeOwn=(p,o,tm)=>G.mode==='ffa'?p.id!==o:p.team!==tm;
+const zoneR=t=>!zoneMode()||t<ZONE_START?ZONE_R0:lerp(ZONE_R0,ZONE_R1,clamp((t-ZONE_START)/ZONE_DUR,0,1));
 const TEAMS=[{n:'Красные',c:'#e5484d',h:0xe5484d},{n:'Синие',c:'#3b82f6',h:0x3b82f6},{n:'Зелёные',c:'#3fb950',h:0x3fb950},{n:'Жёлтые',c:'#eab308',h:0xeab308}];
 const BASES=[[18,18],[110,18],[18,110],[110,110]];
 const ORES={coal:{n:'Уголь',m:COAL,p:8,c:'#9aa0a6'},iron:{n:'Железо',m:IRON,p:18,c:'#e0a080'},gold:{n:'Золото',m:GOLD,p:40,c:'#ffd24a'},crystal:{n:'Кристаллы',m:CRYS,p:90,c:'#6fe7ff'}};
@@ -352,6 +399,8 @@ const HATS=[
  {id:'h_viking',n:'Шлем рыцаря',p:220,b:[[.36,.34,.36,0x9ca3af,0,.09,0],[.28,.03,.02,0x111111,0,.05,-.19],[.04,.14,.3,0xb91c1c,0,.32,0]]},
  {id:'h_wizard',n:'Колпак мага',p:280,b:[[.4,.03,.4,0x4c1d95,0,.16,0],[.26,.14,.26,0x4c1d95,0,.24,0],[.15,.14,.15,0x4c1d95,0,.38,0],[.06,.12,.06,0xfacc15,0,.5,0]]},
  {id:'h_ears',n:'Кошачьи ушки',p:180,b:[[.08,.1,.05,0xf472b6,-.1,.2,0],[.08,.1,.05,0xf472b6,.1,.2,0]]},
+ {id:'p_bandana',n:'Бандана сезона',pass:5,b:[[.34,.1,.34,0xb91c1c,0,.18,0],[.06,.14,.04,0xb91c1c,0,.08,.19]]},
+ {id:'p_skull',n:'Череп шахтёра',pass:20,b:[[.36,.16,.36,0xe7e5e4,0,.2,0],[.08,.06,.02,0x111111,-.08,.18,-.19],[.08,.06,.02,0x111111,.08,.18,-.19]]},
  {id:'h_halo',n:'Нимб',p:600,b:[[.36,.03,.06,0xfff3a0,0,.36,-.15],[.36,.03,.06,0xfff3a0,0,.36,.15],[.06,.03,.3,0xfff3a0,-.15,.36,0],[.06,.03,.3,0xfff3a0,.15,.36,0]]},
 ];
 const SUITS=[
@@ -368,6 +417,8 @@ const SUITS=[
  {id:'s_clown',n:'Клоун',p:260,body:0xf97316,legs:0x7c3aed},
  {id:'s_lava',n:'Лавовый',p:520,body:0xdc2626,legs:0x7f1d1d},
  {id:'s_ice',n:'Ледяной',p:520,body:0x67e8f9,legs:0x0891b2},
+ {id:'p_urban',n:'Городской камуфляж',pass:10,body:0x6b7280,legs:0x374151},
+ {id:'p_shadow',n:'Тень',pass:25,body:0x1e1b4b,legs:0x0b0a1f},
  {id:'s_gold',n:'Золотой',p:800,body:0xeab308,legs:0xb78a06},
 ];
 const BACKS=[
@@ -378,6 +429,8 @@ const BACKS=[
  {id:'b_sword',n:'Меч за спиной',p:180,b:[[.06,1,.03,0xcbd5e1,.14,1.2,.17],[.22,.05,.05,0x78350f,.14,1.5,.17]]},
  {id:'b_jet',n:'Реактивный ранец',p:350,b:[[.14,.5,.14,0x64748b,-.11,1.08,.2],[.14,.5,.14,0x64748b,.11,1.08,.2],[.1,.12,.1,0xf97316,-.11,.78,.2],[.1,.12,.1,0xf97316,.11,.78,.2]]},
  {id:'b_demon',n:'Крылья демона',p:600,b:[[.5,.5,.03,0x450a0a,-.32,1.2,.18],[.5,.5,.03,0x450a0a,.32,1.2,.18]]},
+ {id:'p_drillback',n:'Бур за спиной',pass:15,b:[[.16,.5,.16,0xd6a02a,0,1.1,.2],[.06,.25,.06,0x6a6e73,0,.75,.2]]},
+ {id:'p_goldwings',n:'Золотые крылья',pass:30,b:[[.55,.55,.03,0xfacc15,-.34,1.22,.18],[.55,.55,.03,0xfacc15,.34,1.22,.18]]},
  {id:'b_wings',n:'Крылья',p:500,b:[[.5,.5,.03,0xf5f5f5,-.32,1.2,.18],[.5,.5,.03,0xf5f5f5,.32,1.2,.18]]},
 ];
 const CLASS_LIST=[
@@ -505,10 +558,12 @@ function spawnPos(team,i){const b=BASES[team],dx=Math.sign(CX-b[0]),dz=Math.sign
 /* ===== Рендер ===== */
 const canvas=$('c');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,isTouch?1.25:1.5));renderer.autoClear=false;
+const QUAL={low:{pr:.75,fog:60},med:{pr:isTouch?1:1.25,fog:isTouch?85:105},high:{pr:Math.min(devicePixelRatio||1,2),fog:125}};
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,QUAL[S.q].pr));renderer.autoClear=false;
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(75,1,.08,170);camera.rotation.order='YXZ';
 const vmScene=new THREE.Scene(),vmCam=new THREE.PerspectiveCamera(55,1,.01,5);
-const FOG_FAR=isTouch?85:125;
+let FOG_FAR=QUAL[S.q].fog;camera.far=FOG_FAR+20;camera.updateProjectionMatrix();
+function applyQuality(){FOG_FAR=QUAL[S.q].fog;camera.far=FOG_FAR+20;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,QUAL[S.q].pr));resize();if(G.state==='game'){paintSky(G.map);envMode=-1}}
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=vmCam.aspect=w/h;camera.updateProjectionMatrix();vmCam.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();
 
@@ -647,10 +702,10 @@ function tracer(a,b,color){const g=new THREE.BufferGeometry().setFromPoints([new
 const mineBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.01,1.01,1.01)),new THREE.LineBasicMaterial({color:0x111111}));mineBox.visible=false;scene.add(mineBox);
 
 /* ===== Звук ===== */
-let AC=null;const initAudio=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume()};
+let AC=null,MASTER=null;const initAudio=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=S.vol;MASTER.connect(AC.destination)}catch(e){}}if(AC&&AC.state==='suspended')AC.resume()};
 function vol(x,y,z){if(x==null)return 1;const d=Math.hypot(x-me.x,y-me.y,z-me.z);return clamp(1-d/90,0,1)**2}
-function noise(dur,freq,v,q){if(!AC||v<.01)return;const n=Math.floor(AC.sampleRate*dur),b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n)**2;const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;if(q)f.Q.value=q;const g=AC.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(AC.destination);s.start()}
-function tone(fr,dur,v,type){if(!AC||v<.01)return;const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.value=fr;g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur)}
+function noise(dur,freq,v,q){if(!AC||v<.01)return;const n=Math.floor(AC.sampleRate*dur),b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n)**2;const s=AC.createBufferSource();s.buffer=b;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;if(q)f.Q.value=q;const g=AC.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(MASTER||AC.destination);s.start()}
+function tone(fr,dur,v,type){if(!AC||v<.01)return;const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.value=fr;g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);o.connect(g);g.connect(MASTER||AC.destination);o.start();o.stop(AC.currentTime+dur)}
 const sfx={pistol:(v)=>noise(.14,3200,.35*v),ak:(v)=>noise(.1,2400,.3*v),rifle:(v)=>{noise(.32,1800,.55*v)},shotgun:(v)=>{noise(.3,1200,.65*v)},boom:(v)=>{noise(1.1,500,.9*v)},pick:()=>noise(.05,5000,.12),hit:()=>tone(1300,.06,.1),hurt:()=>tone(160,.15,.2,'sawtooth'),beep:(v)=>tone(1500,.07,.14*v),click:()=>tone(500,.03,.07),rocket:(v)=>noise(.5,900,.4*v),flash:(v)=>tone(4200,1.4,.12*v,'sine')};
 
 /* ===== Модели ===== */
@@ -695,9 +750,9 @@ function makeAvatar(p){
  if(su)g.add(box(.48,.13,.26,TEAMS[p.team].h,0,1.24,0));
  if(hat){helm.visible=false;hat.b.forEach(q=>g.add(box(q[0],q[1],q[2],q[3],q[4],1.52+q[5],q[6])))}
  if(bk)bk.b.forEach(q=>g.add(box(q[0],q[1],q[2],q[3],q[4],q[5],q[6])));
- const cv=document.createElement('canvas');cv.width=256;cv.height=40;const x=cv.getContext('2d');x.font='bold 26px system-ui';x.textAlign='center';x.fillStyle='#000a';x.fillRect(0,0,256,40);x.fillStyle=p.zombie?'#a3e07a':TEAMS[p.team].c;x.fillText(p.name,128,29);
+ const cv=document.createElement('canvas');cv.width=256;cv.height=40;const x=cv.getContext('2d');x.font='bold 26px system-ui';x.textAlign='center';x.fillStyle='#000a';x.fillRect(0,0,256,40);x.fillStyle=p.zombie?'#a3e07a':TEAMS[p.team].c;x.fillText((p.lvl?'['+p.lvl+'] ':'')+p.name,128,29);
  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),depthTest:false,transparent:true}));tag.scale.set(1.6,.25,1);tag.position.y=2.05;g.add(tag);
- g.userData={lL,lR,armR,gun,walk:0};const mt=P();if(mt&&p.team!==mt.team)g.traverse(o=>o.layers.enable(1));scene.add(g);return g}
+ g.userData={lL,lR,armR,gun,walk:0};const mt=P();if(mt&&(G.mode==='ffa'||p.team!==mt.team))g.traverse(o=>o.layers.enable(1));scene.add(g);return g}
 function removeAvatar(p){if(p.av){scene.remove(p.av);p.av=null}}
 
 /* ===== Состояние ===== */
@@ -716,7 +771,7 @@ const PEER_OPTS={config:{iceServers:[{urls:['stun:stun.l.google.com:19302','stun
 function createRoom(){
  const code=randCode();G.host=true;G.myId=PREFIX+code;G.code=code;
  addPlayer(G.myId,myName(),firstFreeTeam(),false);enterLobby();
- Relay.host(code);
+ Relay.host(code);Srv.host(code);
  if(!window.Peer){goOffline();return}
  try{const peer=new Peer(G.myId,PEER_OPTS);Net.peer=peer;
   peer.on('open',()=>{$('netNote').textContent='Комната открыта. Отправьте код другу.';Voice.bind(peer)});
@@ -735,6 +790,17 @@ function hostConn(c){
  })}
 function joinRoom(code){
  G.host=false;G.code=code;$('menuErr').textContent='Подключаемся…';
+ if(!Srv.url()){joinDirect(code);return}
+ // Сначала свой сервер; id берём у PeerJS, чтобы работал голос
+ let started=false,peer=null;const rid=()=>'r'+Math.random().toString(36).slice(2,12);
+ const go=id=>{if(started)return;started=true;G.myId=id;
+  Srv.join(code,id,myName(),()=>{$('netNote').textContent='Подключено через сервер игры.';enterLobby()},
+   ()=>{if(peer&&!Voice.peer)try{peer.destroy()}catch(e){}G.myId=null;Net.peer=null;joinDirect(code)})};
+ if(window.Peer){try{peer=new Peer(PEER_OPTS);Net.peer=peer;const t=setTimeout(()=>go(rid()),3000);
+   peer.on('open',id=>{clearTimeout(t);if(!started){Voice.bind(peer);go(id)}});peer.on('error',()=>{clearTimeout(t);go(rid())})}catch(e){go(rid())}}
+ else go(rid());
+}
+function joinDirect(code){
  let done=false,timer=0,rel=null,fast=null;
  const forced=new URLSearchParams(location.search).get('relay')==='1';
  const toRelay=()=>{if(done)return;done=true;clearTimeout(timer);
@@ -783,18 +849,54 @@ const Relay={cl:[],ready:false,seen:{},tm:0,
     recv(m)})};
   next()}
 };
+/* ===== Свой сервер ===== */
+const ACC_KEY='shtolni-acc-v1';
+let ACC=null;try{ACC=JSON.parse(localStorage.getItem(ACC_KEY))}catch(e){}
+const Srv={ws:null,
+ url(){return(S.srv||DEFAULT_SERVER).trim().replace(/\/+$/,'')},
+ wsUrl(){return this.url().replace(/^http/i,'ws')+'/ws'},
+ async api(path,method,body){const u=this.url();if(!u)throw new Error('no server');
+  const r=await fetch(u+path,{method:method||'GET',headers:Object.assign({'Content-Type':'application/json'},ACC?{Authorization:'Bearer '+ACC.id+':'+ACC.token}:{}),body:body?JSON.stringify(body):undefined});
+  if(!r.ok)throw new Error('http '+r.status);return r.json()},
+ send(o){if(this.ws&&this.ws.readyState===1)this.ws.send(JSON.stringify(o))},
+ all(m){this.send({op:'all',m})},
+ to(id){return{open:true,srv:true,send:m=>this.send({op:'to',id,m}),close(){}}},
+ host(code){const u=this.url();if(!u)return;let ws;try{ws=new WebSocket(this.wsUrl())}catch(e){return}this.ws=ws;
+  ws.onopen=()=>this.send({op:'host',code});
+  ws.onmessage=e=>{let o;try{o=JSON.parse(e.data)}catch(x){return}
+   if(o.op==='hosted'){this.ready=true;$('netNote').textContent='Комната открыта на сервере игры. Отправьте код другу.'}
+   else if(o.op==='from'){const id=String(o.id);if(!Net.conns[id]||!Net.conns[id].srv)Net.conns[id]={srv:true,rel:this.to(id),fast:this.to(id)};handleHost(id,o.m)}
+   else if(o.op==='leave'){const k=Net.conns[o.id];if(k&&k.srv)playerLeft(o.id)}};
+  setInterval(()=>this.send({op:'ping'}),20000)},
+ join(code,id,name,ok,fail){let ws,got=false,done=false;const end=e=>{if(done)return;done=true;clearTimeout(tm);try{ws.close()}catch(x){}fail(e)};
+  try{ws=new WebSocket(this.wsUrl())}catch(e){fail('ws');return}this.ws=ws;const tm=setTimeout(()=>end('timeout'),6000);
+  ws.onerror=()=>{if(!got)end('ws')};
+  ws.onclose=()=>{if(got&&G.state!=='menu'&&!G.ended)hostLost();else if(!got)end('closed')};
+  ws.onopen=()=>this.send({op:'join',code,id});
+  ws.onmessage=e=>{let o;try{o=JSON.parse(e.data)}catch(x){return}
+   if(o.op==='err'){end(o.e);return}
+   if(o.op==='joined'){const up={open:true,srv:true,send:m=>this.send({op:'up',m}),close(){}};Net.rel=up;Net.fast=up;up.send({t:'hello',name});return}
+   if(o.op==='hostgone'){if(G.state!=='menu'&&!G.ended)hostLost();return}
+   if(o.op==='msg'){if(!got){got=true;done=true;clearTimeout(tm);Net.srv=true;ok()}recv(o.m)}};
+  setInterval(()=>this.send({op:'ping'}),20000)}
+};
+async function ensureAccount(){if(!Srv.url())return null;if(ACC)return ACC;try{ACC=await Srv.api('/api/register','POST',{name:myName()});localStorage.setItem(ACC_KEY,JSON.stringify(ACC))}catch(e){ACC=null}return ACC}
+let pushTm=0;
+function cloudPush(){if(!Srv.url()||!ACC)return;clearTimeout(pushTm);pushTm=setTimeout(async()=>{try{const r=await Srv.api('/api/profile','PUT',{profile:PF,name:myName()});if(r.profile&&r.profile.coins<PF.coins){PF.coins=r.profile.coins;localStorage.setItem(PROF_KEY,JSON.stringify(PF));renderCoins()}}catch(e){}},1500)}
+async function cloudPull(){if(!Srv.url())return;await ensureAccount();if(!ACC)return;try{const r=await Srv.api('/api/profile');
+  if(r.profile&&(r.updated||0)>(PF.updated||0)){Object.assign(PF,r.profile);localStorage.setItem(PROF_KEY,JSON.stringify(PF));renderCoins()}else cloudPush()}catch(e){}}
 function hostLost(){toast('Хост покинул игру');$('endTitle').textContent='Связь с хостом потеряна';$('endTable').textContent='';$('btnBack').style.display='none';$('endNote').textContent='Перезагрузите страницу, чтобы создать новую комнату.';$('end').style.display='flex';exitPointer()}
 function toHost(m){if(G.host)handleHost(G.myId,m);else if(Net.rel&&Net.rel.open)Net.rel.send(m)}
 function toHostFast(m){if(G.host)handleHost(G.myId,m);else if(Net.fast&&Net.fast.open)Net.fast.send(m);else if(Net.rel&&Net.rel.open)Net.rel.send(m)}
-function bcast(m){recv(m);for(const id in Net.conns){const c=Net.conns[id].rel;if(c&&c.open)try{c.send(m)}catch(e){}}}
-function bcastFast(m){for(const id in Net.conns){const c=Net.conns[id].fast||Net.conns[id].rel;if(c&&c.open)try{c.send(m)}catch(e){}}}
+function bcast(m){recv(m);let srv=false;for(const id in Net.conns){const c=Net.conns[id].rel;if(c&&c.srv){srv=true;continue}if(c&&c.open)try{c.send(m)}catch(e){}}if(srv)Srv.all(m)}
+function bcastFast(m){let srv=false;for(const id in Net.conns){const c=Net.conns[id].fast||Net.conns[id].rel;if(c&&c.srv){srv=true;continue}if(c&&c.open)try{c.send(m)}catch(e){}}if(srv)Srv.all(m)}
 function sendTo(id,m){if(id===G.myId)recv(m);else{const c=Net.conns[id]&&Net.conns[id].rel;if(c&&c.open)c.send(m)}}
 
 /* ===== Лобби ===== */
 function myName(){return($('nick').value.trim()||'Боец'+Math.floor(Math.random()*90+10)).slice(0,14)}
 function firstFreeTeam(){const c=[0,0,0,0];G.order.forEach(id=>c[G.P[id].team]++);let b=0;for(let i=1;i<4;i++)if(c[i]<c[b])b=i;return b}
 function addPlayer(id,name,team,bot){G.P[id]={id,name,team,bot,hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,vc:'all',priv:G.host?newPriv():null};if(!G.order.includes(id))G.order.push(id)}
-function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,mode:G.mode,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc,cos:p.cos,cls:p.cls}})}}
+function rosterMsg(){return{t:'roster',map:G.map,zs:ZONE_START,lv:MAX_LIVES,ev:EV_INT,mode:G.mode,pl:G.order.map(id=>{const p=G.P[id];return{id,name:p.name,team:p.team,bot:p.bot,vc:p.vc,cos:p.cos,cls:p.cls,acc:p.acc,lvl:p.lvl}})}}
 function pushRoster(){bcast(rosterMsg())}
 function playerLeft(id){delete Net.conns[id];const p=G.P[id];if(!p)return;
  if(G.state==='game'){p.lives=0;if(p.alive){p.alive=false;p.hp=0;bcast({t:'die',id,by:null,w:'вышел'})}bcast({t:'gone',id});checkWin()}
@@ -804,7 +906,7 @@ function renderLobby(){
  const el=$('teamsEl');el.textContent='';
  TEAMS.forEach((t,i)=>{const d=document.createElement('div');d.className='team';d.style.setProperty('--c',t.c);
   const h=document.createElement('h2');h.textContent=t.n;const ul=document.createElement('ul');
-  G.order.filter(id=>G.P[id].team===i).forEach(id=>{const li=document.createElement('li');li.textContent=G.P[id].name+(id===G.myId?' (вы)':'')+(G.P[id].bot?' 🤖':'');ul.appendChild(li)});
+  G.order.filter(id=>G.P[id].team===i).forEach(id=>{const li=document.createElement('li');li.textContent=(G.P[id].lvl?'['+G.P[id].lvl+'] ':'')+G.P[id].name+(id===G.myId?' (вы)':'')+(G.P[id].bot?' 🤖':'');ul.appendChild(li)});
   const b=document.createElement('button');b.textContent='В эту команду';b.onclick=()=>toHost({t:'team',team:i});
   d.append(h,ul,b);el.appendChild(d)});
  const seg=(el,opts,cur,txt,msg)=>{const e=$(el);e.textContent='';opts.forEach(v=>{const b=document.createElement('button');b.textContent=txt(v);b.disabled=!G.host;if(v===cur)b.className='on';b.onclick=()=>toHost(msg(v));e.appendChild(b)})};
@@ -812,10 +914,10 @@ function renderLobby(){
  seg('evSeg',EV_OPTS,EV_INT,v=>v===30?'30 сек':v===60?'1 мин':'1:30',v=>({t:'cfg',ev:v}));
  seg('lvSeg',LIFE_OPTS,MAX_LIVES,v=>String(v),v=>({t:'cfg',lv:v}));
  for(let i=0;i<5;i++)$('m'+i).classList.toggle('on',G.map===i);
- seg('modeSeg',MODE_IDS,G.mode,v=>MODES[v].n,v=>({t:'cfg',mode:v}));$('zsLabel').textContent=G.mode==='br'?'Время до сужения зоны:':G.mode==='zombie'?'Сколько продержаться:':'Длительность боя:';$('modeInfo').textContent=MODES[G.mode].d;renderClassRow();
+ seg('modeSeg',MODE_IDS,G.mode,v=>MODES[v].n,v=>({t:'cfg',mode:v}));$('zsLabel').textContent=zoneMode()?'Время до сужения зоны:':G.mode==='zombie'?'Сколько продержаться:':'Длительность боя:';$('modeInfo').textContent=MODES[G.mode].d;renderClassRow();
  const teams=new Set(G.order.map(id=>G.P[id].team));
- const needT=G.mode==='zombie'?1:2;$('btnStart').disabled=teams.size<needT;
- $('lobbyMsg').textContent=teams.size<needT?'Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.':G.mode==='zombie'?'В этом режиме все игроки и боты воюют вместе, выбор команды не важен.':'';
+ const needT=G.mode==='zombie'?1:2,have=G.mode==='ffa'?G.order.length:teams.size;$('btnStart').disabled=have<needT;
+ $('lobbyMsg').textContent=G.mode==='ffa'?(have<2?'Нужно хотя бы 2 бойца: позовите друга или добавьте бота.':'Все против всех: выбор команды не важен.'):have<needT?'Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.':G.mode==='zombie'?'В этом режиме все игроки и боты воюют вместе, выбор команды не важен.':'';
 }
 ['m0','m1','m2','m3','m4'].forEach(id=>$(id).onclick=()=>toHost({t:'map',map:+$(id).dataset.m}));
 $('botAdd').onclick=()=>{const n=G.order.filter(i=>G.P[i].bot).length;if(n>=11)return;const id='bot'+(G.nid++);addPlayer(id,'Бот-'+(n+1),firstFreeTeam(),true);pushRoster()};
@@ -831,7 +933,7 @@ try{const q=new URLSearchParams(location.search).get('room');if(q)$('joinCode').
 function hostStart(){
  G.seed=Math.floor(Math.random()*1e9);
  G.order.forEach(id=>{const p=G.P[id];Object.assign(p,{hp:100,lives:MAX_LIVES,alive:true,kills:0,priv:newPriv(),respawnAt:0,invuln:0});});
- G.order.forEach(id=>{const p=G.P[id];p.team0=p.team;if(G.mode==='zombie')p.team=0});
+ G.order.forEach(id=>{const p=G.P[id];p.team0=p.team;if(G.mode==='zombie')p.team=0;if(G.mode==='ffa')p.team=G.order.indexOf(id)%4});
  bcast({t:'start',seed:G.seed,map:G.map,pl:rosterMsg().pl});
  G.order.forEach(id=>{const p=G.P[id];if(p.bot)p.cls=CLASS_LIST[Math.floor(Math.random()*CLASS_LIST.length)].id;if(G.mode==='classes')applyKit(p);pushInv(id)});
 }
@@ -842,7 +944,7 @@ function nearShop(p){const b=BASES[p.team];return Math.hypot(p.x-b[0]-.5,p.z-b[1
 function handleHost(id,m){
  const p=G.P[id];
  switch(m.t){
- case 'hello':if(G.state!=='lobby'){return}if(G.P[id]){pushRoster();break}addPlayer(id,String(m.name||'Боец').slice(0,14),firstFreeTeam(),false);pushRoster();break;
+ case 'hello':if(G.state!=='lobby'){return}if(G.P[id]){pushRoster();break}addPlayer(id,cleanText(String(m.name||'Боец').slice(0,14)),firstFreeTeam(),false);pushRoster();break;
  case 'team':if(p&&G.state==='lobby'&&m.team>=0&&m.team<4){p.team=m.team;pushRoster()}break;
  case 'map':if(id===G.myId&&G.state==='lobby'){G.map=clamp(m.map|0,0,4);pushRoster()}break;
  case 'cfg':if(id===G.myId&&G.state==='lobby'){if(TIME_OPTS.includes(m.zs))ZONE_START=m.zs;if(LIFE_OPTS.includes(m.lv))MAX_LIVES=m.lv;if(EV_OPTS.includes(m.ev))EV_INT=m.ev;if(MODES[m.mode])G.mode=m.mode;pushRoster()}break;
@@ -856,18 +958,18 @@ function handleHost(id,m){
  case 'mine':hMine(p,m);break;
  case 'med':if(p&&p.alive&&p.priv.inv.medkit>0&&p.hp<maxHP(p)){p.priv.inv.medkit--;p.hp=Math.max(p.hp,Math.min(maxHP(p),p.hp+60));pushInv(id)}break;
  case 'adr':if(p&&p.alive&&p.priv.inv.adren>0){p.priv.inv.adren--;p.hp=Math.max(p.hp,Math.min(maxHP(p),p.hp+25));pushInv(id)}break;
- case 'chat':if(p)bcast({t:'chat',id,s:String(m.s||'').slice(0,120)});break;
- case 'prof':if(p&&G.state==='lobby'){p.cos=m.cos||{};p.cls=CLS[m.cls]?m.cls:'assault';pushRoster()}break;
+ case 'chat':if(p)bcast({t:'chat',id,s:cleanText(String(m.s||'').slice(0,120))});break;
+ case 'prof':if(p&&G.state==='lobby'){p.acc=String(m.acc||'').slice(0,32);p.lvl=clamp(m.lvl|0,1,999);p.cos=m.cos||{};p.cls=CLS[m.cls]?m.cls:'assault';pushRoster()}break;
  case 'turp':hTurPlace(p,m);break;
  case 'tl':hTurLoad(p,m);break;
- case 'thit':{const q=G.turrets[m.id];if(q&&p&&p.alive&&p.team!==q.tm)turHurt(q,clamp(m.d,0,160));break}
+ case 'thit':{const q=G.turrets[m.id];if(q&&p&&p.alive&&foeOwn(p,q.o,q.tm))turHurt(q,clamp(m.d,0,160));break}
  case 'wall':hWall(p,m);break;
  case 'throw':hThrow(p,m);break;
  case 'place':hPlace(p,m);break;
  case 'drone':hDrone(p,m);break;
  case 'drp':{const q=G.drones[m.id];if(q&&q.o===id){q.x=m.x;q.y=m.y;q.z=m.z;q.yaw=m.yaw}break}
  case 'drb':{const q=G.drones[m.id];if(q&&q.o===id)droneBoom(q,m.x,m.y,m.z);break}
- case 'drhit':{const q=G.drones[m.id];if(q&&p&&p.alive&&p.team!==q.tm)droneBoom(q,q.x,q.y,q.z);break}
+ case 'drhit':{const q=G.drones[m.id];if(q&&p&&p.alive&&foeOwn(p,q.o,q.tm))droneBoom(q,q.x,q.y,q.z);break}
  case 'bm':if(p&&p.alive&&p.priv.inv.bm>0){p.priv.inv.bm--;pushInv(id);const x=clamp(+m.x,1,W-2),z=clamp(+m.z,1,W-2);spawnProj(p,'bm',x,surfaceY(x,z)+120,z,0,-20,0)}break;
  case 'ammo':if(p){const a=p.priv.ammo;a[m.a]=Math.max(0,(a[m.a]||0)-m.n);pushInv(id)}break;
  case 'back':if(id===G.myId){G.order.filter(i=>G.P[i].zombie).forEach(i=>delete G.P[i]);G.order=G.order.filter(i=>G.P[i]);G.order.forEach(i=>{const q=G.P[i];if(q.team0!=null)q.team=q.team0});bcast({t:'lobby'});pushRoster()}break;
@@ -907,7 +1009,7 @@ const turSync=q=>bcast({t:'tus',id:q.id,hp:Math.ceil(q.hp),l:q.l});
 function hTurPlace(p,m){if(!p||!p.alive||!IT[m.k]||IT[m.k].kind!=='turret'||!(p.priv.inv[m.k]>0))return;p.priv.inv[m.k]--;pushInv(p.id);
  bcast({t:'turadd',id:G.nid++,k:m.k,x:m.x,y:m.y,z:m.z,yaw:m.yaw,o:p.id,tm:p.team,hp:150})}
 function turEmpty(q,v){const l=q.l;if(l.w){v.inv[l.w]=(v.inv[l.w]||0)+1;v.ammo[IT[l.w].ammo]+=l.ammo||0;l.w=null;l.ammo=0}(TUR_ITEMS[q.k]||[]).forEach(i=>{if(l[i]){v.inv[i]=(v.inv[i]||0)+l[i];l[i]=0}})}
-function hTurLoad(p,m){const q=G.turrets[m.id];if(!p||!p.alive||!q||q.tm!==p.team||Math.hypot(p.x-q.x,p.z-q.z)>6)return;const v=p.priv,l=q.l,it=IT[m.v];
+function hTurLoad(p,m){const q=G.turrets[m.id];if(!p||!p.alive||!q||foeOwn(p,q.o,q.tm)||Math.hypot(p.x-q.x,p.z-q.z)>6)return;const v=p.priv,l=q.l,it=IT[m.v];
  if(m.a==='w'){if(q.k!=='t_def'||!it||it.kind!=='gun'||!(v.inv[m.v]>0))return;if(l.w){v.inv[l.w]=(v.inv[l.w]||0)+1;v.ammo[IT[l.w].ammo]+=l.ammo||0;l.ammo=0}v.inv[m.v]--;l.w=m.v}
  else if(m.a==='am'){if(!l.w)return;const t=IT[l.w].ammo,pack=ITEMS.find(i=>i.kind==='ammo'&&i.ammo===t).pack,n=Math.min(v.ammo[t]||0,m.all?1e9:pack);v.ammo[t]-=n;l.ammo=(l.ammo||0)+n}
  else if(m.a==='it'){if(!(TUR_ITEMS[q.k]||[]).includes(m.v)||!(v.inv[m.v]>0))return;const n=m.all?v.inv[m.v]:1;v.inv[m.v]-=n;l[m.v]=(l[m.v]||0)+n}
@@ -923,12 +1025,12 @@ function turretsTick(dt){
   const seeable=(t,max)=>{const dx=t.x-ex,dy=t.y+1.1-ey,dz=t.z-ez,d=Math.hypot(dx,dy,dz)||1;return d<=max&&!rayV(ex,ey,ez,dx/d,dy/d,dz/d,d-.3)?d:0};
   if(q.k==='t_med'){
    if(q.cd>0||!(l.medkit>0||l.adren>0))continue;
-   for(const pid of G.order){const t=G.P[pid];if(t.alive&&t.team===q.tm&&t.hp<maxHP(t)&&t.hp<bd&&Math.hypot(t.x-ex,t.z-ez)<8){bd=t.hp;best=t}}
+   for(const pid of G.order){const t=G.P[pid];if(t.alive&&!foeOwn(t,q.o,q.tm)&&t.hp<maxHP(t)&&t.hp<bd&&Math.hypot(t.x-ex,t.z-ez)<8){bd=t.hp;best=t}}
    if(!best)continue;const big=l.medkit>0&&(best.hp<=60||!(l.adren>0));if(big)l.medkit--;else l.adren--;
    best.hp=Math.max(best.hp,Math.min(maxHP(best),best.hp+(big?60:25)));q.cd=2;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));
    bcast({t:'tr',a:[ex,ey,ez],b:[best.x,best.y+1,best.z],w:'',id:'tur',c:0x4ade80});turSync(q);sendState();continue}
   const range=q.k==='t_nade'?28:35;
-  for(const pid of G.order){const t=G.P[pid];if(!t.alive||t.team===q.tm)continue;const d=Math.hypot(t.x-ex,t.y+1.1-ey,t.z-ez);if(d<bd&&d<=range&&(q.k==='t_nade'?d>=6:seeable(t,range))){bd=d;best=t}}
+  for(const pid of G.order){const t=G.P[pid];if(!t.alive||!foeOwn(t,q.o,q.tm))continue;const d=Math.hypot(t.x-ex,t.y+1.1-ey,t.z-ez);if(d<bd&&d<=range&&(q.k==='t_nade'?d>=6:seeable(t,range))){bd=d;best=t}}
   if(!best)continue;q.yaw=Math.atan2(-(best.x-ex),-(best.z-ez));if(q.cd>0)continue;
   if(q.k==='t_def'){const it=IT[l.w];if(!it||!(l.ammo>0)||bd>Math.min(it.range,35))continue;q.cd=Math.max(it.rate*1.3,.2);l.ammo--;
    const aim=Math.random()<.6,off=()=>aim?0:(Math.random()-.5)*2.2;
@@ -942,7 +1044,7 @@ function turretsTick(dt){
 /* ===== Урон и победа ===== */
 function damage(t,d,by,w,head){
  if(!t.alive||G.ended)return;
- if(by&&by.id!==t.id&&by.team===t.team)return;
+ if(by&&by.id!==t.id&&!foe(by,t))return;
  if(t.invuln&&G.time<t.invuln)return;
  if(w!=='zone'){if(evOn('truce'))return;if(evOn('dmg2'))d*=2;
   const bc=classOf(by);if(bc){if(bc.id==='sniper'&&w==='rifle')d*=1.25;if(bc.id==='cowboy'&&w==='pistol')d*=1.6;if(bc.id==='berserk'&&by.hp<50)d*=1.5;if(bc.id==='ninja'&&w==='knife')d*=2;if(bc.id==='bomber'&&by===t&&EXP[w])return}}
@@ -956,19 +1058,20 @@ function damage(t,d,by,w,head){
   if(t.lives>0)t.respawnAt=G.time+4;else t.respawnAt=0;checkWin();sendState()}
 }
 function checkWin(){
- if(G.ended||G.state!=='game')return;if(G.mode==='zombie'){if(!G.order.some(id=>{const p=G.P[id];return !p.zombie&&(p.lives>0||p.alive)}))endMatch(1,'Зомби победили');return}const alive=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.lives>0||p.alive)alive.add(p.team)});
+ if(G.ended||G.state!=='game')return;if(G.mode==='zombie'){if(!G.order.some(id=>{const p=G.P[id];return !p.zombie&&(p.lives>0||p.alive)}))endMatch(1,'Зомби победили');return}
+ if(G.mode==='ffa'){const al=G.order.filter(id=>{const p=G.P[id];return p.lives>0||p.alive});if(al.length<=1){const w=al[0]&&G.P[al[0]];endMatch(w?w.team:-1,w?w.name+': последний выживший':'Ничья: никто не выжил',w?w.id:null)}return}const alive=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.lives>0||p.alive)alive.add(p.team)});
  if(alive.size<=1){const team=alive.size?[...alive][0]:-1;bcast({t:'end',team,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}}
 function sendState(){bcast({t:'st',time:+G.time.toFixed(2),pl:G.order.map(id=>{const p=G.P[id];return[id,Math.ceil(p.hp),p.lives,p.alive?1:0,p.kills]})})}
 function doBoom(x,y,z,k,oid,tm,yaw){
  bcast({t:'boom',x,y,z,k});
  const e=EXP[k],by=G.P[oid];if(!e.d)return;
  G.order.forEach(id=>{const t=G.P[id];if(!t.alive)return;const cy=t.y+.9,dx=t.x-x,dy=cy-y,dz=t.z-z,dist=Math.hypot(dx,dy,dz);if(dist>e.dr)return;
-  if(t.team===tm&&id!==oid)return;
+  if(id!==oid&&!foeOwn(t,oid,tm))return;
   if(e.cone){const f=(dx*-Math.sin(yaw)+dz*-Math.cos(yaw))/(Math.hypot(dx,dz)||1);if(f<.45)return}
   const ray=rayV(x,y+.3,z,dx/(dist||1),(dy-.3)/(dist||1),dz/(dist||1),dist);
   let dmg=e.d*(1-(dist/e.dr)**1.5);if(ray&&e.r<3)dmg*=.3;else if(ray)dmg*=.6;if(id===oid)dmg*=.6;
   damage(t,dmg,id===oid?t:by,k)});
- for(const tid in G.turrets){const q=G.turrets[tid];if(q.tm===tm)continue;const dist=Math.hypot(q.x-x,q.y+.6-y,q.z-z);if(dist<e.dr)turHurt(q,e.d*(1-(dist/e.dr)**1.5))}
+ for(const tid in G.turrets){const q=G.turrets[tid];if(G.mode==='ffa'?q.o===oid:q.tm===tm)continue;const dist=Math.hypot(q.x-x,q.y+.6-y,q.z-z);if(dist<e.dr)turHurt(q,e.d*(1-(dist/e.dr)**1.5))}
  // Цепная детонация расставленной взрывчатки
  for(const pid in G.placed){const q=G.placed[pid];if(!q.deton&&Math.hypot(q.x-x,q.y-y,q.z-z)<Math.max(e.r,2.5)){q.deton=G.time+.15}}
 }
@@ -978,20 +1081,20 @@ function recv(m){
  const R=H_R[m.t];if(R)R(m);
 }
 const H_R={
- roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;G.mode=m.mode;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc,cos:q.cos,cls:q.cls});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
+ roster(m){G.map=m.map;ZONE_START=m.zs;MAX_LIVES=m.lv;EV_INT=m.ev;G.mode=m.mode;const prev=G.P;G.P={};G.order=[];m.pl.forEach(q=>{const o=prev[q.id];G.P[q.id]=o||{id:q.id};Object.assign(G.P[q.id],{name:q.name,team:q.team,bot:q.bot,vc:q.vc,cos:q.cos,cls:q.cls,acc:q.acc,lvl:q.lvl});if(!o)Object.assign(G.P[q.id],{hp:100,lives:MAX_LIVES,alive:true,kills:0,x:0,y:0,z:0,yaw:0,pitch:0,item:0,priv:G.host?newPriv():null});G.order.push(q.id)});
   if(G.state==='lobby')renderLobby();Voice.onRoster()},
  start(m){startMatch(m)},
  s(m){m.a.forEach(q=>{if(q[0]===G.myId)return;const p=G.P[q[0]];if(!p)return;p.x=q[1];p.y=q[2];p.z=q[3];p.yaw=q[4];p.pitch=q[5];p.item=q[6]});(m.tu||[]).forEach(q=>{const u=G.turrets[q[0]];if(u){u.y=q[1];u.yaw=q[2]}});(m.d||[]).forEach(q=>{const d=G.drones[q[0]];if(d&&d.o!==G.myId){d.x=q[1];d.y=q[2];d.z=q[3];d.yaw=q[4]}})},
  p(){},
  st(m){G.time=G.host?G.time:lerp(G.time,m.time,Math.abs(G.time-m.time)>1?1:.2);m.pl.forEach(q=>{const p=G.P[q[0]];if(!p)return;p.hp=q[1];p.lives=q[2];p.alive=!!q[3];p.kills=q[4]})},
- inv(m){const had=Inv.inv;Inv=m.v;for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag&&mags[id]==null)mags[id]=IT[id].mag;if(!(Inv.inv[held]>0))held='pick0';kitSelect();renderBar();renderShop()},
+ inv(m){const oldO=Inv.ores||{};Inv=m.v;if(G.state==='game'&&G.time-(G.lastKillT||-9)>1)for(const k in ORES){const gn=(Inv.ores[k]||0)-(oldO[k]||0);if(gn>0&&gn<10){qEvent('ore',gn);qEvent('ore_'+k,gn)}}for(const id in Inv.inv)if(Inv.inv[id]>0&&IT[id].mag&&mags[id]==null)mags[id]=IT[id].mag;if(!(Inv.inv[held]>0))held='pick0';kitSelect();renderBar();renderShop()},
  vxs(m){m.c.forEach(c=>{const v=getV(c[0],c[1],c[2]);if(v){debris(c[0]+.5,c[1]+.5,c[2]+.5,2,matColor(v));setV(c[0],c[1],c[2],AIR)}});minePending=0;},
  vset(m){m.c.forEach(c=>setV(c[0],c[1],c[2],c[3]))},
  tr(m){if(m.id===G.myId)return;tracer(m.a,m.b,m.c);if(sfx[m.w])sfx[m.w](vol(m.a[0],m.a[1],m.a[2]))},
  proj(m){const pr={...m,t:0,mesh:null};if(m.k==='bm'){bmWarn(pr)}const c=m.k==='bm'?0xd9dde0:m.k==='rpg'?0x4a5a35:m.k==='knife'?0xc8ccd0:m.k==='flash'?0xdddddd:m.k==='smoke'?0x888888:0x3f4f2e;pr.mesh=m.k==='bm'?box(1,5,1,c):box(m.k==='knife'?.06:.2,m.k==='knife'?.06:.2,m.k==='knife'?.35:(m.k==='rpg'?.6:.2),c);pr.mesh.position.set(m.x,m.y,m.z);scene.add(pr.mesh);G.projs[m.id]=pr;if(m.k==='rpg')sfx.rocket(vol(m.x,m.y,m.z))},
  rm(m){const pr=G.projs[m.id];if(pr){scene.remove(pr.mesh);if(pr.beam)scene.remove(pr.beam);delete G.projs[m.id]}},
  boom(m){onBoom(m)},
- fl(m){G.score=m.sc;m.f.forEach(q=>{const f=G.flags[q[0]];if(f){f.x=q[1];f.y=q[2];f.z=q[3];f.c=q[4];f.home=!!q[5]}});if(m.msg){toast(m.msg,2);addChat(esc(m.msg))}},
+ fl(m){if(m.cap===G.myId)qEvent('flag');G.score=m.sc;m.f.forEach(q=>{const f=G.flags[q[0]];if(f){f.x=q[1];f.y=q[2];f.z=q[3];f.c=q[4];f.home=!!q[5]}});if(m.msg){toast(m.msg,2);addChat(esc(m.msg))}},
  ks(m){G.score=m.sc;if(G.hillO!==m.o&&m.o>=0)toast('Гору держат: '+TEAMS[m.o].n,1.5);G.hillO=m.o},
  zw(m){G.wave=m.w;toast('Волна '+m.w,2);tone(180,.6,.18,'sawtooth')},
  zadd(m){const p={id:m.id,name:'Зомби',team:1,bot:true,zombie:true,hp:m.hp,lives:1,alive:true,kills:0,x:m.x,y:m.y,z:m.z,yaw:0,pitch:0,item:0,vc:'all',vx:0,vy:0,vz:0,ground:false,priv:G.host?newPriv():null,b:{cd:0,stuck:0,lastX:m.x,lastZ:m.z}};G.P[m.id]=p;G.order.push(m.id);p.av=makeAvatar(p)},
@@ -1001,7 +1104,7 @@ const H_R={
  turrm(m){const q=G.turrets[m.id];if(q){scene.remove(q.mesh);delete G.turrets[m.id];if(curTur===m.id)closeShop()}},
  ev(m){G.evT=G.evT||{};G.evN=G.evN||{};if(m.f){G.evT[m.f]=G.time+m.dur;G.evN[m.f]=m.n}toast('Событие: '+m.n,3);addChat('<span style="color:#f0b429">Событие: '+esc(m.n)+'</span>');tone(880,.25,.1,'triangle')},
  tp(m){const t=G.P[m.id];if(!t)return;t.x=m.x;t.y=m.y;t.z=m.z;t.rx=undefined;if(m.id===G.myId){me.x=m.x;me.y=m.y;me.z=m.z;me.vx=me.vy=me.vz=0;me.camY=m.y}},
- chat(m){const p=G.P[m.id];if(p&&m.s)addChat(nameC(p)+': '+esc(m.s))},
+ chat(m){const p=G.P[m.id];if(!p||!m.s)return;G.chatHist=(G.chatHist||[]).concat([{id:m.id,n:p.name,s:m.s}]).slice(-60);if(isBlocked(p))return;addChat(nameC(p)+': <span class="raw">'+esc(cleanText(m.s))+'</span>')},
  dr(m){const q={...m,t:0,mesh:droneMesh(m.tm),rx:m.x,ry:m.y,rz:m.z,buzz:0};q.mesh.position.set(m.x,m.y,m.z);scene.add(q.mesh);G.drones[m.id]=q;
   if(m.o===G.myId){Drone={id:m.id,k:m.k,x:m.x,y:m.y,z:m.z,t:0,by:me.yaw,bp:me.pitch,sent:false,tx:0};q.mesh.visible=false;scoped=false;inp.fire=false}},
  rmd(m){const q=G.drones[m.id];if(q){scene.remove(q.mesh);delete G.drones[m.id]}if(Drone&&Drone.id===m.id)endDrone()},
@@ -1010,10 +1113,11 @@ const H_R={
  rmp(m){const q=G.placed[m.id];if(q){scene.remove(q.mesh);delete G.placed[m.id]}},
  pick(m){const mesh=box(.06,.06,.35,0xc8ccd0);mesh.position.set(m.x,m.y,m.z);scene.add(mesh);G.pickups[m.id]={...m,mesh}},
  rmk(m){const q=G.pickups[m.id];if(q){scene.remove(q.mesh);delete G.pickups[m.id]}},
- dmg(m){const my=m.id===G.myId;const t=G.P[m.id];if(t&&!G.host)t.hp=Math.max(0,t.hp-m.d);
+ dmg(m){if(m.by===G.myId&&m.h){G.headOn=G.headOn||{};G.headOn[m.id]=G.time}const my=m.id===G.myId;const t=G.P[m.id];if(t&&!G.host)t.hp=Math.max(0,t.hp-m.d);
   if(my){vigT=.5;sfx.hurt()}if(m.by===G.myId&&!my){hitT=.18;$('hit').style.background=m.h?'':'';sfx.hit()}},
  die(m){const t=G.P[m.id],b=G.P[m.by];if(!t)return;t.alive=false;t.hp=0;if(m.w!=='вышел')t.lives=t.lives;addFeed((b&&b!==t?nameC(b)+' ▸ ':'')+nameC(t)+(m.w&&m.w!=='вышел'?' ('+wName(m.w)+')':m.w==='вышел'?' вышел':''));
-  if(m.id===G.myId){G.deadAt=performance.now();adrenT=0;G.myDeaths=(G.myDeaths||0)+1;closeShop();closeAim()}if(t.av)t.av.visible=false},
+  if(m.id===G.myId){G.deadAt=performance.now();adrenT=0;G.myDeaths=(G.myDeaths||0)+1;closeShop();closeAim()}if(t.av)t.av.visible=false;
+  if(m.by===G.myId&&m.id!==G.myId&&m.w!=='вышел'){const w=m.w||'';G.lastKillT=G.time;qEvent('kill');if(['shotgun','ak','knife','pistol','rifle'].includes(w))qEvent('kill_'+w);if(EXP[w]&&w!=='tboom'&&w!=='quake'&&!w.startsWith('fpv'))qEvent('kill_boom');if(w.startsWith('fpv'))qEvent('kill_drone');if(t.zombie)qEvent('kill_zombie');if(G.headOn&&G.time-(G.headOn[m.id]||-9)<1)qEvent('head')}},
  spawn(m){const t=G.P[m.id];if(!t)return;t.alive=true;t.hp=maxHP(t);t.x=m.x;t.y=m.y;t.z=m.z;t.rx=undefined;
   if(m.id===G.myId){me.x=m.x;me.y=m.y;me.z=m.z;me.vx=me.vy=me.vz=0;me.camY=m.y;faceCenter();requestLock()}if(t.av)t.av.visible=m.id!==G.myId},
  gone(m){const t=G.P[m.id];if(t){t.alive=false;t.lives=0;removeAvatar(t)}},
@@ -1061,7 +1165,7 @@ function backToLobby(){G.state='lobby';G.ended=false;clearChunks();Object.values
 function showEnd(m){
  G.ended=true;exitPointer();closeShop();closeAim();endDrone();
  m.pl.forEach(q=>{const p=G.P[q[0]];if(p){p.kills=q[1];p.lives=q[2]}});
- const t=m.team>=0?TEAMS[m.team]:null;const mine=P()&&P().team===m.team;
+ const t=m.team>=0?TEAMS[m.team]:null;const mine=m.win!=null?m.win===G.myId:P()&&P().team===m.team;
  $('endTitle').textContent=m.title?((t&&mine?'Победа! ':'')+m.title):t?(mine?'Победа! ':'')+t.n+' выжили':'Ничья: выживших нет';$('endTitle').style.color=t?t.c:'';
  const tb=document.createElement('table');tb.innerHTML='<tr><th>Игрок</th><th>Команда</th><th>Убийства</th><th>Жизни</th></tr>'+G.order.filter(id=>!G.P[id].zombie).map(id=>{const p=G.P[id];return`<tr><td>${esc(p.name)}</td><td style="color:${TEAMS[p.team].c}">${TEAMS[p.team].n}</td><td>${p.kills}</td><td>${p.lives}</td></tr>`}).join('');
  $('endTable').textContent='';$('endTable').appendChild(tb);
@@ -1086,7 +1190,7 @@ function hostTick(dt){
  // Расставленная взрывчатка
  for(const id in G.placed){const q=G.placed[id];q.t+=dt;let go=q.deton&&G.time>=q.deton;
   if(q.k==='charge'){if(q.t>=3)go=true}
-  else if(q.t>1.2)for(const pid of G.order){const t=G.P[pid];if(!t.alive||t.team===q.tm)continue;const dx=t.x-q.x,dz=t.z-q.z,dy=t.y-q.y,d=Math.hypot(dx,dz);
+  else if(q.t>1.2)for(const pid of G.order){const t=G.P[pid];if(!t.alive||!foeOwn(t,q.o,q.tm))continue;const dx=t.x-q.x,dz=t.z-q.z,dy=t.y-q.y,d=Math.hypot(dx,dz);
    if(q.k==='mine'&&d<1.6&&Math.abs(dy)<1.6)go=true;
    if(q.k==='claymore'&&d<5&&Math.abs(dy)<2.5&&(dx*-Math.sin(q.yaw)+dz*-Math.cos(q.yaw))/(d||1)>.5)go=true}
   if(go){bcast({t:'rmp',id});doBoom(q.x,q.y+.4,q.z,q.k,q.o,q.tm,q.yaw)}}
@@ -1104,7 +1208,7 @@ function stepProjs(dt){
     if(q.k==='rpg'||q.k==='bm'||q.k==='knife'){done='wall'}
     else{if(solid(Math.floor(nx),Math.floor(q.y),Math.floor(q.z)))q.vx*=-.4;if(solid(Math.floor(q.x),Math.floor(ny),Math.floor(q.z))){q.vy*=-.3;q.vx*=.45;q.vz*=.45}if(solid(Math.floor(q.x),Math.floor(q.y),Math.floor(nz)))q.vz*=-.4}
    }else{q.x=nx;q.y=ny;q.z=nz}
-   if(G.host&&(q.k==='rpg'||q.k==='knife'))for(const pid of G.order){const t=G.P[pid];if(!t.alive||t.team===q.tm)continue;if(Math.hypot(t.x-q.x,t.y+.9-q.y,t.z-q.z)<1){done=pid;break}}
+   if(G.host&&(q.k==='rpg'||q.k==='knife'))for(const pid of G.order){const t=G.P[pid];if(!t.alive||!foeOwn(t,q.o,q.tm))continue;if(Math.hypot(t.x-q.x,t.y+.9-q.y,t.z-q.z)<1){done=pid;break}}
   }
   q.mesh.position.set(q.x,q.y,q.z);q.mesh.rotation.y=Math.atan2(q.vx,q.vz);
   if((q.k==='rpg'||q.k==='bm')&&Math.random()<dt*40)addFx(sprite(q.x,q.y,q.z,.5,0xdddddd,.55),.6,1.2,.3);
@@ -1152,7 +1256,12 @@ const EVENTS=[
  {n:'Разведка: все враги видны',f:'reveal',dur:15},
  {n:'Бесплатный FPV-дрон',run(){evAll((p,v)=>{v.inv.fpv1=(v.inv.fpv1||0)+1})}},
  {n:'Бесконечные патроны',f:'ammo',dur:15},
+ {n:'Кристальная жила в горе',run(){oreBurst(CRYS,1,4,10)}},
+ {n:'Золотая лихорадка у горы',run(){oreBurst(GOLD,4,3,22)}},
 ];
+function oreBurst(m,n,r,rad){const c=[];for(let k=0;k<n;k++){const a=Math.random()*6.283,d=Math.random()*rad,x=Math.round(CX+Math.cos(a)*d),z=Math.round(CZ+Math.sin(a)*d),y=surfaceY(x,z)-1;
+ for(let dy=-r;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){if(dx*dx+dy*dy+dz*dz>r*r)continue;const X=x+dx,Y=y+dy,Z=z+dz,v=getV(X,Y,Z);if(v&&breakable(v)&&Y>1)c.push([X,Y,Z,m])}}
+ if(c.length)bcast({t:'vset',c})}
 function runEvent(i){const e=EVENTS[i];bcast({t:'ev',n:e.n,f:e.f,dur:e.dur});if(e.run)e.run()}
 function eventsTick(){
  for(let i=G.evQ.length-1;i>=0;i--)if(G.time>=G.evQ[i].at){const q=G.evQ[i];G.evQ.splice(i,1);q.fn()}
@@ -1165,19 +1274,20 @@ function updateEnv(){const m=evOn('night')?1:evOn('fog')?2:0;if(m===envMode)retu
 
 /* ===== Режимы ===== */
 const MODES={
+ ffa:{n:'Каждый сам за себя',d:'Все против всех: союзников нет, у каждого ограниченные жизни, зона сжимается. Побеждает последний выживший.',tip:()=>`Все против всех! Зона сожмётся через ${Math.floor(ZONE_START/60)}:00`},
  br:{n:'Последняя команда',d:'Классика: у всех ограниченные жизни, зона сжимается, побеждает последняя живая команда.',tip:()=>`Копайте руду! Зона сожмётся через ${Math.floor(ZONE_START/60)}:00`},
  ctf:{n:'Захват флага',d:'Унесите вражеский флаг на свою базу, пока ваш флаг на месте. Победа за 3 захвата или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Принесите вражеский флаг на свою базу'},
  zombie:{n:'Зомби',d:'Все вместе против волн зомби. Продержитесь выбранное время. Волны каждые 20 секунд и всё сильнее.',tip:()=>'Продержитесь до конца таймера'},
  classes:{n:'Война классов',d:'Команды воюют классами из гардероба. У каждого свой набор и способность, снаряжение пополняется при возрождении. Первая команда с 25 убийствами побеждает, иначе побеждает счёт в конце времени.',tip:()=>'Первая команда с 25 убийствами побеждает'},
  koth:{n:'Царь горы',d:'Удерживайте вершину горы: каждая секунда без врагов на ней даёт очко. Победа за 60 очков или по счёту в конце времени. Возрождения без ограничений.',tip:()=>'Займите вершину горы и удержите её'},
 };
-const MODE_IDS=['br','ctf','zombie','koth','classes'],CLASS_WIN=25,CTF_WIN=3,KOTH_WIN=60,Z_MAX=24;
+const MODE_IDS=['br','ffa','ctf','zombie','koth','classes'],CLASS_WIN=25,CTF_WIN=3,KOTH_WIN=60,Z_MAX=24;
 function infLives(){return G.mode==='ctf'||G.mode==='koth'||G.mode==='classes'}
 function classOf(p){return G.mode==='classes'&&p?(CLS[p.cls]||CLS.assault):null}
 function maxHP(p){const c=classOf(p);return c?c.hp:100}
 function applyKit(p){const c=classOf(p);if(!c||!p.priv)return;const v=p.priv;for(const i in c.kit)v.inv[i]=Math.max(v.inv[i]||0,c.kit[i]);for(const a in c.ammo)v.ammo[a]=Math.max(v.ammo[a]||0,c.ammo[a]);if(c.vest&&!v.armorId){v.armorId=c.vest;v.armor=IT[c.vest].ap}}
 function kitSelect(){if(G.mode!=='classes'||G.kitSel||G.state!=='game')return;const f=ITEMS.find(i=>Inv.inv[i.id]>0&&['gun','rpg','knife'].includes(i.kind))||ITEMS.find(i=>Inv.inv[i.id]>0&&i.id==='drill');if(f){G.kitSel=true;held=f.id}}
-function endMatch(team,title){if(G.ended)return;bcast({t:'end',team,title,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}
+function endMatch(team,title,win){if(G.ended)return;bcast({t:'end',team,title,win,pl:G.order.map(id=>[id,G.P[id].kills,G.P[id].lives])})}
 function endByScore(){let best=-1,top=-1,tie=false;for(const t in G.score){const v=G.score[t];if(v>top){top=v;best=+t;tie=false}else if(v===top)tie=true}
  if(best<0||tie)endMatch(-1,'Ничья: счёт равный');else endMatch(best,TEAMS[best].n+': счёт '+top)}
 function modeInit(){
@@ -1191,7 +1301,7 @@ function modeInit(){
 }
 const flagState=msg=>({t:'fl',msg,sc:G.score,f:Object.values(G.flags).map(f=>[f.team,+f.x.toFixed(2),+f.y.toFixed(2),+f.z.toFixed(2),f.c,f.home?1:0])});
 function modeTick(dt){
- if(G.mode==='br')return;
+ if(zoneMode())return;
  if(G.mode==='classes'){G.clsT=(G.clsT||0)-dt;if(G.clsT<=0){G.clsT=1;G.clsN=(G.clsN||0)+1;G.order.forEach(id=>{const p=G.P[id];if(!p.alive||p.bot)return;
     if(p.cls==='medic'&&p.hp<maxHP(p))p.hp=Math.min(maxHP(p),p.hp+3);
     if(p.cls==='pilot'&&G.clsN%30===0){p.priv.inv.fpv1=(p.priv.inv.fpv1||0)+1;pushInv(id)}
@@ -1199,7 +1309,7 @@ function modeTick(dt){
     if(p.cls==='grenadier'&&G.clsN%20===0){p.priv.inv.m67=(p.priv.inv.m67||0)+1;pushInv(id)}
     if(p.cls==='rocketeer'&&G.clsN%15===0){p.priv.ammo.rpg=(p.priv.ammo.rpg||0)+1;pushInv(id)}})}
   for(const t in G.score)if(G.score[t]>=CLASS_WIN){endMatch(+t,TEAMS[t].n+': '+CLASS_WIN+' убийств');return}}
- if(G.mode==='ctf'){let chg=null;const fl=Object.values(G.flags);
+ if(G.mode==='ctf'){let chg=null,cap=null;const fl=Object.values(G.flags);
   fl.forEach(f=>{if(f.c){const c=G.P[f.c];if(!c||!c.alive){if(c){f.x=c.x;f.y=surfaceY(c.x,c.z);f.z=c.z}f.c=null;f.home=false;f.dropT=G.time;chg='Флаг брошен: '+TEAMS[f.team].n}}
    else if(!f.home&&G.time-f.dropT>20){f.x=f.hx;f.y=f.hy;f.z=f.hz;f.home=true;chg='Флаг вернулся на базу: '+TEAMS[f.team].n}});
   G.order.forEach(id=>{const p=G.P[id];if(!p.alive)return;const carrying=fl.find(f=>f.c===id);
@@ -1207,8 +1317,8 @@ function modeTick(dt){
     if(f.team!==p.team){if(!carrying){f.c=id;f.home=false;chg=p.name+' взял флаг: '+TEAMS[f.team].n}}
     else if(!f.home){f.x=f.hx;f.y=f.hy;f.z=f.hz;f.home=true;chg=p.name+' вернул свой флаг'}});
    const own=G.flags[p.team];
-   if(carrying&&own&&own.home&&Math.hypot(p.x-own.hx,p.z-own.hz)<3){carrying.c=null;carrying.x=carrying.hx;carrying.y=carrying.hy;carrying.z=carrying.hz;carrying.home=true;G.score[p.team]++;chg=p.name+' захватил флаг!';if(p.priv){p.priv.money+=150;pushInv(id)}}});
-  if(chg)bcast(flagState(chg));
+   if(carrying&&own&&own.home&&Math.hypot(p.x-own.hx,p.z-own.hz)<3){carrying.c=null;carrying.x=carrying.hx;carrying.y=carrying.hy;carrying.z=carrying.hz;carrying.home=true;G.score[p.team]++;cap=id;chg=p.name+' захватил флаг!';if(p.priv){p.priv.money+=150;pushInv(id)}}});
+  if(chg){const fm=flagState(chg);fm.cap=cap;bcast(fm)}
   for(const t in G.score)if(G.score[t]>=CTF_WIN){endMatch(+t,TEAMS[t].n+' захватили '+CTF_WIN+' флага');return}
  }
  if(G.mode==='koth'){G.hillT-=dt;if(G.hillT<=0){G.hillT=1;const h=G.hill,on=new Set();G.order.forEach(id=>{const p=G.P[id];if(p.alive&&Math.hypot(p.x-h.x,p.z-h.z)<h.r&&p.y>h.y-10)on.add(p.team)});
@@ -1249,7 +1359,7 @@ function botTick(p,dt){
  if(p.zombie){zTick(p,dt);return}
  const b=p.b;b.cd-=dt;b.nade-=dt;
  const tier=G.time<20?0:G.time<70?1:2;p.item=ITEM_IDX[tier===0?'pick0':tier===1?'pistol':'ak'];
- let target=null,best=1e9;G.order.forEach(id=>{const t=G.P[id];if(t.alive&&t.team!==p.team){const d=Math.hypot(t.x-p.x,t.z-p.z);if(d<best){best=d;target=t}}});
+ let target=null,best=1e9;G.order.forEach(id=>{const t=G.P[id];if(t.alive&&foe(t,p)){const d=Math.hypot(t.x-p.x,t.z-p.z);if(d<best){best=d;target=t}}});
  let gx=CX,gz=CZ;const zr=zoneR(G.time),rc=Math.hypot(p.x-CX,p.z-CZ);
  if(rc>zr-4){gx=CX;gz=CZ}else if(target&&(G.time>25||best<25)){gx=target.x;gz=target.z}else{b.wander+=dt*(Math.sin(G.time+p.x)*.8);gx=p.x+Math.cos(b.wander)*10;gz=p.z+Math.sin(b.wander)*10}
  const goal=modeGoal(p);if(goal){gx=goal.x;gz=goal.z}
@@ -1276,7 +1386,7 @@ function requestLock(){if(isTouch)return;try{const r=canvas.requestPointerLock()
 function exitPointer(){if(document.pointerLockElement)document.exitPointerLock()}
 document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(!locked){inp.fire=false;inp.alt=false;for(const k in keys)keys[k]=false}});
 $('lock').onclick=()=>{initAudio();requestLock()};
-document.addEventListener('mousemove',e=>{if(!locked)return;const s=scoped?.0007:.0022;me.yaw-=e.movementX*s;me.pitch=clamp(me.pitch-e.movementY*s,-1.54,1.54)});
+document.addEventListener('mousemove',e=>{if(!locked)return;const s=(scoped?.0007:.0022)*S.ms;me.yaw-=e.movementX*s;me.pitch=clamp(me.pitch-e.movementY*s*(S.inv?-1:1),-1.54,1.54)});
 document.addEventListener('mousedown',e=>{if(chatOpen&&locked){e.preventDefault();return}if(!locked||shopOpen||aimOpen||uiBlock||chatOpen)return;if(e.button===0){inp.fire=true;inp.firePress=true}if(e.button===2){inp.alt=true;inp.altPress=true}});
 document.addEventListener('mouseup',e=>{if(e.button===0)inp.fire=false;if(e.button===2)inp.alt=false});
 document.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1289,6 +1399,7 @@ document.addEventListener('keydown',e=>{
  if(e.code==='Escape'&&aimOpen){closeAim();return}
  if(e.code==='KeyB'){shopOpen?closeShop():openShop();return}
  if(e.code==='KeyE'){curTur?closeShop():openTurret();return}
+ if(e.code==='KeyP'){plistOpen?closePlist():openPlist();return}
  if(e.code==='KeyV')Voice.toggle();
  if(e.code==='KeyY')Voice.channel();
  if(shopOpen||aimOpen||uiBlock)return;
@@ -1305,7 +1416,7 @@ $('joyZone').addEventListener('touchstart',e=>{e.preventDefault();initAudio();co
 $('lookZone').addEventListener('touchstart',e=>{e.preventDefault();initAudio();const t=e.changedTouches[0];look.id=t.identifier;look.x=t.clientX;look.y=t.clientY},{passive:false});
 document.addEventListener('touchmove',e=>{for(const t of e.changedTouches){
  if(t.identifier===joy.id){let dx=t.clientX-joy.x0,dy=t.clientY-joy.y0;const js=LAY.joyS||1,l=Math.hypot(dx,dy),m=48*js;if(l>m){dx*=m/l;dy*=m/l}joy.dx=dx/m;joy.dy=dy/m;$('joy').firstChild.style.transform=`translate(${dx/js}px,${dy/js}px)`}
- if(t.identifier===look.id||t.identifier===fireT.id){const o=t.identifier===look.id?look:fireT;const s=scoped?.0016:.0052;me.yaw-=(t.clientX-o.x)*s;me.pitch=clamp(me.pitch-(t.clientY-o.y)*s,-1.54,1.54);o.x=t.clientX;o.y=t.clientY}
+ if(t.identifier===look.id||t.identifier===fireT.id){const o=t.identifier===look.id?look:fireT;const s=(scoped?.0016:.0052)*S.ts;me.yaw-=(t.clientX-o.x)*s;me.pitch=clamp(me.pitch-(t.clientY-o.y)*s*(S.inv?-1:1),-1.54,1.54);o.x=t.clientX;o.y=t.clientY}
 }},{passive:true});
 const touchEnd=e=>{for(const t of e.changedTouches){if(t.identifier===joy.id){joy.id=null;joy.dx=joy.dy=0;$('joy').style.display='none';$('joy').firstChild.style.transform=''}if(t.identifier===look.id)look.id=null;if(t.identifier===fireT.id)fireT.id=null}};
 document.addEventListener('touchend',touchEnd);document.addEventListener('touchcancel',touchEnd);
@@ -1323,6 +1434,7 @@ bindHold($('tSprint'),()=>{inp.sprint=!inp.sprint;$('tSprint').style.borderColor
  el.addEventListener('touchcancel',()=>{sw.id=null})}
 bindHold($('tSet'),()=>{},()=>openLayout());
 bindHold($('tTur'),()=>{},()=>{curTur?closeShop():openTurret()});
+bindHold($('tPl'),()=>{},()=>{plistOpen?closePlist():openPlist()});
 bindHold($('tChat'),()=>{},()=>openChat());
 bindHold($('tShop'),()=>{shopOpen?closeShop():openShop()});
 $('hud').addEventListener('touchstart',()=>{},{passive:true});
@@ -1338,7 +1450,7 @@ function eye(){return[me.x,me.y+1.55,me.z]}
 function lookDir(sp){const cp=Math.cos(me.pitch);let x=-Math.sin(me.yaw)*cp,y=Math.sin(me.pitch),z=-Math.cos(me.yaw)*cp;if(sp){x+=(Math.random()-.5)*sp*2;y+=(Math.random()-.5)*sp*2;z+=(Math.random()-.5)*sp*2;const l=Math.hypot(x,y,z);x/=l;y/=l;z/=l}return[x,y,z]}
 function rayBox(o,d,mn,mx){let t0=0,t1=1e9;for(let i=0;i<3;i++){if(Math.abs(d[i])<1e-6){if(o[i]<mn[i]||o[i]>mx[i])return null;continue}let a=(mn[i]-o[i])/d[i],b=(mx[i]-o[i])/d[i];if(a>b){const q=a;a=b;b=q}t0=Math.max(t0,a);t1=Math.min(t1,b);if(t0>t1)return null}return t0}
 function rayPlayers(o,d,max){let best=null,bd=max;const me_=P();
- G.order.forEach(id=>{if(id===G.myId)return;const t=G.P[id];if(!t.alive||t.team===me_.team)return;const x=t.rx!=null?t.rx:t.x,y=t.ry!=null?t.ry:t.y,z=t.rz!=null?t.rz:t.z;
+ G.order.forEach(id=>{if(id===G.myId)return;const t=G.P[id];if(!t.alive||!foe(t,me_))return;const x=t.rx!=null?t.rx:t.x,y=t.ry!=null?t.ry:t.y,z=t.rz!=null?t.rz:t.z;
   const r=rayBox(o,d,[x-.36,y,z-.36],[x+.36,y+1.82,z+.36]);if(r!=null&&r<bd){bd=r;best={p:t,d:r,head:o[1]+d[1]*r>y+1.38}}});
  return best}
 function fireGun(it){
@@ -1353,20 +1465,20 @@ function fireGun(it){
  const heavy=it.id==='rifle'||it.id==='shotgun';recoil=Math.min(1,recoil+(heavy?1:.35));me.pitch=clamp(me.pitch+(heavy?.03:.009),-1.54,1.54);me.yaw+=(Math.random()-.5)*.006;muzzleT=.04;
 }
 let muzzleT=0;
-function rayTurrets(o,d,max){let best=null,bd=max;const my=P();for(const id in G.turrets){const q=G.turrets[id];if(q.tm===my.team)continue;const r=rayBox(o,d,[q.x-.45,q.y,q.z-.45],[q.x+.45,q.y+1.4,q.z+.45]);if(r!=null&&r<bd){bd=r;best=q}}return best}
+function rayTurrets(o,d,max){let best=null,bd=max;const my=P();for(const id in G.turrets){const q=G.turrets[id];if(!foeOwn(my,q.o,q.tm))continue;const r=rayBox(o,d,[q.x-.45,q.y,q.z-.45],[q.x+.45,q.y+1.4,q.z+.45]);if(r!=null&&r<bd){bd=r;best=q}}return best}
 function turretMesh(k,tm){const g=new THREE.Group(),c=k==='t_med'?0xdddddd:k==='t_nade'?0x4a5a35:0x3a3f44,head=new THREE.Group();
  g.add(box(.8,.2,.8,0x555a50,0,.1,0),box(.2,.75,.2,0x555a50,0,.55,0),box(.82,.06,.82,TEAMS[tm].h,0,.22,0));head.position.y=1.1;head.add(box(.46,.36,.5,c));
  if(k==='t_med'){head.add(box(.3,.08,.51,0xcc2222),box(.08,.3,.51,0xcc2222))}
  else if(k==='t_nade'){head.add(box(.2,.2,.65,0x2f3a23,0,.05,-.45))}
  else head.add(box(.08,.08,.75,0x1b1b1d,0,.03,-.55));
  g.add(head);g.userData.head=head;
- const cv=document.createElement('canvas');cv.width=256;cv.height=36;const x=cv.getContext('2d');x.fillStyle='#000a';x.fillRect(0,0,256,36);x.font='bold 22px system-ui';x.textAlign='center';x.fillStyle=TEAMS[tm].c;x.fillText(IT[k].name.replace(' турель',''),128,26);
+ const cv=document.createElement('canvas');cv.width=256;cv.height=36;const x=cv.getContext('2d');x.fillStyle='#000a';x.fillRect(0,0,256,36);x.font='bold 22px system-ui';x.textAlign='center';x.fillStyle=TEAMS[tm].c;x.fillText(tr(IT[k].name.replace(' турель','')),128,26);
  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));tag.scale.set(1.3,.18,1);tag.position.y=1.65;g.add(tag);return g}
 function updateTurrets(dt){for(const id in G.turrets){const q=G.turrets[id];q.mesh.position.y=lerp(q.mesh.position.y,q.y,Math.min(1,dt*12));let d=(q.yaw||0)-q.ry;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;q.ry+=d*Math.min(1,dt*10);q.head.rotation.y=q.ry}}
-function nearTurret(){const my=P();if(!my||!my.alive)return null;let best=null,bd=3.5;for(const id in G.turrets){const q=G.turrets[id];if(q.tm!==my.team)continue;const d=Math.hypot(q.x-me.x,q.z-me.z);if(d<bd&&Math.abs(q.y-me.y)<3){bd=d;best=q}}return best}
+function nearTurret(){const my=P();if(!my||!my.alive)return null;let best=null,bd=3.5;for(const id in G.turrets){const q=G.turrets[id];if(foeOwn(my,q.o,q.tm))continue;const d=Math.hypot(q.x-me.x,q.z-me.z);if(d<bd&&Math.abs(q.y-me.y)<3){bd=d;best=q}}return best}
 function turStatus(q){const l=q.l;if(q.k==='t_def')return l.w?`${IT[l.w].name}, патронов ${l.ammo||0}`:'пусто';return (TUR_ITEMS[q.k]||[]).map(i=>IT[i].name+' '+(l[i]||0)).join(', ')}
 function openTurret(){if(shopOpen||Drone||aimOpen||uiBlock||chatOpen)return;const q=nearTurret();if(!q)return;curTur=q.id;shopOpen=true;scoped=false;$('shop').style.display='flex';exitPointer();renderShop()}
-function rayDrones(o,d,max){let best=null,bd=max;const my=P();for(const id in G.drones){const q=G.drones[id];if(q.tm===my.team)continue;const r=rayBox(o,d,[q.rx-.6,q.ry-.6,q.rz-.6],[q.rx+.6,q.ry+.6,q.rz+.6]);if(r!=null&&r<bd){bd=r;best=q}}return best}
+function rayDrones(o,d,max){let best=null,bd=max;const my=P();for(const id in G.drones){const q=G.drones[id];if(!foeOwn(my,q.o,q.tm))continue;const r=rayBox(o,d,[q.rx-.6,q.ry-.6,q.rz-.6],[q.rx+.6,q.ry+.6,q.rz+.6]);if(r!=null&&r<bd){bd=r;best=q}}return best}
 
 /* ===== FPV-дроны и наведение ракеты ===== */
 let Drone=null,aimOpen=false;
@@ -1380,7 +1492,7 @@ function updateDrone(dt){
  const steps=Math.ceil(Math.hypot(vx,vy,vz)*dt/.3)||1;let blow=inp.firePress||D.t>=it.batt;inp.firePress=false;inp.altPress=false;const my=P();
  for(let i=0;i<steps&&!blow;i++){const nx=D.x+vx*dt/steps,ny=D.y+vy*dt/steps,nz=D.z+vz*dt/steps;
   if(solid(Math.floor(nx),Math.floor(ny),Math.floor(nz))||ny>H+15){blow=true;break}D.x=nx;D.y=ny;D.z=nz;
-  for(const id of G.order){const t=G.P[id];if(t.alive&&t.team!==my.team&&Math.hypot((t.rx!=null?t.rx:t.x)-D.x,(t.ry!=null?t.ry:t.y)+.9-D.y,(t.rz!=null?t.rz:t.z)-D.z)<1.4)blow=true}}
+  for(const id of G.order){const t=G.P[id];if(t.alive&&foe(t,my)&&Math.hypot((t.rx!=null?t.rx:t.x)-D.x,(t.ry!=null?t.ry:t.y)+.9-D.y,(t.rz!=null?t.rz:t.z)-D.z)<1.4)blow=true}}
  const q=G.drones[D.id];if(q){q.x=D.x;q.y=D.y;q.z=D.z;q.yaw=me.yaw}
  if(blow&&!D.sent){D.sent=true;toHost({t:'drb',id:D.id,x:+D.x.toFixed(2),y:+D.y.toFixed(2),z:+D.z.toFixed(2)});return}
  D.tx-=dt;if(D.tx<=0&&!D.sent){D.tx=.066;toHostFast({t:'drp',id:D.id,x:+D.x.toFixed(2),y:+D.y.toFixed(2),z:+D.z.toFixed(2),yaw:+me.yaw.toFixed(2)})}
@@ -1448,6 +1560,21 @@ function updateHeld(dt){
  }
 }
 
+/* ===== Геймпад ===== */
+let padOn=false;const padPrev=[];
+function padPoll(dt,blocked){const pads=navigator.getGamepads?navigator.getGamepads():[];let g=null;for(const q of pads)if(q&&q.connected){g=q;break}
+ if(!g){padOn=false;return null}
+ const ax=i=>{const v=g.axes[i]||0;return Math.abs(v)<.15?0:v},bt=i=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>.5)),edge=i=>bt(i)&&!padPrev[i];
+ const any=g.buttons.some(b=>b&&b.pressed)||g.axes.some(v=>Math.abs(v)>.3);if(any)padOn=true;if(!padOn)return null;
+ if(!blocked){const rs=2.6*dt*S.gs*(scoped?.35:1);me.yaw-=ax(2)*rs;me.pitch=clamp(me.pitch-ax(3)*rs*(S.inv?-1:1),-1.54,1.54)}
+ if(edge(7)){inp.fire=true;inp.firePress=true}if(!bt(7)&&padPrev[7])inp.fire=false;
+ if(edge(6)){inp.alt=true;inp.altPress=true}if(!bt(6)&&padPrev[6])inp.alt=false;
+ inp.jump=bt(0);if(edge(1))reload();if(edge(4))cycle(-1);if(edge(5)||edge(3))cycle(1);if(edge(10))inp.sprint=!inp.sprint;
+ if(edge(2)){if(curTur)closeShop();else if(nearTurret())openTurret();else shopOpen?closeShop():openShop()}
+ if(edge(9))shopOpen?closeShop():openShop();if(edge(8))plistOpen?closePlist():openPlist();
+ for(let i=0;i<g.buttons.length;i++)padPrev[i]=bt(i);
+ return{x:ax(0),y:ax(1)}}
+
 /* ===== Кадр игрока ===== */
 let sendT=0,walk=0,alives=true;
 function updateMe(dt){
@@ -1455,6 +1582,7 @@ function updateMe(dt){
  const blocked=shopOpen||aimOpen||uiBlock||!pl.alive||!!Drone;
  let fw=0,st=0;
  if(!blocked){fw=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);st=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);if(joy.id!=null){fw=-joy.dy;st=joy.dx}}
+ const gp=padPoll(dt,blocked);if(gp&&!blocked&&(Math.abs(gp.x)>.15||Math.abs(gp.y)>.15)){fw=-gp.y;st=gp.x}
  const len=Math.hypot(fw,st);if(len>1){fw/=len;st/=len}
  const sprint=(keys.ShiftLeft||keys.ShiftRight||inp.sprint)&&fw>0;
  adrenT=Math.max(0,adrenT-dt);const sp=(sprint?10.5:7.5)*(scoped?.5:1)*(adrenT>0?1.4:1)*(evOn('speed')?1.5:1)*(classOf(pl)?classOf(pl).spd:1);
@@ -1467,8 +1595,8 @@ function updateMe(dt){
  me.camY+=(me.y-me.camY)*Math.min(1,dt*(Math.abs(me.y-me.camY)>1.5?30:18));
  if(Math.abs(me.y-me.camY)>3)me.camY=me.y;
  sendT-=dt;if(sendT<=0&&!G.host&&pl.alive){sendT=.066;toHostFast({t:'p',x:+me.x.toFixed(2),y:+me.y.toFixed(2),z:+me.z.toFixed(2),yaw:+pl.yaw.toFixed(2),pitch:+pl.pitch.toFixed(2),i:ITEM_IDX[held]||0})}
- if(Drone&&pl.alive&&!G.ended){if(isTouch||locked)updateDrone(dt);$('mineBar').style.display='none';mineBox.visible=false}
- else if(pl.alive&&!shopOpen&&!aimOpen&&!uiBlock&&!G.ended&&(isTouch||locked))updateHeld(dt);else{inp.firePress=inp.altPress=false;$('mineBar').style.display='none';mineBox.visible=false}
+ if(Drone&&pl.alive&&!G.ended){if(isTouch||locked||padOn)updateDrone(dt);$('mineBar').style.display='none';mineBox.visible=false}
+ else if(pl.alive&&!shopOpen&&!aimOpen&&!uiBlock&&!G.ended&&(isTouch||locked||padOn))updateHeld(dt);else{inp.firePress=inp.altPress=false;$('mineBar').style.display='none';mineBox.visible=false}
  // Камера
  const speed=Math.hypot(me.vx,me.vz);if(me.ground)walk+=speed*dt*1.3;
  const bob=Math.sin(walk*2)*.035*Math.min(1,speed/7);shake=Math.max(0,shake-dt*2.2);
@@ -1477,7 +1605,7 @@ function updateMe(dt){
   camera.position.set(me.x,me.camY+1.55+bob,me.z);
   camera.rotation.set(me.pitch+(Math.random()-.5)*shake*.05,me.yaw+(Math.random()-.5)*shake*.05,(Math.random()-.5)*shake*.03);
  }else spectate(dt);
- const f=Drone?95:scoped?22:75;if(Math.abs(camera.fov-f)>.1){camera.fov=lerp(camera.fov,f,Math.min(1,dt*16));camera.updateProjectionMatrix()}
+ const f=Drone?95:scoped?22:S.fov;if(Math.abs(camera.fov-f)>.1){camera.fov=lerp(camera.fov,f,Math.min(1,dt*16));camera.updateProjectionMatrix()}
  $('scope').style.display=scoped?'block':'none';$('cross').style.display=scoped?'none':'';
  // Рука с предметом
  setVm(held);vmRoot.visible=pl.alive&&!scoped&&!Drone;
@@ -1542,10 +1670,10 @@ function renderShop(){
   const isAmmo=it.kind==='ammo',own=isAmmo?(Inv.ammo[it.ammo]||0):(Inv.inv[it.id]||0),uniq=['gun','rpg','knife','tool'].includes(it.kind);
   const owned=isAmmo?`В запасе: ${own}`:uniq?(own?'Куплено':'Не куплено'):`В рюкзаке: ${own}`;
   if(it.kind==='armor'){const w=Inv.armorId===it.id,full=w&&Inv.armor>=it.ap;
-   card(it.name,it.d,w?`Надет: прочность ${Math.ceil(Inv.armor)} из ${it.ap}`:'Не надет',`Купить $${it.price}`,()=>toHost({t:'buy',id:it.id}),Inv.money<it.price||full,`Продать $${w?Math.floor(it.price/2*Inv.armor/it.ap):Math.floor(it.price/2)}`,()=>toHost({t:'sell',id:it.id}),!w);return}
+   card(it.name,it.d,w?`Надет: прочность ${Math.ceil(Inv.armor)} из ${it.ap}`:'Не надет',`Купить $${it.price}`,()=>{if(Inv.money>=it.price)qEvent('buy');toHost({t:'buy',id:it.id})},Inv.money<it.price||full,`Продать $${w?Math.floor(it.price/2*Inv.armor/it.ap):Math.floor(it.price/2)}`,()=>toHost({t:'sell',id:it.id}),!w);return}
   if(it.price<=0){card(it.name,it.d,'Выдана в начале боя',null,null,0,'Не продаётся',()=>{},true);return}
   const sp=Math.floor(it.price/2);
-  card(it.name,it.d,owned,`Купить $${it.price}`,()=>toHost({t:'buy',id:it.id}),Inv.money<it.price||(uniq&&own>0),`Продать $${sp}`,()=>toHost({t:'sell',id:it.id}),isAmmo?own<it.pack:own<1)});
+  card(it.name,it.d,owned,`Купить $${it.price}`,()=>{if(Inv.money>=it.price)qEvent('buy');toHost({t:'buy',id:it.id})},Inv.money<it.price||(uniq&&own>0),`Продать $${sp}`,()=>toHost({t:'sell',id:it.id}),isAmmo?own<it.pack:own<1)});
 }
 $('shopClose').onclick=closeShop;$('sellAll').onclick=()=>toHost({t:'sellOre'});
 function livesTxt(n){n=Math.max(0,n);return MAX_LIVES>5?'♥ '+n+'/'+MAX_LIVES:'♥'.repeat(n)+'♡'.repeat(Math.max(0,MAX_LIVES-n))}
@@ -1558,7 +1686,7 @@ function drawMap(){if(!mapBase)return;const g=mapG;g.drawImage(mapBase,0,0);cons
  for(const t in G.flags){const f=G.flags[t];const c=f.c&&G.P[f.c];g.fillStyle=TEAMS[t].c;g.strokeStyle='#fff';g.lineWidth=1;g.beginPath();g.rect((c?c.x:f.x)-3,(c?c.z:f.z)-3,6,6);g.fill();g.stroke()}
  if(G.hill){g.strokeStyle=G.hillO>=0?TEAMS[G.hillO].c:'#fff';g.lineWidth=2;g.beginPath();g.arc(G.hill.x,G.hill.z,G.hill.r,0,7);g.stroke()}
  for(const id in G.projs){const q=G.projs[id];if(q.k==='bm'){g.strokeStyle='#ff2a2a';g.beginPath();g.arc(q.x,q.z,EXP.bm.dr,0,7);g.stroke()}}
- G.order.forEach(id=>{const p=G.P[id];if(!p.alive||id===G.myId||(p.team!==pl.team&&!evOn('reveal')&&!(classOf(pl)&&pl.cls==='scout')))return;g.fillStyle=TEAMS[p.team].c;g.beginPath();g.arc(p.x,p.z,3,0,7);g.fill()});
+ G.order.forEach(id=>{const p=G.P[id];if(!p.alive||id===G.myId||((G.mode==='ffa'||p.team!==pl.team)&&!evOn('reveal')&&!(classOf(pl)&&pl.cls==='scout')))return;g.fillStyle=TEAMS[p.team].c;g.beginPath();g.arc(p.x,p.z,3,0,7);g.fill()});
  g.save();g.translate(me.x,me.z);g.rotate(-me.yaw);g.fillStyle='#fff';g.beginPath();g.moveTo(0,-6);g.lineTo(4,4);g.lineTo(-4,4);g.fill();g.restore()}
 let uiT=0;
 function updateUI(dt){
@@ -1567,10 +1695,10 @@ function updateUI(dt){
  const pl=P();if(!pl)return;
  const t=G.time,tm=$('timer'),zt=$('zoneTxt');
  const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
- if(G.mode!=='br'){tm.textContent=fmt(Math.max(0,ZONE_START-t));zt.textContent=modeTxt();zt.className=''}else if(t<ZONE_START){tm.textContent=fmt(ZONE_START-t);zt.textContent='до сужения зоны';zt.className=''}else{tm.textContent=fmt(Math.max(0,ZONE_START+ZONE_DUR-t));zt.textContent=t<ZONE_START+ZONE_DUR?'зона сужается':'зона сжалась';zt.className='bad'}
+ if(!zoneMode()){tm.textContent=fmt(Math.max(0,ZONE_START-t));zt.textContent=modeTxt();zt.className=''}else if(t<ZONE_START){tm.textContent=fmt(ZONE_START-t);zt.textContent='до сужения зоны';zt.className=''}else{tm.textContent=fmt(Math.max(0,ZONE_START+ZONE_DUR-t));zt.textContent=t<ZONE_START+ZONE_DUR?'зона сужается':'зона сжалась';zt.className='bad'}
  const out=Math.hypot(me.x-CX,me.z-CZ)>zoneR(t)&&pl.alive;$('zoneVig').style.opacity=out?1:0;if(out&&uiT>-1)zt.textContent='Вы вне зоны! Бегите к центру';
- zoneMesh.visible=G.mode==='br'&&t>=ZONE_START-15;const zr=zoneR(t);zoneMesh.scale.set(zr,1,zr);
- const tp=$('tpills');tp.textContent='';TEAMS.forEach((tt,i)=>{const pp=G.order.map(id=>G.P[id]).filter(p=>p.team===i&&!p.zombie);if(!pp.length)return;const s=document.createElement('span');s.style.background=tt.c;const l=pp.reduce((a,p)=>a+p.lives,0);s.textContent=infLives()||G.mode==='ctf'?(G.score[i]||0):l;s.title=tt.n;if(l===0)s.style.opacity=.3;tp.appendChild(s)});
+ zoneMesh.visible=zoneMode()&&t>=ZONE_START-15;const zr=zoneR(t);zoneMesh.scale.set(zr,1,zr);
+ const tp=$('tpills');tp.textContent='';if(G.mode==='ffa'){const s=document.createElement('span');s.style.background='#555';s.title='Осталось бойцов';s.textContent=G.order.filter(id=>{const p=G.P[id];return p.lives>0||p.alive}).length;tp.appendChild(s)}else TEAMS.forEach((tt,i)=>{const pp=G.order.map(id=>G.P[id]).filter(p=>p.team===i&&!p.zombie);if(!pp.length)return;const s=document.createElement('span');s.style.background=tt.c;const l=pp.reduce((a,p)=>a+p.lives,0);s.textContent=infLives()||G.mode==='ctf'?(G.score[i]||0):l;s.title=tt.n;if(l===0)s.style.opacity=.3;tp.appendChild(s)});
  $('lives').textContent=infLives()?'♥ ∞':livesTxt(pl.lives);$('hpTxt').textContent=Math.ceil(pl.hp);$('hpBar').firstChild.style.width=Math.min(100,pl.hp/maxHP(pl)*100)+'%';$('hpBar').firstChild.style.background=pl.hp>50?'var(--green)':pl.hp>25?'var(--amber)':'var(--red)';
  const av=IT[Inv.armorId];$('arBar').style.display=av?'block':'none';if(av)$('arBar').firstChild.style.width=(Inv.armor/av.ap*100)+'%';$('adrTxt').textContent=adrenT>0?'Адреналин '+Math.ceil(adrenT)+' с':'';
  const it=IT[held];$('itemName').textContent=it?it.name:'';
@@ -1584,7 +1712,7 @@ function updateUI(dt){
  if(nt&&!shopOpen){h.style.display='block';h.textContent=`${isTouch?'Кнопка ТУР.':'E'}: ${IT[nt.k].name} (${turStatus(nt)})`}else
  if(near&&!shopOpen){h.style.display='block';h.textContent=isTouch?'Вы на базе: магазин открыт (кнопка МАГ.)':'Вы на базе: B открывает магазин'}else if(!mineTarget)h.style.display='none';
  $('tShop').style.opacity=near?1:.35;
- $('lock').style.display=(!isTouch&&!locked&&!shopOpen&&!aimOpen&&!uiBlock&&!chatOpen&&pl.alive&&!G.ended&&G.state==='game')?'flex':'none';
+ $('lock').style.display=(!isTouch&&!padOn&&!locked&&!shopOpen&&!aimOpen&&!uiBlock&&!chatOpen&&pl.alive&&!G.ended&&G.state==='game')?'flex':'none';
  const alt=$('tAlt');alt.style.visibility=(it&&(it.scope||it.kind==='knife'))?'visible':'hidden';alt.textContent=it&&it.scope?'ПРИЦЕЛ':'БРОСОК';
  drawMap();renderBar();Voice.ui();
 }
@@ -1595,7 +1723,7 @@ const Voice={stream:null,on:false,mode:'all',called:{},audios:{},peer:null,an:{}
  attach(id,s){this.detach(id);const a=new Audio();a.srcObject=s;a.autoplay=true;a.setAttribute('playsinline','');a.play().catch(()=>{});this.audios[id]=a;document.body.appendChild(a);this.applyMute();
   try{initAudio();if(AC){const n=AC.createAnalyser();n.fftSize=256;AC.createMediaStreamSource(s).connect(n);this.an[id]=n}}catch(e){}},
  detach(id){const a=this.audios[id];if(a){a.srcObject=null;a.remove();delete this.audios[id]}delete this.an[id]},
- applyMute(){const my=P();for(const id in this.audios){const p=G.P[id];this.audios[id].muted=!!(p&&my&&p.vc==='team'&&p.team!==my.team)}},
+ applyMute(){const my=P();for(const id in this.audios){const p=G.P[id];this.audios[id].muted=!!(p&&(isBlocked(p)||(my&&p.vc==='team'&&p.team!==my.team)))}},
  async toggle(){
   if(!this.peer){toast('Голос недоступен без подключения к серверу',2);return}
   if(!this.stream){
@@ -1615,6 +1743,11 @@ $('micBtn').onclick=()=>Voice.toggle();$('micBtn').addEventListener('touchstart'
 $('lobbyMic').onclick=()=>{initAudio();Voice.toggle()};$('lobbyVc').onclick=()=>Voice.channel();
 document.addEventListener('pointerdown',()=>{initAudio();for(const id in Voice.audios)if(Voice.audios[id].paused)Voice.audios[id].play().catch(()=>{})});
 
+/* ===== Фильтр нецензурных слов ===== */
+const BAD=[/^(за|у|вы|по|на|до|от|отъ|съ|разъ|при|въ|недо|пере)?[её]б(а|у|л|н|е|и|ё|ы|ш)/,/ху[йеёяюи]/,/пизд/,/^бля/,/^су(ка|ки|ку|кой|чк|чар)/,/^муда[кч]|^мудил/,/^пид[оа]?р/,/^гандон/,/^шлюх/,/^залуп/,/^манд[аеуы]$/,/^дроч/,
+ /fuck/,/^shit/,/^bitch/,/^cunt/,/^dick(head)?$/,/^asshole/,/^nigg/,/^fag/,/^whore/,/^slut/,/^retard/];
+function cleanText(s){return String(s).replace(/[a-zа-яё0-9]+/gi,w=>{const l=w.toLowerCase().replace(/0/g,'о');return BAD.some(r=>r.test(l))?'*'.repeat(w.length):w})}
+
 /* ===== Чат ===== */
 let chatOpen=false,uiBlock=false;
 const chatEl=$('chatBox');
@@ -1630,25 +1763,26 @@ $('chatWrap').addEventListener('submit',e=>{e.preventDefault();chatSubmit()});
 $('chatCancel').onclick=closeChat;
 /* ===== Профиль: статистика, монеты, гардероб ===== */
 const PROF_KEY='shtolni-profile-v1',COIN_PER_KILL=20;
-let PF={coins:0,earned:0,matches:0,wins:0,kills:0,deaths:0,best:0,modeWins:{},owned:{},hat:null,suit:null,back:null,cls:'assault'};
+let PF={coins:0,earned:0,matches:0,wins:0,kills:0,deaths:0,best:0,modeWins:{},owned:{},hat:null,suit:null,back:null,cls:'assault',xp:0,seasonXp:0,claimed:{},quests:null,ach:{},st:{},blocked:{},updated:0};
 try{Object.assign(PF,JSON.parse(localStorage.getItem(PROF_KEY))||{})}catch(e){}
-function savePF(){try{localStorage.setItem(PROF_KEY,JSON.stringify(PF))}catch(e){}}
-function profMsg(){return{t:'prof',cos:{hat:PF.hat,suit:PF.suit,back:PF.back},cls:PF.cls}}
+function savePF(){PF.updated=Date.now();try{localStorage.setItem(PROF_KEY,JSON.stringify(PF))}catch(e){}cloudPush()}
+function profMsg(){return{t:'prof',cos:{hat:PF.hat,suit:PF.suit,back:PF.back},cls:PF.cls,acc:ACC?ACC.id:'',lvl:lvlInfo(PF.xp||0).lvl}}
 function awardMatch(m){const pl=P();if(!pl||G.awarded)return null;G.awarded=true;const k=pl.kills||0,d=G.myDeaths||0,gain=Math.max(0,k-d)*COIN_PER_KILL;
- const won=m.team>=0&&pl.team===m.team;PF.matches++;PF.kills+=k;PF.deaths+=d;PF.best=Math.max(PF.best,k);PF.coins+=gain;PF.earned+=gain;if(won){PF.wins++;PF.modeWins[G.mode]=(PF.modeWins[G.mode]||0)+1}savePF();renderCoins();
- return`Убийства ${k} − смерти ${d} = ${Math.max(0,k-d)} × $${COIN_PER_KILL}: +$${gain} монет. Всего: $${PF.coins}.`}
-function renderCoins(){$('menuCoins').textContent='Монеты: $'+PF.coins;$('storeCoins').textContent='Монеты: $'+PF.coins}
+ const won=m.win!=null?m.win===G.myId:m.team>=0&&pl.team===m.team;qEvent('match');if(won)qEvent('win');const xpGain=25+k*10+(won?100:0),lv0=lvlInfo(PF.xp).lvl;addXp(xpGain);PF.matches++;PF.kills+=k;PF.deaths+=d;PF.best=Math.max(PF.best,k);PF.coins+=gain;PF.earned+=gain;if(won){PF.wins++;PF.modeWins[G.mode]=(PF.modeWins[G.mode]||0)+1}savePF();renderCoins();
+ checkAch();const lv1=lvlInfo(PF.xp).lvl;savePF();
+ return`Убийства ${k} − смерти ${d} = ${Math.max(0,k-d)} × $${COIN_PER_KILL}: +$${gain} монет. Опыт +${xpGain}${lv1>lv0?', новый уровень '+lv1:''}. Всего: $${PF.coins}.`}
+function renderCoins(){$('menuCoins').textContent='Ур. '+lvlInfo(PF.xp).lvl+' · Монеты: $'+PF.coins;$('storeCoins').textContent='Монеты: $'+PF.coins}
 function renderStats(){const kd=PF.deaths?(PF.kills/PF.deaths).toFixed(2):PF.kills.toFixed(2),wr=PF.matches?Math.round(PF.wins/PF.matches*100):0;
  const rows=[['Монеты','$'+PF.coins],['Заработано всего','$'+PF.earned],['Боёв',PF.matches],['Побед',PF.wins],['Процент побед',wr+'%'],['Убийств',PF.kills],['Смертей',PF.deaths],['У/С',kd],['Лучший бой, убийств',PF.best]];
  MODE_IDS.forEach(m=>rows.push(['Побед: '+MODES[m].n,PF.modeWins[m]||0]));
  const g=$('statGrid');g.textContent='';rows.forEach(([a,b])=>{const d=document.createElement('div'),v=document.createElement('b'),l=document.createElement('span');v.textContent=b;l.textContent=a;d.append(v,l);g.appendChild(d)})}
-$('btnStats').onclick=()=>{renderStats();$('stats').style.display='flex'};$('statsClose').onclick=()=>{$('stats').style.display='none'};
+$('btnStats').onclick=()=>{profTab='stats';renderProfile();$('stats').style.display='flex'};$('statsClose').onclick=()=>{$('stats').style.display='none'};
 let storeOpen=false,storeTab='hat',pvR=null,pvS=null,pvC=null,pvA=null;
 const STORE_TABS=[['hat','Шляпы',HATS],['suit','Костюмы',SUITS],['back','Спина',BACKS],['cls','Классы',CLASS_LIST]];
 function pvRefresh(){if(!pvR){try{pvR=new THREE.WebGLRenderer({canvas:$('pv'),alpha:true,antialias:true});pvR.setSize(220,280,false);pvS=new THREE.Scene();pvC=new THREE.PerspectiveCamera(32,220/280,.1,20);pvC.position.set(0,1.15,4.3);pvC.lookAt(0,.98,0)}catch(e){pvR=null;return}}
  if(pvA)pvS.remove(pvA);pvA=makeAvatar({name:'',team:0,cos:{hat:PF.hat,suit:PF.suit,back:PF.back}});pvS.add(pvA);pvA.traverse(o=>{if(o.isSprite)o.visible=false})}
 function renderPreview(){if(pvR&&pvA){pvA.rotation.y=performance.now()/1400;pvR.render(pvS,pvC)}}
-function storeBuy(it){if(PF.coins<it.p)return;PF.coins-=it.p;PF.owned[it.id]=1;storeEquip(it)}
+function storeBuy(it){if(it.pass||PF.coins<it.p)return;PF.coins-=it.p;PF.owned[it.id]=1;storeEquip(it)}
 function storeEquip(it){const t=storeTab;if(t==='cls')PF.cls=it.id;else PF[t]=PF[t]===it.id?null:it.id;savePF();if(G.state==='lobby'){toHost(profMsg());renderLobby()}renderStore()}
 function renderStore(){renderCoins();const tb=$('storeTabs');tb.textContent='';STORE_TABS.forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;if(k===storeTab)b.className='on';b.onclick=()=>{storeTab=k;renderStore()};tb.appendChild(b)});
  const list=STORE_TABS.find(x=>x[0]===storeTab)[2],g=$('storeItems');g.textContent='';
@@ -1656,6 +1790,7 @@ function renderStore(){renderCoins();const tb=$('storeTabs');tb.textContent='';S
   const n=document.createElement('b');n.textContent=it.n;d.appendChild(n);if(it.d){const q=document.createElement('p');q.textContent=it.d;d.appendChild(q)}
   const r=document.createElement('div'),b=document.createElement('button');r.className='row';
   if(own){b.textContent=on?(storeTab==='cls'?'Выбран':'Снять'):(storeTab==='cls'?'Выбрать':'Надеть');b.disabled=on&&storeTab==='cls';b.onclick=()=>storeEquip(it)}
+  else if(it.pass){b.textContent='Пропуск, уровень '+it.pass;b.disabled=true}
   else{b.className='pri';b.textContent='Купить $'+it.p;b.disabled=PF.coins<it.p;b.onclick=()=>storeBuy(it)}
   r.appendChild(b);d.appendChild(r);g.appendChild(d)});pvRefresh()}
 const openStore=()=>{storeOpen=true;$('store').style.display='flex';renderStore()};
@@ -1664,6 +1799,100 @@ function renderClassRow(){const on=G.mode==='classes';$('classRow').hidden=!on;$
  CLASS_LIST.filter(c=>c.p===0||PF.owned[c.id]).forEach(c=>{const b=document.createElement('button');b.textContent=c.n;if(PF.cls===c.id)b.className='on';b.onclick=()=>{PF.cls=c.id;savePF();toHost(profMsg());renderClassRow()};e.appendChild(b)});
  $('classInfo').textContent=(CLS[PF.cls]||CLS.assault).d+' Новые классы покупаются в гардеробе.'}
 renderCoins();
+
+/* ===== Уровни, задания, пропуск, достижения ===== */
+function lvlInfo(xp){let lvl=1,need=100;xp=xp||0;while(xp>=need){xp-=need;lvl++;need=100*lvl}return{lvl,cur:xp,need}}
+function addXp(n){const a=lvlInfo(PF.xp).lvl;PF.xp=(PF.xp||0)+n;PF.seasonXp=(PF.seasonXp||0)+n;const b=lvlInfo(PF.xp).lvl;for(let l=a+1;l<=b;l++){PF.coins+=l*25;toast('Новый уровень '+l+'! +$'+(l*25),2.5)}}
+const QDEF=[
+ {id:'k10',n:'Убейте 10 врагов',ev:'kill',goal:10,c:80},{id:'k25',n:'Убейте 25 врагов',ev:'kill',goal:25,c:150},
+ {id:'hs3',n:'Убейте 3 врагов выстрелом в голову',ev:'head',goal:3,c:120},{id:'sg5',n:'Убейте 5 врагов из дробовика',ev:'kill_shotgun',goal:5,c:100},
+ {id:'ak8',n:'Убейте 8 врагов из автомата',ev:'kill_ak',goal:8,c:100},{id:'kn2',n:'Убейте 2 врагов ножом',ev:'kill_knife',goal:2,c:120},
+ {id:'bo5',n:'Убейте 5 врагов взрывами',ev:'kill_boom',goal:5,c:120},{id:'ore30',n:'Добудьте 30 блоков руды',ev:'ore',goal:30,c:80},
+ {id:'go10',n:'Добудьте 10 золота',ev:'ore_gold',goal:10,c:100},{id:'cr5',n:'Добудьте 5 кристаллов',ev:'ore_crystal',goal:5,c:120},
+ {id:'m3',n:'Сыграйте 3 боя',ev:'match',goal:3,c:80},{id:'w1',n:'Победите в бою',ev:'win',goal:1,c:120},
+ {id:'z30',n:'Убейте 30 зомби',ev:'kill_zombie',goal:30,c:120},{id:'fl1',n:'Захватите флаг',ev:'flag',goal:1,c:150},
+ {id:'dr2',n:'Убейте 2 врагов FPV-дроном',ev:'kill_drone',goal:2,c:150},{id:'buy5',n:'Купите 5 предметов в магазине базы',ev:'buy',goal:5,c:60}];
+const QBY={};QDEF.forEach(q=>QBY[q.id]=q);
+const dayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function dailyQuests(){const k=dayKey();if(PF.quests&&PF.quests.day===k)return PF.quests.list;let h=0;for(const ch of k)h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0;const r=rng(h),pool=QDEF.slice(),list=[];
+ while(list.length<3){const q=pool.splice(Math.floor(r()*pool.length),1)[0];if(!list.some(x=>QBY[x.id].ev===q.ev))list.push({id:q.id,prog:0,done:false})}PF.quests={day:k,list};savePF();return list}
+function qEvent(ev,n){n=n||1;PF.st=PF.st||{};PF.st[ev]=(PF.st[ev]||0)+n;
+ dailyQuests().forEach(q=>{const d=QBY[q.id];if(!d||q.done||d.ev!==ev)return;q.prog=Math.min(d.goal,q.prog+n);if(q.prog>=d.goal){q.done=true;PF.coins+=d.c;addXp(100);PF.st.quest=(PF.st.quest||0)+1;toast('Задание выполнено: '+d.n+' +$'+d.c,2.5)}});
+ checkAch();savePF();renderCoins()}
+const PASS_TIERS=30,PASS_XP=250,SEASON='Сезон 1: Глубокие штольни';
+const PASS_ITEMS={5:'p_bandana',10:'p_urban',15:'p_drillback',20:'p_skull',25:'p_shadow',30:'p_goldwings'};
+const passReward=i=>PASS_ITEMS[i]?{item:PASS_ITEMS[i]}:{coins:40+i*10};
+function claimTier(i){if(PF.claimed[i]||Math.floor((PF.seasonXp||0)/PASS_XP)<i)return;const r=passReward(i);PF.claimed[i]=1;if(r.item)PF.owned[r.item]=1;else PF.coins+=r.coins;checkAch();savePF();renderProfile();renderCoins()}
+const ACH=[
+ {id:'first',n:'Первая кровь',d:'Убейте врага',t:()=>(PF.st.kill||0)>=1,c:50},{id:'k100',n:'Ветеран',d:'100 убийств',t:()=>(PF.st.kill||0)>=100,c:200},
+ {id:'k1000',n:'Легенда штолен',d:'1000 убийств',t:()=>(PF.st.kill||0)>=1000,c:1000},{id:'w1',n:'Первая победа',d:'Победите в бою',t:()=>PF.wins>=1,c:100},
+ {id:'w25',n:'Чемпион',d:'25 побед',t:()=>PF.wins>=25,c:500},{id:'m50',n:'Завсегдатай',d:'Сыграйте 50 боёв',t:()=>PF.matches>=50,c:300},
+ {id:'hs50',n:'Снайпер',d:'50 убийств в голову',t:()=>(PF.st.head||0)>=50,c:300},{id:'z500',n:'Истребитель зомби',d:'500 убитых зомби',t:()=>(PF.st.kill_zombie||0)>=500,c:400},
+ {id:'dr10',n:'Пилот',d:'10 убийств FPV-дроном',t:()=>(PF.st.kill_drone||0)>=10,c:300},{id:'kn10',n:'Тихий клинок',d:'10 убийств ножом',t:()=>(PF.st.kill_knife||0)>=10,c:300},
+ {id:'bo50',n:'Подрывник',d:'50 убийств взрывами',t:()=>(PF.st.kill_boom||0)>=50,c:300},{id:'fl10',n:'Знаменосец',d:'Захватите 10 флагов',t:()=>(PF.st.flag||0)>=10,c:300},
+ {id:'ore500',n:'Шахтёр',d:'Добудьте 500 блоков руды',t:()=>(PF.st.ore||0)>=500,c:300},{id:'cr100',n:'Кристальный барон',d:'Добудьте 100 кристаллов',t:()=>(PF.st.ore_crystal||0)>=100,c:400},
+ {id:'lv10',n:'Опытный боец',d:'Достигните 10 уровня',t:()=>lvlInfo(PF.xp).lvl>=10,c:200},{id:'lv30',n:'Мастер',d:'Достигните 30 уровня',t:()=>lvlInfo(PF.xp).lvl>=30,c:1000},
+ {id:'rich',n:'Богач',d:'Заработайте $10 000 монет',t:()=>(PF.earned||0)>=10000,c:500},{id:'q30',n:'Исполнительный',d:'Выполните 30 заданий',t:()=>(PF.st.quest||0)>=30,c:500},
+ {id:'pass',n:'Весь сезон',d:'Пройдите пропуск до 30 уровня',t:()=>(PF.seasonXp||0)>=PASS_TIERS*PASS_XP,c:1000}];
+function checkAch(){PF.ach=PF.ach||{};ACH.forEach(a=>{if(!PF.ach[a.id]&&a.t()){PF.ach[a.id]=Date.now();PF.coins+=a.c;toast('Достижение: '+a.n+' +$'+a.c,3)}})}
+let profTab='stats';
+const PROF_TABS=[['stats','Статистика'],['quests','Задания'],['pass','Пропуск'],['ach','Достижения'],['top','Рейтинг']];
+function renderProfile(){const L=lvlInfo(PF.xp);$('profLvl').textContent='Уровень '+L.lvl;$('profXp').textContent=L.cur+' / '+L.need+' опыта';$('profBar').style.width=(L.cur/L.need*100)+'%';
+ const tb=$('profTabs');tb.textContent='';PROF_TABS.forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;if(k===profTab)b.className='on';b.onclick=()=>{profTab=k;renderProfile()};tb.appendChild(b)});
+ const g=$('profBody');g.textContent='';const card=(title,sub,right)=>{const d=document.createElement('div');d.className='pcard';const a=document.createElement('div');const b=document.createElement('b');b.textContent=title;const p=document.createElement('p');p.textContent=sub;a.append(b,p);d.appendChild(a);if(right)d.appendChild(right);g.appendChild(d);return d};
+ if(profTab==='stats'){const gr=document.createElement('div');gr.id='statGrid';gr.className='statGrid';g.appendChild(gr);renderStats()}
+ else if(profTab==='quests'){dailyQuests().forEach(q=>{const d=QBY[q.id];const bar=document.createElement('div');bar.className='qbar';bar.innerHTML='<i></i>';bar.firstChild.style.width=(q.prog/d.goal*100)+'%';
+   const c=card(d.n,(q.done?'Выполнено. ':'')+q.prog+' / '+d.goal+' · награда $'+d.c+' и 100 опыта');c.querySelector('div').appendChild(bar)});
+  const n=document.createElement('p');n.className='note';n.textContent='Новые задания появляются каждый день.';g.appendChild(n)}
+ else if(profTab==='pass'){const tier=Math.min(PASS_TIERS,Math.floor((PF.seasonXp||0)/PASS_XP));const h=document.createElement('p');h.className='note';h.textContent=SEASON+'. Уровень пропуска '+tier+' из '+PASS_TIERS+'. Опыт сезона: '+(PF.seasonXp||0)+', каждый уровень '+PASS_XP+'. Пропуск бесплатный.';g.appendChild(h);
+  const grid=document.createElement('div');grid.className='passGrid';g.appendChild(grid);
+  for(let i=1;i<=PASS_TIERS;i++){const r=passReward(i),it=r.item&&COS_ALL[r.item],d=document.createElement('div');d.className='ptier'+(it?' rare':'');const b=document.createElement('b');b.textContent=i;const p=document.createElement('span');p.textContent=it?it.n:'$'+r.coins;const btn=document.createElement('button');
+   if(PF.claimed[i]){btn.textContent='Получено';btn.disabled=true}else if(tier>=i){btn.textContent='Забрать';btn.className='pri';btn.onclick=()=>claimTier(i)}else{btn.textContent='Закрыто';btn.disabled=true}d.append(b,p,btn);grid.appendChild(d)}}
+ else if(profTab==='ach'){const done=ACH.filter(a=>PF.ach[a.id]).length;const h=document.createElement('p');h.className='note';h.textContent='Открыто '+done+' из '+ACH.length;g.appendChild(h);
+  ACH.forEach(a=>{const ok=!!PF.ach[a.id];const c=card((ok?'✓ ':'')+a.n,a.d+' · $'+a.c);if(!ok)c.style.opacity=.55})}
+ else if(profTab==='top'){const n=document.createElement('p');n.className='note';n.textContent=Srv.url()?'Загружаем…':'Рейтинг работает через сервер игры. Укажите его адрес в настройках.';g.appendChild(n);
+  if(Srv.url())Srv.api('/api/top').then(r=>{n.textContent=r.top.length?'Лучшие игроки по опыту':'Пока никто не сыграл с аккаунтом.';const t=document.createElement('table');t.innerHTML='<tr><th>#</th><th>Игрок</th><th>Ур.</th><th>Убийства</th><th>Победы</th></tr>';
+   r.top.forEach((x,i)=>{const tr=document.createElement('tr');[i+1,x.name,x.level,x.kills,x.wins].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});t.appendChild(tr)});g.appendChild(t)}).catch(()=>{n.textContent='Сервер не отвечает.'})}}
+dailyQuests();checkAch();cloudPull();
+
+/* ===== Игроки: блокировка и жалобы ===== */
+const blockKey=p=>p.acc?'a:'+p.acc:'n:'+p.name;
+function isBlocked(p){return!!(PF.blocked&&PF.blocked[blockKey(p)])}
+function toggleBlock(p){PF.blocked=PF.blocked||{};const k=blockKey(p);if(PF.blocked[k])delete PF.blocked[k];else PF.blocked[k]=p.name;savePF();Voice.applyMute();renderPlist()}
+let plistOpen=false,repTarget=null;
+function openPlist(){if(plistOpen)return;plistOpen=true;closeShop();closeChat();if(G.state==='game')uiBlock=true;exitPointer();$('plist').style.display='flex';repTarget=null;renderPlist()}
+function closePlist(){if(!plistOpen)return;plistOpen=false;$('plist').style.display='none';if(G.state==='game'){uiBlock=false;if(!G.ended)requestLock()}}
+function renderPlist(){const g=$('plistBody');g.textContent='';
+ if(repTarget){const p=repTarget;const f=document.createElement('form');f.className='repForm';
+  f.innerHTML='<p class="note"></p><label><input type="radio" name="rr" value="abuse" checked> Оскорбления</label><label><input type="radio" name="rr" value="spam"> Мат или спам</label><label><input type="radio" name="rr" value="cheat"> Читы</label><label><input type="radio" name="rr" value="name"> Неприемлемый ник</label><label><input type="radio" name="rr" value="other"> Другое</label><textarea id="repText" maxlength="500" rows="3" placeholder="Что случилось (необязательно)"></textarea><div class="row"><button type="submit" class="pri">Отправить жалобу</button><button type="button" id="repCancel">Отмена</button></div><p id="repMsg" class="note"></p>';
+  f.querySelector('.note').textContent='Жалоба на игрока '+p.name+'. Вместе с ней отправятся его последние сообщения в чате.';
+  f.onsubmit=async e=>{e.preventDefault();const reason=f.querySelector('input[name=rr]:checked').value,chat=(G.chatHist||[]).filter(c=>c.id===p.id).map(c=>c.s).join('\n').slice(-1500);
+   PF.blocked=PF.blocked||{};PF.blocked[blockKey(p)]=p.name;savePF();Voice.applyMute();
+   try{await Srv.api('/api/report','POST',{target:p.acc||'',targetName:p.name,reason,text:$('repText').value,room:G.code||'',chat});$('repMsg').textContent='Жалоба отправлена. Игрок заблокирован у вас.'}
+   catch(x){$('repMsg').textContent=Srv.url()?'Не удалось отправить жалобу: сервер не отвечает. Игрок заблокирован у вас.':'Жалобы отправляются через сервер игры, а он не указан в настройках. Игрок заблокирован у вас.'}};
+  f.querySelector('#repCancel').onclick=()=>{repTarget=null;renderPlist()};g.appendChild(f);return}
+ const list=G.order.map(id=>G.P[id]).filter(p=>p&&!p.bot&&!p.zombie&&p.id!==G.myId);
+ if(!list.length){const n=document.createElement('p');n.className='note';n.textContent='Других игроков нет.';g.appendChild(n)}
+ list.forEach(p=>{const r=document.createElement('div');r.className='prow';const n=document.createElement('b');n.textContent=(p.lvl?'['+p.lvl+'] ':'')+p.name;n.style.color=TEAMS[p.team].c;
+  const b1=document.createElement('button');b1.textContent=isBlocked(p)?'Разблокировать':'Заблокировать';b1.onclick=()=>toggleBlock(p);
+  const b2=document.createElement('button');b2.textContent='Пожаловаться';b2.onclick=()=>{repTarget=p;renderPlist()};r.append(n,b1,b2);g.appendChild(r)});
+ const bl=Object.entries(PF.blocked||{});if(bl.length){const h=document.createElement('p');h.className='note';h.textContent='Заблокированы у вас: '+bl.map(x=>x[1]).join(', ');g.appendChild(h)}}
+$('plistClose').onclick=closePlist;$('lobbyPlayers').onclick=openPlist;
+
+/* ===== Настройки ===== */
+let setOpen=false;
+function openSettings(){setOpen=true;if(G.state==='game'){uiBlock=true;exitPointer()}$('settings').style.display='flex';renderSettings()}
+function closeSettings(){setOpen=false;$('settings').style.display='none';if(G.state==='game'){uiBlock=layoutOn||plistOpen;if(!G.ended&&!uiBlock)requestLock()}}
+function renderSettings(){$('setLang').value=S.lang;['low','med','high'].forEach(q=>$('q_'+q).classList.toggle('on',S.q===q));
+ $('setFov').value=S.fov;$('setFovV').textContent=S.fov+'°';$('setMs').value=S.ms;$('setMsV').textContent='×'+S.ms;$('setTs').value=S.ts;$('setTsV').textContent='×'+S.ts;$('setGs').value=S.gs;$('setGsV').textContent='×'+S.gs;
+ $('setInv').checked=S.inv;$('setVol').value=S.vol;$('setVolV').textContent=Math.round(S.vol*100)+'%';$('setSrv').value=S.srv||DEFAULT_SERVER;$('padInfo').textContent=padOn?'Геймпад подключён.':'Геймпад не найден. Подключите его и нажмите любую кнопку.'}
+['low','med','high'].forEach(q=>$('q_'+q).onclick=()=>{S.q=q;saveS();applyQuality();renderSettings()});
+[['setFov','fov',v=>{}],['setMs','ms'],['setTs','ts'],['setGs','gs'],['setVol','vol',v=>{if(MASTER)MASTER.gain.value=v}]].forEach(([id,k,f])=>$(id).addEventListener('input',e=>{S[k]=+e.target.value;if(f)f(S[k]);saveS();renderSettings()}));
+$('setInv').onchange=e=>{S.inv=e.target.checked;saveS()};
+$('setLang').onchange=e=>{S.lang=e.target.value;saveS();location.reload()};
+$('setSrvSave').onclick=async()=>{S.srv=$('setSrv').value.trim();saveS();$('setSrvMsg').textContent='Проверяем…';if(!Srv.url()){$('setSrvMsg').textContent='Сервер не указан: используются прямые соединения.';return}
+ try{const r=await Srv.api('/health');$('setSrvMsg').textContent=r.ok?'Сервер отвечает.':'Сервер ответил с ошибкой.';ACC=null;try{ACC=JSON.parse(localStorage.getItem(ACC_KEY))}catch(e){}cloudPull()}catch(e){$('setSrvMsg').textContent='Сервер не отвечает. Проверьте адрес.'}};
+$('settingsClose').onclick=closeSettings;document.querySelectorAll('.setOpen').forEach(b=>b.onclick=openSettings);
 
 /* ===== Обучение ===== */
 const K=(pc,tc)=>isTouch?tc:pc;
@@ -1676,7 +1905,7 @@ const TUT=[
  ['Турели',`<p>Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите ${K('E','ТУР.')}, чтобы загрузить.</p><ul><li><b>Защитная</b>: положите оружие и патроны, стреляет по врагам</li><li><b>Медицинская</b>: аптечки или адреналин, лечит союзников рядом</li><li><b>Метательная</b>: гранаты, флешки или дым, метает во врагов</li></ul><p>Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.</p>`],
  ['Зона и события',`<p>После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.</p><p>Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.</p>`],
  ['Режимы и карты',`<ul><li><b>Последняя команда</b>: ограниченные жизни и сжимающаяся зона</li><li><b>Захват флага</b>: подойдите к чужому флагу, чтобы взять его, и донесите до своего. Свой брошенный флаг возвращается касанием</li><li><b>Зомби</b>: все вместе против волн, продержитесь до конца таймера</li><li><b>Царь горы</b>: стойте на вершине без врагов и набирайте очки</li></ul><p>Карты: равнина, пустыня, город с домами, джунгли с деревьями и высокие горы. Режим и карту выбирает хост в лобби.</p>`],
- ['Монеты, гардероб и классы',`<p>После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.</p><p>В <b>гардеробе</b> на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 18 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.</p>`],
+ ['Монеты, гардероб и классы',`<p>После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.</p><p>В гардеробе на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 18 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.</p>`],
  ['Друзья и голос',`<p>Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.</p><p>Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.</p><button id="tutPlay" class="pri">Потренироваться с ботом</button>`],
 ];
 let tutI=0;
@@ -1688,8 +1917,8 @@ $('tutPrev').onclick=()=>{if(tutI>0){tutI--;tutRender()}};
 $('tutNext').onclick=()=>{if(tutI<TUT.length-1){tutI++;tutRender()}};
 
 /* ===== Настройка кнопок на телефоне ===== */
-const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar','tTur','ammo'];
-const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов',tTur:'Загрузка турели',ammo:'Счётчик патронов'};
+const LAY_IDS=['tFire','tJump','tRel','tAlt','tSprint','tShop','tChat','tSet','tWpn','micBtn','bar','tTur','ammo','tPl'];
+const LAY_NAMES={tFire:'Огонь',tJump:'Прыжок',tRel:'Перезарядка',tAlt:'Особое действие',tSprint:'Бег',tShop:'Магазин',tChat:'Чат',tSet:'Настройки',tWpn:'Смена оружия',micBtn:'Микрофон',bar:'Панель предметов',tTur:'Загрузка турели',ammo:'Счётчик патронов',tPl:'Игроки'};
 const LAY_KEY='shtolni-layout-v1';
 let LAY={},layoutOn=false,laySel=null,layDrag=null,layHudPrev='';
 try{LAY=JSON.parse(localStorage.getItem(LAY_KEY))||{}}catch(e){LAY={}}
@@ -1716,6 +1945,20 @@ const layEnd=e=>{if(!layoutOn||e.target.closest('#layoutPanel'))return;e.stopPro
 document.addEventListener('touchend',layEnd,true);document.addEventListener('touchcancel',layEnd,true);
 if(isTouch){document.querySelectorAll('.layoutOpen').forEach(b=>{b.hidden=false;b.onclick=openLayout});applyLayout()}
 
+/* ===== Английский язык ===== */
+// Перевод по фрагментам: сначала длинные фразы, затем короткие слова; числа меняются шаблонами
+const EN=[["В гардеробе на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 18 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.","In the wardrobe on the main screen you can spend coins on hats, outfits, back items and 18 classes for Class War. Assault is unlocked from the start. The Profile button shows your progress."],["базовая","basic"],["ур.1","lvl 1"],["ур.2","lvl 2"],["Дымовая","Smoke"],["стенка","wall"],["нож","knife"],["Геймпад: левый стик ходьба, правый обзор, RT огонь, LT прицел или бросок, A прыжок, B перезарядка, X турель или магазин, LB/RB/Y смена предмета, нажатие левого стика бег, Start магазин, Back игроки.","Gamepad: left stick moves, right stick looks, RT fires, LT aims or throws, A jumps, B reloads, X opens a turret or the shop, LB/RB/Y switch items, left stick click sprints, Start opens the shop, Back opens players."],["Команды воюют классами из гардероба. У каждого свой набор и способность, снаряжение пополняется при возрождении. Первая команда с 25 убийствами побеждает, иначе побеждает счёт в конце времени.","Teams fight with classes from the wardrobe. Each class has its own kit and ability, and gear refills on respawn. The first team to 25 kills wins, otherwise the higher score wins when time runs out."],["на главном экране за монеты покупаются шляпы, костюмы, вещи на спину и 18 классов для режима «Война классов». Штурмовик доступен сразу. Кнопка «Статистика» показывает ваши итоги.","on the main screen you can spend coins on hats, outfits, back items and 18 classes for Class War. Assault is unlocked from the start. The Profile button shows your progress."],["До 4 команд сражаются на одной карте. У каждого игрока есть жизни, после смерти он возрождается на базе. Побеждает последняя команда, у которой остались живые игроки.","Up to 4 teams fight on one map. Every player has lives and respawns at base after dying. The last team with players still alive wins."],["Гора окружена траншеями, внутри неё сеть пещер. Землю можно разрушать: РПГ, гранаты, мины и шахтёрский заряд оставляют воронки, а кирка и бур прорывают ходы.","The mountain is ringed with trenches and full of caves. The ground is destructible: RPGs, grenades, mines and mining charges leave craters, and picks and drills dig tunnels."],["Магазин работает только на вашей базе, под навесом с цветом команды. Там можно купить и продать оружие, патроны, броню, взрывчатку, дроны, ракету и турели.","The shop works only at your base, under the canopy in your team color. Buy and sell weapons, ammo, armor, explosives, drones, the missile and turrets there."],["Удерживайте вершину горы: каждая секунда без врагов на ней даёт очко. Победа за 60 очков или по счёту в конце времени. Возрождения без ограничений.","Hold the mountain top: every second there with no enemies gives a point. 60 points wins, otherwise the score decides when time runs out. Unlimited respawns."],["Унесите вражеский флаг на свою базу, пока ваш флаг на месте. Победа за 3 захвата или по счёту в конце времени. Возрождения без ограничений.","Carry the enemy flag to your base while your own flag is home. 3 captures win, otherwise the score decides when time runs out. Unlimited respawns."],["После боя вы получаете монеты: убийства минус смерти, по $20 за разницу. Это отдельные от магазина базы деньги, они остаются между боями.","After a match you get coins: kills minus deaths, $20 for each. These are separate from base shop money and stay between matches."],["Прогресс хранится в этом браузере, а при подключённом сервере игры ещё и в облаке. За разницу убийств и смертей в бою дают по $20.","Progress is saved in this browser, and also in the cloud when a game server is set. Each kill over your deaths in a match pays $20."],["После заданного времени зона начинает сужаться к центру, снаружи она быстро отнимает здоровье. Следите за таймером и мини-картой.","After the set time the zone starts closing toward the center, and outside it you lose health fast. Watch the timer and the minimap."],["Esc освобождает мышь. Кирка в руках: зажмите ЛКМ на блоке. Магазин работает на вашей базе (B). P: игроки, блокировка и жалобы.","Esc frees the mouse. With the pick in hand, hold LMB on a block. The shop works at your base (B). P: players, blocking and reports."],["Создайте комнату и отправьте другу код или ссылку. Войти можно только пока хост в лобби. Если хост выйдет, бой закончится.","Create a room and send a friend the code or link. Players can join only while the host is in the lobby. If the host leaves, the match ends."],["Голосовой чат включается кнопкой микрофона и работает при прямом соединении. В резервной связи доступен текстовый чат.","Voice chat turns on with the mic button and works over a direct connection. On the backup connection only text chat is available."],["FPV-дрон управляется от первого лица, но ваше тело в это время беззащитно. Баллистическая ракета наводится по карте.","You fly an FPV drone in first person, but your body is defenseless meanwhile. The ballistic missile is aimed on the map."],["Случайные события меняют бой: дождь из гранат, ночь, двойной урон, подарки и другие. Название появляется на экране.","Random events shake up the match: grenade rain, night, double damage, gifts and more. The event name appears on screen."],["Карты: равнина, пустыня, город с домами, джунгли с деревьями и высокие горы. Режим и карту выбирает хост в лобби.","Maps: plains, desert, a city with buildings, a jungle with trees and high mountains. The host picks the mode and map in the lobby."],[": подойдите к чужому флагу, чтобы взять его, и донесите до своего. Свой брошенный флаг возвращается касанием",": walk up to the enemy flag to take it and carry it to yours. Touch your dropped flag to return it"],["Все против всех: союзников нет, у каждого ограниченные жизни, зона сжимается. Побеждает последний выживший.","Everyone against everyone: no allies, limited lives, a closing zone. The last survivor wins."],["Копай руду, покупай оружие, ставь турели и взрывай землю под врагом. Побеждает последняя живая команда.","Mine ore, buy weapons, build turrets and blow up the ground under your enemies. The last team standing wins."],["Чем ближе к горе в центре, тем дороже руда. Руду продают в магазине, при смерти она достаётся убийце.","The closer to the central mountain, the more valuable the ore. Sell ore at the shop; when you die, your killer takes it."],["Все вместе против волн зомби. Продержитесь выбранное время. Волны каждые 20 секунд и всё сильнее.","Everyone together against zombie waves. Survive the chosen time. Waves come every 20 seconds and get stronger."],["Купите турель на вкладке «Защита», возьмите её в руки и поставьте на землю. Подойдите и нажмите","Buy a turret on the Defense tab, take it in hand and place it on the ground. Walk up and press"],["Прямые соединения недоступны. Друзья войдут через резервную связь, но голос работать не будет.","Direct connections are unavailable. Friends will join over the backup connection, but voice will not work."],["Жалобы отправляются через сервер игры, а он не указан в настройках. Игрок заблокирован у вас.","Reports are sent through the game server, which is not set in Settings. The player is blocked for you."],["Цель выбирается на карте. Падает 6 с, все видят предупреждение. 300 урона, огромная воронка","Pick the target on the map. Falls for 6 s and everyone sees a warning. 300 damage, a huge crater"],["Враги могут уничтожить турель вместе с содержимым. Владелец может её поднять и перенести.","Enemies can destroy a turret along with what is inside. The owner can pick it up and move it."],["Не удалось войти. Проверьте код и что хост ещё в лобби: начавшийся бой закрыт для входа.","Could not join. Check the code and that the host is still in the lobby: a match in progress is closed."],["Классика: у всех ограниченные жизни, зона сжимается, побеждает последняя живая команда.","Classic: limited lives, a closing zone, the last team standing wins."],["Быстрый и прыгучий. Нож бьёт вдвое сильнее, а брошенный сразу возвращается. 3 дымовые.","Fast and springy. The knife hits twice as hard and returns right after a throw. 3 smoke grenades."],["Оружие покупается без патронов сверх первого магазина: не забудьте вкладку «Патроны».","Weapons come with only their first magazine, so remember the Ammo tab."],["Нужны игроки хотя бы в двух разных командах. Можно играть 1 на 1 или добавить ботов.","You need players in at least two teams. You can play 1 on 1 or add bots."],["Играть можно даже 1 на 1. Время боя, жизни и частоту событий хост выбирает в лобби.","You can even play 1 on 1. The host sets match time, lives and event frequency in the lobby."],["Пистолет, аптечки, адреналин и медтурель. Сам восстанавливает 3 здоровья в секунду.","Pistol, medkits, adrenaline and a medic turret. Regenerates 3 health per second."],["РПГ-7 и 10 ракет, каждые 15 секунд новая ракета. 90 здоровья, бег на 10% медленнее.","RPG-7 and 10 rockets, a new rocket every 15 seconds. 90 health, runs 10% slower."],["Нет доступа к микрофону. Страница должна открываться по https и иметь разрешение.","No microphone access. The page must use https and have permission."],["Дробовик и 120 здоровья. Когда здоровья меньше 50, наносит на 50% больше урона.","Shotgun and 120 health. Deals 50% more damage while below 50 health."],["Свой сервер даёт стабильное подключение, облачное сохранение, рейтинг и жалобы.","Your own server gives a stable connection, cloud saves, the leaderboard and reports."],["Бегает на 30% быстрее, видит врагов на мини-карте. Пистолет, нож и 3 флешки.","Runs 30% faster and sees enemies on the minimap. Pistol, knife and 3 flashbangs."],["Не удалось отправить жалобу: сервер не отвечает. Игрок заблокирован у вас.","Could not send the report: the server is not responding. The player is blocked for you."],["Автомат, метательная турель и 3 М-67. Держит позицию вместе с турелью.","Assault rifle, a launcher turret and 3 M67s. Holds ground with the turret."],["В этом режиме все игроки и боты воюют вместе, выбор команды не важен.","In this mode all players and bots fight together, so teams do not matter."],["Дробовик, очень высокий прыжок и бег на 15% быстрее, но 85 здоровья.","Shotgun, a very high jump and 15% faster running, but 85 health."],["Нет связи с интернет-серверами. Сейчас можно играть только с ботами.","No connection to internet servers. You can only play with bots right now."],["Винтовка и нож, винтовка бьёт на 25% сильнее, но здоровья всего 80.","Rifle and knife; the rifle hits 25% harder, but only 80 health."],["Пистолет бьёт на 60% сильнее, бег на 10% быстрее. В наборе ещё нож.","The pistol hits 60% harder and runs 10% faster. Also carries a knife."],["Рейтинг работает через сервер игры. Укажите его адрес в настройках.","The leaderboard needs the game server. Enter its address in Settings."],["Пистолет и 5 гранат М-67. Каждые 20 секунд получает новую гранату.","Pistol and 5 M67 grenades. Gets a new grenade every 20 seconds."],["Положите гранаты: М-67, флешки или дым. Метает во врагов на 6-28 м","Load grenades: M67, flashbangs or smoke. Throws at enemies 6-28 m away"],["Проведите по плашке оружия влево или вправо, чтобы сменить предмет","Swipe the weapon bar left or right to switch items"],["Возрождение на базе через несколько секунд. Руда досталась врагу.","Respawning at base in a few seconds. Your ore went to the enemy."],["Пистолет и FPV-дроны. Каждые 30 секунд получает новый дрон ур.1.","Pistol and FPV drones. Gets a new level 1 drone every 30 seconds."],["Пистолет, автомат для турели, защитная турель и песчаные стенки.","Pistol, a rifle for the turret, a defense turret and sandbag walls."],["Пистолет, клейморы и мины. Каждые 20 секунд получает новую мину.","Pistol, claymores and mines. Gets a new mine every 20 seconds."],["Положите в неё оружие и патроны: сама стреляет по врагам до 35 м","Load a weapon and ammo: it fires at enemies up to 35 m away"],["Дробовик, жилет ур.3 и 150 здоровья, но ходит на 20% медленнее.","Shotgun, a level 3 vest and 150 health, but moves 20% slower."],["8 дробин по 12 урона, магазин 6. Страшен вблизи, издалека слаб","8 pellets of 12 damage, 6-round magazine. Deadly up close, weak at range"],["Прочность 100, поглощает 55% урона. Выстрел в голову не держит","Durability 100, absorbs 55% of damage. Does not stop headshots"],["Прочность 150, поглощает 70% урона. Выстрел в голову не держит","Durability 150, absorbs 70% of damage. Does not stop headshots"],["РПГ-7, гранаты и шахтёрские заряды. Свои взрывы ему не вредят.","RPG-7, grenades and mining charges. Immune to own explosions."],["Автомат. Каждая рана врага лечит на 30% от нанесённого урона.","Assault rifle. Heals for 30% of the damage dealt."],["Положите аптечки или адреналин: лечит союзников в радиусе 8 м","Load medkits or adrenaline: heals allies within 8 m"],["Прочность 50, поглощает 40% урона. Выстрел в голову не держит","Durability 50, absorbs 40% of damage. Does not stop headshots"],["Нет оружия: купите пистолет, автомат, винтовку или дробовик.","No weapon: buy a pistol, assault rifle, rifle or shotgun."],["Резервная связь: возможна задержка, голос может не работать.","Backup connection: expect lag, voice may not work."],["45 урона в упор, ПКМ: бросок на 70. Подберите после броска","45 damage up close, RMB throws for 70. Pick it up after throwing"],[". Вместе с ней отправятся его последние сообщения в чате.",". Their latest chat messages will be sent with it."],["Автомат и 2 гранаты М-67. Надёжный класс на любой случай.","Assault rifle and 2 M67 grenades. A reliable class for any fight."],["Геймпад не найден. Подключите его и нажмите любую кнопку.","No gamepad found. Connect one and press any button."],["Вы управляете им от первого лица. Батарея 12 с, 90 урона","You fly it in first person. 12 s battery, 90 damage"],["Нужно хотя бы 2 бойца: позовите друга или добавьте бота.","You need at least 2 fighters: invite a friend or add a bot."],[": все вместе против волн, продержитесь до конца таймера",": everyone together against waves, survive until the timer runs out"],["Лечит 25 здоровья и ускоряет бег в 1,4 раза на 8 секунд","Heals 25 health and makes you run 1.4× faster for 8 seconds"],["Самый быстрый, батарея 25 с, 160 урона, большая воронка","Fastest, 25 s battery, 160 damage, a large crater"],["Ставится на стену. Через 3 с вырывает огромную полость","Sticks to a wall. Blasts a huge cavity after 3 s"],["Комната открыта на сервере игры. Отправьте код другу.","Room is open on the game server. Send the code to a friend."],["Прямое соединение не прошло, пробуем резервную связь…","Direct connection failed, trying the backup connection…"],["Перезагрузите страницу, чтобы создать новую комнату.","Reload the page to create a new room."],["зажимается, и пальцем на нём тоже можно вести прицел","is held down, and you can aim by dragging on it too"],["Бур, заряды и пистолет. Получает вдвое больше руды.","Drill, charges and a pistol. Gets twice as much ore."],["В начале у вас только базовая кирка. Возьмите её и","You start with only a basic pick. Take it and"],["Сервер не указан: используются прямые соединения.","No server set: direct connections are used."],[": положите оружие и патроны, стреляет по врагам",": load a weapon and ammo, it shoots enemies"],[": стойте на вершине без врагов и набирайте очки",": stand on the summit with no enemies to score points"],["75 урона, в голову вдвое больше, прицел на ПКМ","75 damage, double on headshots, RMB to scope"],[": аптечки или адреналин, лечит союзников рядом",": medkits or adrenaline, heals nearby allies"],["Баллистическая ракета! Уходите из красной зоны","Ballistic missile! Get out of the red zone"],["Быстрее, батарея 18 с, 120 урона, взрыв шире","Faster, 18 s battery, 120 damage, wider blast"],["Жалоба отправлена. Игрок заблокирован у вас.","Report sent. The player is blocked for you."],["Любая порода, сверлит сразу 3 блока в ширину","Any rock, drills 3 blocks wide at once"],[": гранаты, флешки или дым, метает во врагов",": grenades, flashbangs or smoke, throws them at enemies"],["Левая часть экрана: джойстик. Правая: обзор","Left side of the screen: joystick. Right side: look"],["Голос недоступен без подключения к серверу","Voice is unavailable without a server connection"],["Ещё и кристаллы, копает в 2,5 раза быстрее","Crystals too, digs 2.5× faster"],["Значок ⚙ двигает кнопки и меняет их размер","The ⚙ icon moves buttons and changes their size"],["Смена предмета: проведите влево или вправо","Switch items: swipe left or right"],["Бьёт конусом вперёд, когда враг перед ней","Fires a forward cone when an enemy is in front"],["Рудная лихорадка: всем золото и кристаллы","Ore rush: gold and crystals for everyone"],["Взрывается под врагом, оставляет воронку","Explodes under an enemy and leaves a crater"],["Все против всех: выбор команды не важен.","Everyone against everyone: teams do not matter."],["Вы на базе: магазин открыт (кнопка МАГ.)","You are at base: the shop is open (SHOP button)"],["Осколочная, 100 урона, небольшая воронка","Fragmentation, 100 damage, a small crater"],["Первая команда с 25 убийствами побеждает","First team to 25 kills wins"],["4 команды · 2 карты · разрушаемая земля","4 teams · 5 maps · destructible ground"],[": ограниченные жизни и сжимающаяся зона",": limited lives and a closing zone"],["Ещё и золото, копает в 1,6 раза быстрее","Gold too, digs 1.6× faster"],["Нужно открытое пространство перед вами","You need open space in front of you"],["Комната открыта. Отправьте код другу.","Room is open. Send the code to a friend."],["Магазин работает только на вашей базе","The shop works only at your base"],["Новые задания появляются каждый день.","New quests appear every day."],["Ослепляет тех, кто смотрит на вспышку","Blinds anyone looking at the flash"],["Принесите вражеский флаг на свою базу","Bring the enemy flag to your base"],["Все против всех! Зона сожмётся через","Everyone for themselves! The zone closes in"],["Ждём, пока хост вернёт всех в лобби.","Waiting for the host to return everyone to the lobby."],["Новые классы покупаются в гардеробе.","Buy new classes in the wardrobe."],["Сервер не отвечает. Проверьте адрес.","The server is not responding. Check the address."],["Займите вершину горы и удержите её","Take the mountain top and hold it"],["Купите 5 предметов в магазине базы","Buy 5 items at the base shop"],["Перемирие: оружие не наносит урона","Truce: weapons deal no damage"],["Подойдите к турели и загрузите её:","Walk up to the turret and load it:"],["Убейте 3 врагов выстрелом в голову","Kill 3 enemies with headshots"],["Копайте руду! Зона сожмётся через","Mine ore! The zone closes in"],["Браузер не дал доступ к микрофону","The browser denied microphone access"],["Пока никто не сыграл с аккаунтом.","Nobody has played with an account yet."],["Посмотрите на землю рядом с собой","Look at the ground next to you"],[": перетащите или измените размер",": drag it or change its size"],["Гуманитарка: аптечки и адреналин","Supply drop: medkits and adrenaline"],["Коснитесь кнопки и перетащите её","Touch a button and drag it"],["18 урона, магазин 30, очередями","18 damage, 30-round magazine, full auto"],[": прицел винтовки и бросок ножа",": rifle scope and knife throw"],["Вы на базе: B открывает магазин","You are at base: B opens the shop"],["Ракета: взрыв и воронка в земле","Rocket: an explosion and a crater"],["Стена 3×2 блока в точке прицела","A 3×2 block wall where you aim"],["Микрофону нужен адрес https://","The microphone needs an https:// address"],["Выберите цель ракеты на карте","Pick the missile target on the map"],["Кристаллы: кирка ур.2 или бур","Crystals: level 2 pick or drill"],["Подключено через сервер игры.","Connected through the game server."],["Продержитесь до конца таймера","Survive until the timer runs out"],["Пройдите пропуск до 30 уровня","Reach pass level 30"],["Склад патронов: всем боезапас","Ammo depot: ammo for everyone"],["Уголь и железо: базовая кирка","Coal and iron: basic pick"],["Урон турели зависит от оружия","Turret damage depends on the weapon"],["Что случилось (необязательно)","What happened (optional)"],["Адреналин: 8 секунд скорости","Adrenaline: 8 seconds of speed"],["Вы вне зоны! Бегите к центру","You are outside the zone! Run to the center"],["Нет патронов: купите на базе","Out of ammo: buy some at base"],["Убейте 5 врагов из дробовика","Kill 5 enemies with a shotgun"],["Убейте 8 врагов из автомата","Kill 8 enemies with an assault rifle"],["Денежный дождь: всем +$200","Money rain: +$200 for everyone"],["Убейте 2 врагов FPV-дроном","Kill 2 enemies with an FPV drone"],["или колесо: смена предмета","or wheel: switch item"],["Заработайте $10 000 монет","Earn $10,000 in coins"],["Монеты, гардероб и классы","Coins, wardrobe and classes"],["Нет ракет: купите на базе","Out of rockets: buy some at base"],["Нужна кирка ур.1 или выше","Needs a level 1 pick or better"],["Разведка: все враги видны","Recon: all enemies visible"],["Сезон 1: Глубокие штольни","Season 1: Deep Adits"],["Сервер ответил с ошибкой.","The server returned an error."],["Чувствительность геймпада","Gamepad sensitivity"],[": голос всем или команде",": voice to all or to team"],["Добудьте 500 блоков руды","Mine 500 ore blocks"],["Золотая лихорадка у горы","Gold rush by the mountain"],["Нужна кирка ур.2 или бур","Needs a level 2 pick or drill"],["Плотный дым на 12 секунд","Thick smoke for 12 seconds"],["Ставится только на землю","Can only be placed on the ground"],["Телепорт: все перемешаны","Teleport: everyone shuffled"],["Убейте 5 врагов взрывами","Kill 5 enemies with explosions"],["Добудьте 100 кристаллов","Mine 100 crystals"],["Добудьте 30 блоков руды","Mine 30 ore blocks"],["Заменит оружие в турели","Replaces the weapon in the turret"],["Инвертировать вертикаль","Invert vertical look"],["Кристальная жила в горе","Crystal vein in the mountain"],["Потренироваться с ботом","Practice against a bot"],["Связь с хостом потеряна","Lost connection to the host"],["Чувствительность пальца","Touch sensitivity"],["Время до сужения зоны:","Time until the zone closes:"],["Лучшие игроки по опыту","Top players by experience"],["Флаг вернулся на базу:","Flag returned to base:"],[". Пропуск бесплатный.",". The pass is free."],["10 убийств FPV-дроном","10 FPV drone kills"],[": огонь или действие,",": fire or action,"],["https://адрес-сервера","https://server-address"],["Баллистическая ракета","Ballistic missile"],["Баллистические ракеты","Ballistic missiles"],["Выжившие продержались","The survivors held out"],["Голос: только команда","Voice: team only"],["Добудьте 5 кристаллов","Mine 5 crystals"],["Нажмите, чтобы играть","Click to play"],["Ничья: никто не выжил","Draw: nobody survived"],["Патроны для дробовика","Shotgun shells"],["Патроны для пистолета","Pistol ammo"],["Сколько продержаться:","Time to survive:"],["Убейте 2 врагов ножом","Kill 2 enemies with a knife"],["Чувствительность мыши","Mouse sensitivity"],["22 урона, магазин 12","22 damage, 12-round magazine"],[": последний выживший",": last one standing"],["Выполните 30 заданий","Complete 30 quests"],["Достигните 10 уровня","Reach level 10"],["Достигните 30 уровня","Reach level 30"],["Заблокированы у вас:","Blocked by you:"],["Патроны для автомата","Assault rifle ammo"],["Патроны для винтовки","Rifle ammo"],["50 убийств в голову","50 headshot kills"],["50 убийств взрывами","50 explosive kills"],["Бесконечные патроны","Infinite ammo"],["Бесплатный FPV-дрон","Free FPV drone"],["Выдана в начале боя","Given at match start"],["Голос: всем игрокам","Voice: all players"],["Других игроков нет.","No other players."],["Захватите 10 флагов","Capture 10 flags"],["Кислородные баллоны","Oxygen tanks"],["Лучший бой, убийств","Best match, kills"],["Неизвестная команда","Unknown command"],["Ничья: выживших нет","Draw: no survivors"],["Пиратская треуголка","Pirate tricorn"],["Сервер не отвечает.","The server is not responding."],[", чтобы загрузить."," to load it."],[". Уровень пропуска",". Pass level"],[": загрузка турели,",": load turret,"],["В коде 5 символов.","The code has 5 characters."],["Все бегают быстрее","Everyone runs faster"],["Всем +100 здоровья","+100 health for everyone"],["Выключить микрофон","Turn off microphone"],["Геймпад подключён.","Gamepad connected."],["Городской камуфляж","Urban camo"],["Добудьте 10 золота","Mine 10 gold"],["Задание выполнено:","Quest complete:"],["Золото: кирка ур.1","Gold: level 1 pick"],["Каждый сам за себя","Free for all"],["Медицинская турель","Medic turret"],["Метательная турель","Launcher turret"],["Наблюдаете за боем","Spectating the match"],["Ничья: счёт равный","Draw: the score is tied"],["Предпросмотр бойца","Fighter preview"],["Скопировать ссылку","Copy link"],["Случайные события:","Random events:"],["Включить микрофон","Turn on microphone"],["Длительность боя:","Match length:"],["Жизни закончились","Out of lives"],["Истребитель зомби","Zombie slayer"],["Кристальный барон","Crystal baron"],["Лечит 60 здоровья","Heals 60 health"],["Микрофон: команда","Mic: team"],["Низкая гравитация","Low gravity"],["Панель вверх/вниз","Panel up/down"],["Последняя команда","Last team standing"],["Хост покинул игру","The host left the game"],["Надет: прочность","Worn: durability"],[", каждый уровень",", each level"],["10 убийств ножом","10 knife kills"],["500 убитых зомби","500 zombies killed"],["Бесплатная броня","Free armor"],["Жалоба на игрока","Report player"],["Заработано всего","Total earned"],["Ковбойская шляпа","Cowboy hat"],["Комната найдена.","Room found."],["Настроить кнопки","Customize buttons"],["Неприемлемый ник","Inappropriate name"],["Осталось жизней:","Lives left:"],["Отправить жалобу","Send report"],["Панель предметов","Item bar"],["Продать всю руду","Sell all ore"],["Пропуск, уровень","Pass, level"],["Ракеты для РПГ-7","RPG-7 rockets"],["Реактивный ранец","Jetpack"],["Сервер отвечает.","The server is responding."],["Счётчик патронов","Ammo counter"],["Сыграйте 50 боёв","Play 50 matches"],["Убейте 10 врагов","Kill 10 enemies"],["Убейте 25 врагов","Kill 25 enemies"],["Шахтёрская каска","Miner's helmet"],["Шахтёрский заряд","Mining charge"],["вернул свой флаг","returned their flag"],["захват флага: до","capture the flag: first to"],[", новый уровень",", new level"],["Армейская каска","Army helmet"],["Бронежилет ур.1","Vest level 1"],["Бронежилет ур.2","Vest level 2"],["Бронежилет ур.3","Vest level 3"],["В запасе у вас:","You have:"],["Взрывы и пещеры","Explosions and caves"],["Вспышки повсюду","Flashbangs everywhere"],["Добыча и деньги","Mining and money"],["Дождь из гранат","Grenade rain"],["Дымовая граната","Smoke grenade"],["Загрузка турели","Load turret"],["Защитная турель","Defense turret"],["Здоровье полное","Health is full"],["Оператор дронов","Drone operator"],["Особое действие","Special action"],["Осталось бойцов","Fighters left"],["Песчаная стенка","Sandbag wall"],["Подойдите ближе","Get closer"],["Продать ресурсы","Sell resources"],["Ракета запущена","Missile launched"],["Скопировать код","Copy code"],["Создать комнату","Create room"],["Сообщение в чат","Chat message"],["Убейте 30 зомби","Kill 30 zombies"],["до сужения зоны","until the zone closes"],[". Опыт сезона:",". Season XP:"],[": перезарядка,",": reload,"],["Бандана сезона","Season bandana"],["Голос: команде","Voice: team"],["Друзья и голос","Friends and voice"],["Захватите флаг","Capture a flag"],["Золотые крылья","Golden wings"],["Зомби победили","The zombies won"],["Зона и события","Zone and events"],["Исполнительный","Diligent"],["Легенда штолен","Legend of the adits"],["Микрофон: всем","Mic: all"],["Настройки игры","Game settings"],["Обстрел с неба","Shelling from the sky"],["Победите в бою","Win a match"],["Поднять турель","Pick up turret"],["Разблокировать","Unblock"],["Режимы и карты","Modes and maps"],["Сыграйте 3 боя","Play 3 matches"],["Уголь и железо","Coal and iron"],["Четыре Штольни","Four Adits"],["захватил флаг!","captured the flag!"],["монет. Опыт +","coins. XP +"],["FPV-дрон ур.1","FPV drone lvl 1"],["FPV-дрон ур.2","FPV drone lvl 2"],["FPV-дрон ур.3","FPV drone lvl 3"],["Армейский нож","Combat knife"],["Бур за спиной","Drill on the back"],["В эту команду","Join this team"],["Война классов","Class War"],["Заблокировать","Block"],["Землетрясение","Earthquake"],["Кирка базовая","Basic pick"],["Колпак повара","Chef's hat"],["Крылья демона","Demon wings"],["Меч за спиной","Sword on the back"],["Микрофон выкл","Mic off"],["Новый уровень","New level"],["Первая победа","First victory"],["Подключаемся…","Connecting…"],["Процент побед","Win rate"],["Роем траншеи…","Digging trenches…"],["Череп шахтёра","Miner's skull"],["держите ОГОНЬ","hold FIRE"],["зона сужается","zone is closing"],["Продать за $","Sell for $"],["1000 убийств","1000 kills"],["Гору держат:","Holding the hill:"],["Густой туман","Thick fog"],["Двойной урон","Double damage"],["Дымовая буря","Smoke storm"],["Захват флага","Capture the flag"],["Кошачьи ушки","Cat ears"],["Магазин базы","Base shop"],["Мат или спам","Profanity or spam"],["Не продаётся","Not for sale"],["Опытный боец","Seasoned fighter"],["Пачка 10 шт.","Pack of 10"],["Пачка 12 шт.","Pack of 12"],["Пачка 24 шт.","Pack of 24"],["Пачка 60 шт.","Pack of 60"],["Первая кровь","First blood"],["Пожаловаться","Report"],["Рога викинга","Viking horns"],["Смена оружия","Weapon switch"],["Тихий клинок","Silent blade"],["Убейте врага","Kill an enemy"],["Флаг брошен:","Flag dropped:"],["Чужая турель","Someone else's turret"],["зона сжалась","zone has closed"],["100 убийств","100 kills"],[": движение,",": move,"],[": микрофон,",": microphone,"],[": цари горы",": kings of the hill"],["· Монеты: $","· Coins: $"],["· награда $","· reward $"],["Голос: всем","Voice: all"],["Достижение:","Achievement:"],["Забрать всё","Take everything"],["Завсегдатай","Regular"],["Кнопка ТУР.","TUR. button"],["Код комнаты","Room code"],["Колпак мага","Wizard hat"],["Медицинская","Medic"],["Метательная","Launcher"],["Минное поле","Minefield"],["Оскорбления","Insults"],["Перезарядка","Reload"],["Поле зрения","Field of view"],["Сервер игры","Game server"],["Скопировано","Copied"],["Шлем рыцаря","Knight helmet"],["зажмите ЛКМ","hold LMB"],["и 100 опыта","and 100 XP"],["кнопка ТУР.","TUR. button"],[", патронов",", ammo"],["В рюкзаке:","In backpack:"],[". Всего: $",". Total: $"],[": магазин,",": shop,"],["Ваш класс:","Your class:"],["Весь сезон","Whole season"],["Вы погибли","You died"],["Выполнено.","Complete."],["Достижения","Achievements"],["Загружаем…","Loading…"],["Знаменосец","Standard-bearer"],["Кирка ур.1","Pick lvl 1"],["Кирка ур.2","Pick lvl 2"],["Начать бой","Start match"],["Не куплено","Not owned"],["Проверяем…","Checking…"],["Расходники","Consumables"],["Статистика","Statistics"],["Управление","Controls"],["Шапка-бини","Beanie"],["Шахтёрский","Mining"],["взял флаг:","took the flag:"],["◀ Оружие ▶","◀ Weapon ▶"],[": батарея",": battery"],["В запасе:","In stock:"],["Продать $","Sell $"],["Адреналин","Adrenaline"],["Армейский","Combat"],["В турели:","In turret:"],["Громкость","Volume"],["Космонавт","Astronaut"],["Кристаллы","Crystals"],["Монеты: $","Coins: $"],["Настройки","Settings"],["Отправить","Send"],["Подрывник","Demolitions"],["Прочность","Durability"],["Разведчик","Scout"],["Сообщение","Message"],["Сохранить","Save"],["Царь горы","King of the hill"],["Штурмовик","Assault"],["гардеробе","wardrobe"],["захватили","captured"],["клавиша E","E key"],["на блоке.","on a block."],["Убийства","Kills"],["− смерти","− deaths"],["Купить $","Buy $"],["1 ракета","1 rocket"],["25 побед","25 wins"],[": прыжок",": jump"],["Взрывное","Explosives"],["Винтовка","Rifle"],["Гардероб","Wardrobe"],["Гренадёр","Grenadier"],["Джойстик","Joystick"],["Добавить","Add"],["Дробовик","Shotgun"],["Заменить","Replace"],["Защитная","Defense"],["Камуфляж","Camo"],["Микрофон","Microphone"],["Не надет","Not worn"],["Обучение","Tutorial"],["Патроны:","Ammo:"],["Песчаная","Sandbag"],["Песчаный","Desert"],["Пистолет","Pistol"],["Позывной","Call sign"],["Положить","Load"],["Получено","Claimed"],["Ракетчик","Rocketeer"],["Сбросить","Reset"],["Событие:","Event:"],["Цель боя","Objective"],["свободна","free"],["+ пачка","+ pack"],[": взрыв",": detonate"],["· зомби","· zombies"],["Автомат","Assault rifle"],["Акробат","Acrobat"],["Аптечка","Medkit"],["Берсерк","Berserker"],["В лобби","To lobby"],["Ветеран","Veteran"],["Выбрать","Select"],["Высокая","High"],["Графика","Graphics"],["Джунгли","Jungle"],["Забрать","Claim"],["Задания","Quests"],["Закрыто","Locked"],["Закрыть","Close"],["Зелёные","Green"],["Золотой","Golden"],["Инженер","Engineer"],["Клеймор","Claymore"],["Команда","Team"],["Костюмы","Outfits"],["Котелок","Bowler hat"],["Красные","Red"],["Куплено","Owned"],["Лавовый","Lava"],["Ледяной","Ice"],["Магазин","Shop"],["Открыто","Unlocked"],["Патроны","Ammo"],["Победа!","Victory!"],["Пропуск","Pass"],["Профиль","Profile"],["Пустыня","Desert"],["Равнина","Plains"],["Рейтинг","Leaderboard"],["Смертей","Deaths"],["Смокинг","Tuxedo"],["Снайпер","Sniper"],["Спецназ","SWAT"],["Средняя","Medium"],["Убийств","Kills"],["Ударные","Strike"],["Уровень","Level"],["Цилиндр","Top hat"],["Часовой","Sentinel"],["Чемпион","Champion"],["граната","grenade"],["за блок","per block"],["спорная","contested"],["убийств","kills"],["Батарея","Battery"],["Событие","Event"],["30 сек","30 sec"],[": бег,",": sprint,"],[": счёт",": scoreboard"],[": чат,",": chat,"],["БРОСОК","THROW"],["В меню","To menu"],["Вампир","Vampire"],["Выбран","Selected"],["Готово","Done"],["Дальше","Next"],["Добыча","Mining"],["Другое","Other"],["Железо","Iron"],["Жизни:","Lives:"],["Жёлтые","Yellow"],["Защита","Defense"],["Зимний","Winter"],["Золото","Gold"],["Игроки","Players"],["Карта:","Map:"],["Классы","Classes"],["Ковбой","Cowboy"],["Корона","Crown"],["Крылья","Wings"],["Мастер","Master"],["Монеты","Coins"],["Надеть","Wear"],["Низкая","Low"],["Ниндзя","Ninja"],["Оружие","Weapons"],["Отмена","Cancel"],["ПРИЦЕЛ","SCOPE"],["ПРЫЖОК","JUMP"],["Побед:","Wins:"],["Победы","Wins"],["Пробел","Space"],["Прыжок","Jump"],["Размер","Size"],["Режим:","Mode:"],["Рюкзак","Backpack"],["Турели","Turrets"],["У вас:","You have:"],["Убрать","Remove"],["Ушанка","Ushanka"],["Флешка","Flashbang"],["Шахтёр","Miner"],["выжили","survived"],["из 150","of 150"],["турель","turret"],["10 мин","10 min"],["Победа","Victory"],["1 мин","1 min"],["2 мин","2 min"],["3 мин","3 min"],["5 мин","5 min"],[": чат",": chat"],["Богач","Tycoon"],["Боты:","Bots:"],["Броня","Armor"],["Войти","Join"],["Волна","Wave"],["Город","City"],["Жизни","Lives"],["Знамя","Banner"],["Зомби","Zombie"],["Игрок","Player"],["Кепка","Cap"],["Кирка","Pick"],["Клоун","Clown"],["Медик","Medic"],["Минёр","Sapper"],["Назад","Back"],["ОГОНЬ","FIRE"],["ОСОБ.","ALT"],["Огонь","Fire"],["ПАТР.","AMMO"],["Пилот","Pilot"],["Побед","Wins"],["РПГ-7","RPG-7"],["Синие","Blue"],["Снять","Take off"],["Спина","Back"],["Уголь","Coal"],["Шляпы","Hats"],["волна","wave"],["выбыл","out"],["вышел","left"],["гора:","hill:"],["заряд","charge"],["зомби","zombies"],["опыта","XP"],["пусто","empty"],["флага","flags"],["Ничья","Draw"],["Шаг ","Step"],["(вы)","(you)"],["· до","· first to"],["Боец","Fighter"],["Бот-","Bot-"],["Боёв","Matches"],["Горы","Mountains"],["ИГР.","PLR."],["М-67","M67"],["МАГ.","SHOP"],["Мина","Mine"],["Неон","Neon"],["Нимб","Halo"],["Ночь","Night"],["Плащ","Cape"],["ТУР.","TUR."],["Танк","Tank"],["Тень","Shadow"],["Язык","Language"],["зона","zone"],[" из "," of"],["БЕГ","RUN"],["Бег","Sprint"],["Бур","Drill"],["Все","All"],["ЛКМ","LMB"],["ПКМ","RMB"],["У/С","K/D"],["Ур.","Lv."],["ЧАТ","CHAT"],["Чат","Chat"],["Нож","Knife"]];
+EN.sort((a,b)=>b[0].length-a[0].length);
+const EN_RE=[[/(\d) с(?![а-яё])/g,'$1 s'],[/(\d) мин(?![а-яё])/g,'$1 min'],[/Убийства (\d+)/g,'Kills $1'],[/(\d+) × \$/g,'$1 × $$'],[/ из /g,' of ']];
+function tr(s){if(S.lang!=='en'||!s||!/[а-яё]/i.test(s))return s;for(const[a,b]of EN)if(s.indexOf(a)>=0)s=s.split(a).join(b);for(const[r,b]of EN_RE)s=s.replace(r,b);return s}
+const TR_SKIP='.raw,script,style,textarea,#nick,#chatLog .raw';
+function trNode(n){if(n.nodeType===3){const p=n.parentElement;if(!p||p.closest(TR_SKIP))return;const v=n.nodeValue,t=tr(v);if(t!==v)n.nodeValue=t}
+ else if(n.nodeType===1){if(n.closest&&n.closest(TR_SKIP))return;['placeholder','title','aria-label'].forEach(a=>{const v=n.getAttribute&&n.getAttribute(a);if(v){const t=tr(v);if(t!==v)n.setAttribute(a,t)}});
+  if(n.tagName==='OPTION')return;for(const c of n.childNodes)trNode(c)}}
+if(S.lang==='en'){document.documentElement.lang='en';document.title=tr(document.title);trNode(document.body);
+ new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData')trNode(m.target);else if(m.type==='attributes')trNode(m.target);else m.addedNodes.forEach(trNode)}})
+  .observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']})}
+
 /* ===== Главный цикл ===== */
 let last=performance.now();
 function frame(now){
@@ -1740,7 +1983,7 @@ let lastHidden=performance.now();
 setInterval(()=>{const now=performance.now();let dt=Math.min(2,(now-lastHidden)/1000);lastHidden=now;
  if(now-last<500||!G.host||G.state!=='game'||!chunks.length)return;
  while(dt>0){const s=Math.min(.05,dt);hostTick(s);stepProjs(s);dt-=s}},250);
-window.__g={get PF(){return PF},CLASS_LIST,MODES,PAL,TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
+window.__g={tr,qEvent,lvlInfo,ACH,QDEF,claimTier,renderProfile,Srv,S,get ACC(){return ACC},cleanText,get PF(){return PF},CLASS_LIST,MODES,PAL,TUT,get LAY(){return LAY},EVENTS,runEvent,G,me,Relay,Net,get Drone(){return Drone},Inv:()=>Inv,V,getV,toHost,hostTick,zoneR};
 </script>
 </body>
 </html>
