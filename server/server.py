@@ -6,7 +6,7 @@
   DATA_DIR   папка для базы (по умолчанию ./data); на хостинге это должен быть постоянный диск
   ADMIN_KEY  ключ для просмотра жалоб: /api/reports?key=...
 """
-import asyncio, base64, hashlib, hmac, json, os, secrets, struct, time
+import asyncio, base64, hashlib, hmac, json, os, secrets, socket, struct, time
 
 PORT = int(os.environ.get('PORT', '8787'))
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data'))
@@ -159,30 +159,59 @@ async def handle_api(method, path, query, headers, body, ip, w):
 
 # ---------- WebSocket ----------
 rooms = {}  # код -> {'host': Conn, 'clients': {id: Conn}}
+FAST_QUEUE = 8  # сколько частых сообщений может ждать в очереди, остальные лишние отбрасываются
+
+def frame(obj):
+    """Кадр WebSocket собирается один раз и раздаётся всем получателям."""
+    data = json.dumps(obj, ensure_ascii=False, separators=(',', ':')).encode()
+    n = len(data)
+    if n < 126:
+        return struct.pack('!BB', 0x81, n) + data
+    if n < 65536:
+        return struct.pack('!BBH', 0x81, 126, n) + data
+    return struct.pack('!BBQ', 0x81, 127, n) + data
+
+def unmask(payload, mask):
+    n = len(payload)
+    if not n:
+        return payload
+    key = (mask * (n // 4 + 1))[:n]
+    return (int.from_bytes(payload, 'big') ^ int.from_bytes(key, 'big')).to_bytes(n, 'big')
 
 class Conn:
+    """Отправка идёт через очередь: медленный игрок не задерживает остальных."""
     def __init__(self, r, w):
         self.r, self.w = r, w
         self.room = None; self.id = None; self.is_host = False; self.closed = False
-        self.lock = asyncio.Lock()
+        self.q = asyncio.Queue()
+        self.fast_waiting = 0
+        self.task = asyncio.create_task(self.writer())
 
-    async def send(self, obj):
-        if self.closed:
-            return
-        data = json.dumps(obj, ensure_ascii=False, separators=(',', ':')).encode()
-        n = len(data)
-        if n < 126:
-            hdr = struct.pack('!BB', 0x81, n)
-        elif n < 65536:
-            hdr = struct.pack('!BBH', 0x81, 126, n)
-        else:
-            hdr = struct.pack('!BBQ', 0x81, 127, n)
+    async def writer(self):
         try:
-            async with self.lock:
-                self.w.write(hdr + data)
-                await self.w.drain()
+            while True:
+                data, fast = await self.q.get()
+                if fast:
+                    self.fast_waiting -= 1
+                self.w.write(data)
+                # Ждём сеть только когда набралась очередь, иначе отправляем сразу
+                if self.q.empty() or self.w.transport.get_write_buffer_size() > 65536:
+                    await self.w.drain()
         except Exception:
             self.closed = True
+
+    def put(self, data, fast=False):
+        if self.closed:
+            return
+        if fast:
+            # Положения игроков устаревают быстро: при заторе лучше пропустить старое
+            if self.fast_waiting >= FAST_QUEUE:
+                return
+            self.fast_waiting += 1
+        self.q.put_nowait((data, fast))
+
+    def send(self, obj, fast=False):
+        self.put(frame(obj), fast)
 
     async def recv(self):
         """Возвращает текст сообщения или None при закрытии."""
@@ -200,13 +229,11 @@ class Conn:
             mask = await self.r.readexactly(4) if masked else b''
             payload = await self.r.readexactly(ln)
             if masked:
-                payload = bytes(b ^ mask[i % 4] for i, b in enumerate(payload))
+                payload = unmask(payload, mask)
             if op == 0x8:
                 return None
             if op == 0x9:
-                async with self.lock:
-                    self.w.write(struct.pack('!BB', 0x8A, len(payload)) + payload)
-                    await self.w.drain()
+                self.put(struct.pack('!BB', 0x8A, len(payload)) + payload)
                 continue
             if op == 0xA:
                 continue
@@ -226,36 +253,41 @@ async def ws_session(c):
                 m = json.loads(txt)
             except Exception:
                 continue
-            op = m.get('op')
-            if op == 'host':
+            op = m.get('op'); fast = bool(m.get('f'))
+            if op == 'up' and c.room and not c.is_host:
+                room = rooms.get(c.room)
+                if room:
+                    room['host'].send({'op': 'from', 'id': c.id, 'm': m.get('m')}, fast)
+            elif op == 'to' and c.is_host:
+                t = rooms[c.room]['clients'].get(str(m.get('id')))
+                if t:
+                    t.send({'op': 'msg', 'm': m.get('m')}, fast)
+            elif op == 'all' and c.is_host:
+                ex = set(map(str, m.get('ex') or []))
+                data = frame({'op': 'msg', 'm': m.get('m')})
+                for cid, t in list(rooms[c.room]['clients'].items()):
+                    if cid not in ex:
+                        t.put(data, fast)
+            elif op == 'ping':
+                c.send({'op': 'pong', 't': m.get('t')})
+            elif op == 'host':
                 code = str(m.get('code', ''))[:8]
                 if code in rooms:
-                    await c.send({'op': 'err', 'e': 'taken'}); continue
+                    c.send({'op': 'err', 'e': 'taken'}); continue
                 rooms[code] = {'host': c, 'clients': {}}
                 c.room, c.is_host = code, True
-                await c.send({'op': 'hosted', 'code': code})
+                c.send({'op': 'hosted', 'code': code})
             elif op == 'join':
                 code = str(m.get('code', ''))[:8]; cid = str(m.get('id', ''))[:64]
                 room = rooms.get(code)
                 if not room:
-                    await c.send({'op': 'err', 'e': 'noroom'}); continue
+                    c.send({'op': 'err', 'e': 'noroom'}); continue
                 if len(room['clients']) >= MAX_ROOM or not cid or cid in room['clients']:
-                    await c.send({'op': 'err', 'e': 'full'}); continue
+                    c.send({'op': 'err', 'e': 'full'}); continue
                 room['clients'][cid] = c
                 c.room, c.id = code, cid
-                await c.send({'op': 'joined'})
-                await room['host'].send({'op': 'join', 'id': cid})
-            elif op == 'up' and c.room and not c.is_host:
-                room = rooms.get(c.room)
-                if room:
-                    await room['host'].send({'op': 'from', 'id': c.id, 'm': m.get('m')})
-            elif op == 'to' and c.is_host:
-                t = rooms[c.room]['clients'].get(str(m.get('id')))
-                if t:
-                    await t.send({'op': 'msg', 'm': m.get('m')})
-            elif op == 'all' and c.is_host:
-                for t in list(rooms[c.room]['clients'].values()):
-                    await t.send({'op': 'msg', 'm': m.get('m')})
+                c.send({'op': 'joined'})
+                room['host'].send({'op': 'join', 'id': cid})
     except (asyncio.IncompleteReadError, ConnectionError):
         pass
     finally:
@@ -264,11 +296,13 @@ async def ws_session(c):
         if room:
             if c.is_host and room['host'] is c:
                 for t in list(room['clients'].values()):
-                    await t.send({'op': 'hostgone'})
+                    t.send({'op': 'hostgone'})
                 rooms.pop(c.room, None)
             elif room['clients'].get(c.id) is c:
                 room['clients'].pop(c.id, None)
-                await room['host'].send({'op': 'leave', 'id': c.id})
+                room['host'].send({'op': 'leave', 'id': c.id})
+        await asyncio.sleep(0.2)
+        c.task.cancel()
         try:
             c.w.close()
         except Exception:
@@ -277,6 +311,13 @@ async def ws_session(c):
 # ---------- Приём соединений ----------
 async def handle(r, w):
     ip = (w.get_extra_info('peername') or ('?',))[0]
+    sock = w.get_extra_info('socket')
+    if sock is not None:
+        try:
+            # Без алгоритма Нейгла мелкие сообщения уходят сразу, без ожидания до 40 мс
+            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        except OSError:
+            pass
     try:
         head = await asyncio.wait_for(r.readuntil(b'\r\n\r\n'), 15)
         lines = head.decode('latin-1').split('\r\n')
