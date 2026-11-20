@@ -18,10 +18,13 @@ jobs:
       - name: Есть секрет ANDROID_KEYSTORE_BASE64
         run: test -n "$KEYSTORE"
       - name: Есть секрет ANDROID_STORE_PASSWORD
+        if: always()
         run: test -n "$STORE_PASSWORD"
       - name: Есть секрет ANDROID_KEY_ALIAS
+        if: always()
         run: test -n "$KEY_ALIAS"
       - name: Есть секрет ANDROID_KEY_PASSWORD
+        if: always()
         run: test -n "$KEY_PASSWORD"
       - name: Ключ читается с этим паролем
         run: |
