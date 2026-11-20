@@ -96,7 +96,7 @@ async def http_reply(w, code, body, ctype='application/json'):
         body = json.dumps(body, ensure_ascii=False).encode()
     head = (f'HTTP/1.1 {code} OK\r\nContent-Type: {ctype}; charset=utf-8\r\nContent-Length: {len(body)}\r\n'
             'Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Headers: Content-Type, Authorization\r\n'
-            'Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS\r\nConnection: close\r\n\r\n')
+            'Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\nConnection: close\r\n\r\n')
     w.write(head.encode() + body)
     await w.drain()
 
@@ -132,6 +132,11 @@ async def handle_api(method, path, query, headers, body, ip, w):
             acc['updated'] = int(time.time() * 1000)
             dirty = True
             return await http_reply(w, 200, {'profile': acc['profile'], 'updated': acc['updated']})
+        if method == 'DELETE':
+            # Удаление аккаунта по просьбе игрока: требование Google Play
+            db['accounts'].pop(acc_id, None)
+            dirty = True
+            return await http_reply(w, 200, {'deleted': True})
     if path == '/api/top' and method == 'GET':
         rows = []
         for acc in db['accounts'].values():
@@ -148,7 +153,9 @@ async def handle_api(method, path, query, headers, body, ip, w):
         rep['from'] = auth(headers) or ''
         rep['ip'] = hashlib.sha256(ip.encode()).hexdigest()[:12]
         rep['time'] = int(time.time())
-        db['reports'].append(rep); db['reports'] = db['reports'][-5000:]
+        # Жалобы хранятся не дольше года, как обещано в политике конфиденциальности
+        year_ago = rep['time'] - 365 * 86400
+        db['reports'] = [x for x in db['reports'] if x.get('time', 0) >= year_ago][-4999:] + [rep]
         dirty = True
         return await http_reply(w, 200, {'ok': True})
     if path == '/api/reports' and method == 'GET':

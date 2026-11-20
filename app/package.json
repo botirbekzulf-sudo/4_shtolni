@@ -25,6 +25,7 @@
     "directories": { "output": "dist" },
     "files": ["electron/**", "www/**", "package.json"],
     "win": { "target": ["nsis", "portable"], "icon": "assets/icon.png" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "artifactName": "4_shtolni_setup.${ext}" },
+    "portable": { "artifactName": "4_shtolni.${ext}" }
   }
 }
