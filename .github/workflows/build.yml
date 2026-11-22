@@ -45,6 +45,8 @@ jobs:
           java-version: 21
       - name: Подготовка проекта
         working-directory: app
+        env:
+          ADMOB_APP_ID: ${{ vars.ADMOB_APP_ID }}
         run: |
           npm install
           npm run prepare-web

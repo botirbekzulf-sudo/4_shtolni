@@ -17,6 +17,14 @@ manifest = manifest.replace('</manifest>', `${perms}</manifest>`);
 if (!manifest.includes('android:screenOrientation')) {
   manifest = manifest.replace(/<activity\b/, '<activity\n            android:screenOrientation="sensorLandscape"');
 }
+// AdMob: без идентификатора приложения реклама роняет приложение при запуске.
+// Свой ID задаётся переменной ADMOB_APP_ID (GitHub > Settings > Variables), иначе тестовый ID Google
+const admobId = (process.env.ADMOB_APP_ID || 'ca-app-pub-3940256099942544~3347511713').trim();
+if (!manifest.includes('com.google.android.gms.ads.APPLICATION_ID')) {
+  manifest = manifest.replace(/(<application[^>]*>)/, `$1
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${admobId}" />`);
+}
+console.log(admobId.startsWith('ca-app-pub-3940256099942544') ? 'AdMob: тестовый ID приложения' : 'AdMob: свой ID приложения');
 fs.writeFileSync(manifestPath, manifest);
 
 // Весь экран без системных панелей, экран не гаснет
