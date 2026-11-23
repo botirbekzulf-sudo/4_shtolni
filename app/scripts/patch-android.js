@@ -13,7 +13,12 @@ let manifest = fs.readFileSync(manifestPath, 'utf8');
 const perms = ['android.permission.RECORD_AUDIO', 'android.permission.MODIFY_AUDIO_SETTINGS']
   .filter(p => !manifest.includes(p))
   .map(p => `    <uses-permission android:name="${p}" />\n`).join('');
-manifest = manifest.replace('</manifest>', `${perms}</manifest>`);
+// Горизонтальный экран неявно делает android.hardware.screen.landscape обязательным,
+// и Google Play скрывает игру на части устройств. Помечаем функции экрана необязательными
+const features = ['android.hardware.screen.landscape', 'android.hardware.screen.portrait']
+  .filter(f => !manifest.includes(f))
+  .map(f => `    <uses-feature android:name="${f}" android:required="false" />\n`).join('');
+manifest = manifest.replace('</manifest>', `${perms}${features}</manifest>`);
 if (!manifest.includes('android:screenOrientation')) {
   manifest = manifest.replace(/<activity\b/, '<activity\n            android:screenOrientation="sensorLandscape"');
 }
