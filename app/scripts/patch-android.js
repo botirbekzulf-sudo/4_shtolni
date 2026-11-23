@@ -26,7 +26,7 @@ if (!manifest.includes('android:screenOrientation')) {
 // Свой ID задаётся переменной ADMOB_APP_ID (GitHub > Settings > Variables), иначе тестовый ID Google
 const admobId = (process.env.ADMOB_APP_ID || 'ca-app-pub-3940256099942544~3347511713').trim();
 if (!manifest.includes('com.google.android.gms.ads.APPLICATION_ID')) {
-  manifest = manifest.replace(/(<application[^>]*>)/, `$1
+  manifest = manifest.replace(/(<application\b[^>]*>)/, `$1
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${admobId}" />`);
 }
 console.log(admobId.startsWith('ca-app-pub-3940256099942544') ? 'AdMob: тестовый ID приложения' : 'AdMob: свой ID приложения');
